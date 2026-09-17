@@ -52,18 +52,24 @@ $config['site.backup_folder'] = 'archives/';
 // The icon displayed is chosen automatically from the file:
 //      theme/images/context_context_name.png
 $config['contexts'] = array(
-	'content',
+	'pelayanan',
+	'pemeriksaan',
+	'apotek',
+	'online',
+	'transaksi',
+	'laporan',
 	'master',
-	'reports',
 	'settings',
-	'developer',
 );
 $config['contexts_icon'] = array(
-	'content' => 'fas fa-tachometer-alt',
+	'pelayanan' => 'fas fa-clipboard-list',
+	'pemeriksaan' => 'fas fa-stethoscope',
+	'apotek' => 'fas fa-pills',
+	'online' => 'fas fa-shopping-cart',
+	'transaksi' => 'fas fa-cash-register',
+	'laporan' => 'fas fa-chart-bar',
 	'master' => 'fas fa-database',
-	'reports' => 'fas fa-file-alt',
 	'settings' => 'fas fa-cog',
-	'developer' => 'fas fa-tools',
 );
 
 //------------------------------------------------------------------------------

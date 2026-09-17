@@ -1,0 +1,8 @@
+<?php defined('BASEPATH') || exit('No direct script access allowed');
+
+$config['module_config'] = array(
+	'description' => 'Jejak aktivitas pengguna aplikasi',
+	'name'        => 'Audit Log',
+	'version'     => '1.0.0',
+	'author'      => 'Klinik Apotek Team',
+);

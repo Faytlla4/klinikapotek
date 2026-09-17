@@ -20,20 +20,27 @@ class Api extends Authenticated_Controller
             ->set_output(json_encode($data));
     }
 
+    /** ID -> int positif; 0 bila tidak valid (hindari SQL error). */
+    private function as_id($v)
+    {
+        $id = (int) $v;
+        return $id > 0 ? $id : 0;
+    }
+
     /** GET ?id_poli= (antrian hari ini, urut nomor) */
     public function hari_ini()
     {
         if (! $this->auth->has_permission('kelola_antrian') && ! $this->auth->has_permission('kelola_antrian_dokter')) {
             $this->auth->restrict('kelola_antrian');
         }
-        $this->json(array('success' => true, 'data' => $this->antrian_model->hari_ini($this->input->get('id_poli'))));
+        $this->json(array('success' => true, 'data' => $this->antrian_model->hari_ini($this->as_id($this->input->get('id_poli')))));
     }
 
     /** POST: id_kunjungan. Membuat antrian dari kunjungan TERDAFTAR. */
     public function buat()
     {
         $this->auth->restrict('kelola_antrian');
-        $hasil = $this->antrian_model->buat_dari_kunjungan($this->input->post('id_kunjungan'));
+        $hasil = $this->antrian_model->buat_dari_kunjungan($this->as_id($this->input->post('id_kunjungan')));
         if (! $hasil) {
             $this->json(array('success' => false, 'error' => $this->antrian_model->error ?: 'Gagal.'), 422);
             return;
@@ -46,7 +53,7 @@ class Api extends Authenticated_Controller
     public function pasien()
     {
         $this->auth->restrict('kelola_pasien');
-        $this->json(array('success' => true, 'data' => $this->antrian_model->untuk_pasien($this->input->get('id_pasien'))));
+        $this->json(array('success' => true, 'data' => $this->antrian_model->untuk_pasien($this->as_id($this->input->get('id_pasien')))));
     }
 
     /** GET antrian dokter yang login (parameter id_dokter diabaikan, anti-IDOR). */
@@ -62,7 +69,7 @@ class Api extends Authenticated_Controller
             $this->json(array('success' => true, 'data' => $this->antrian_model->untuk_dokter($dokter->id_dokter)));
             return;
         }
-        $this->json(array('success' => true, 'data' => $this->antrian_model->untuk_dokter($this->input->get('id_dokter'))));
+        $this->json(array('success' => true, 'data' => $this->antrian_model->untuk_dokter($this->as_id($this->input->get('id_dokter')))));
     }
 
     /** POST /antrian/api/status/{id}: DIPANGGIL|DILEWATI|SEDANG_DIPERIKSA|SELESAI|BATAL */
@@ -71,6 +78,7 @@ class Api extends Authenticated_Controller
         if (! $this->auth->has_permission('kelola_antrian') && ! $this->auth->has_permission('kelola_antrian_dokter')) {
             $this->auth->restrict('kelola_antrian');
         }
+        $id = $this->as_id($id);
         $status = $this->input->post('status');
         if (! $this->auth->has_permission('kelola_antrian')) {
             // Dokter hanya boleh mengubah antrian pasiennya sendiri.

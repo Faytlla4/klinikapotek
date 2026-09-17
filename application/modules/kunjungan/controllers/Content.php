@@ -1,8 +1,11 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Content extends App_Controller
 {
 	protected $permission = 'kelola_pendaftaran';
+
+	/** Context aktif (sidebar/redirect). Child per-context meng-override. */
+	protected $ctx = 'content';
 
 	public function __construct()
 	{
@@ -30,7 +33,7 @@ class Content extends App_Controller
 	{
 		if (isset($_POST['save']) && $this->save_kunjungan()) {
 			Template::set_message('Kunjungan berhasil dibuat.', 'success');
-			redirect(SITE_AREA . '/content/kunjungan');
+			redirect(SITE_AREA . '/' . $this->ctx . '/kunjungan');
 		}
 		$this->set_master_data();
 		Template::set('toolbar_title', 'Tambah Kunjungan');
@@ -39,10 +42,11 @@ class Content extends App_Controller
 
 	public function detail($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		$kunjungan = $this->kunjungan_model->detail($id);
 		if (! $kunjungan) {
 			Template::set_message('Kunjungan tidak ditemukan.', 'error');
-			redirect(SITE_AREA . '/content/kunjungan');
+			redirect(SITE_AREA . '/' . $this->ctx . '/kunjungan');
 		}
 		Template::set('kunjungan', $kunjungan);
 		Template::set('toolbar_title', 'Detail Kunjungan');
@@ -105,10 +109,10 @@ class Content extends App_Controller
 				->join('ruangan', 'ruangan.id_ruangan = kunjungan.id_ruangan');
 			if ($search !== '') {
 				$this->db->group_start()
-					->like('pasien.no_rm', $search)
-					->or_like('pasien.nama', $search)
-					->or_like('pelayanan.nama_pelayanan', $search)
-					->or_like('poli.nama_poli', $search)
+					->where("pasien.no_rm ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
+					->or_where("pasien.nama ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
+					->or_where("pelayanan.nama_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
+					->or_where("poli.nama_poli ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
 					->group_end();
 			}
 		};
@@ -121,3 +125,5 @@ class Content extends App_Controller
 		echo json_encode(array('draw' => $draw, 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data ?: array()));
 	}
 }
+
+

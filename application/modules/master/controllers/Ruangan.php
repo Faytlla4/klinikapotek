@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Ruangan extends App_Controller
 {
@@ -39,6 +39,7 @@ class Ruangan extends App_Controller
 
 	public function edit($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		if (empty($id)) {
 			Template::set_message('ID Ruangan tidak valid.', 'error');
 			redirect(SITE_AREA . '/master/ruangan');
@@ -89,8 +90,8 @@ class Ruangan extends App_Controller
 
 		if (!empty($search)) {
 			$this->db->group_start();
-			$this->db->like('ruangan.nama_ruangan', $search);
-			$this->db->or_like('poli.nama_poli', $search);
+			$this->db->where("ruangan.nama_ruangan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("poli.nama_poli ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 			$this->db->group_end();
 		}
 		$total = $this->db->count_all_results();
@@ -101,8 +102,8 @@ class Ruangan extends App_Controller
 
 		if (!empty($search)) {
 			$this->db->group_start();
-			$this->db->like('ruangan.nama_ruangan', $search);
-			$this->db->or_like('poli.nama_poli', $search);
+			$this->db->where("ruangan.nama_ruangan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("poli.nama_poli ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 			$this->db->group_end();
 		}
 		$this->db->order_by('ruangan.id_ruangan', 'DESC');
@@ -117,3 +118,5 @@ class Ruangan extends App_Controller
 		));
 	}
 }
+
+

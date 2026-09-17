@@ -2,6 +2,8 @@
 
 class Content extends App_Controller
 {
+    /** Context aktif (sidebar/redirect). Child per-context meng-override. */
+    protected $ctx = 'content';
     public function __construct()
     {
         parent::__construct(); $this->auth->restrict('kelola_pengadaan');
@@ -14,7 +16,7 @@ class Content extends App_Controller
         if (isset($_POST['save'])) {
             $items = array(array('id_obat' => $this->input->post('id_obat'), 'jumlah_pesan' => $this->input->post('jumlah_pesan'), 'harga' => $this->input->post('harga')));
             $result = $this->pengadaan_model->pesan($this->input->post('id_supplier'), $items);
-            if ($result) { Template::set_message('Pengadaan berhasil dibuat.', 'success'); redirect(SITE_AREA . '/content/pengadaan'); }
+            if ($result) { Template::set_message('Pengadaan berhasil dibuat.', 'success'); redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan'); }
             Template::set_message($this->pengadaan_model->error ?: 'Pengadaan gagal.', 'error');
         }
         Template::set('supplier_list', $this->supplier_model->aktif()); Template::set('obat_list', $this->obat_model->aktif());

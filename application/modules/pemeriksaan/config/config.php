@@ -5,5 +5,8 @@ $config['module_config'] = array(
 	'name'        => 'Pemeriksaan',
 	'version'     => '1.0.0',
 	'author'      => 'Klinik Apotek Team',
-	'menu_topic'  => array('content' => 'Pemeriksaan'),
+	'menu_topic'  => array('pemeriksaan' => 'Pemeriksaan & Rekam Medis'),
+	'menus'       => array(
+		'pemeriksaan' => 'pemeriksaan/_menu_pemeriksaan',
+	),
 );

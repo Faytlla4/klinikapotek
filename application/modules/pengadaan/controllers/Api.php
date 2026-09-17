@@ -20,6 +20,29 @@ class Api extends Authenticated_Controller
             ->set_output(json_encode($data));
     }
 
+    /** ID -> int positif; 0 bila tidak valid (hindari SQL error). */
+    private function as_id($v)
+    {
+        $id = (int) $v;
+        return $id > 0 ? $id : 0;
+    }
+
+    /** Item list: id_obat -> int. Qty DIBIARKAN mentah agar validasi
+     * bilangan bulat di model dapat menolak desimal. */
+    private function as_items($items, $qty_key)
+    {
+        if (! is_array($items)) {
+            return $items;
+        }
+        foreach ($items as &$it) {
+            if (isset($it['id_obat'])) {
+                $it['id_obat'] = $this->as_id($it['id_obat']);
+            }
+        }
+        unset($it);
+        return $items;
+    }
+
     /** GET supplier aktif */
     public function supplier()
     {
@@ -31,7 +54,10 @@ class Api extends Authenticated_Controller
     public function supplier_simpan()
     {
         $this->auth->restrict('kelola_pengadaan');
-        $id = $this->supplier_model->insert($this->input->post());
+        $data = array_intersect_key($this->input->post(), array_flip(array(
+            'kode_supplier', 'nama_supplier', 'alamat', 'no_hp', 'status',
+        )));
+        $id = $this->supplier_model->insert($data);
         if (! $id) {
             $this->json(array('success' => false, 'error' => $this->supplier_model->error ?: 'Gagal.'), 422);
             return;
@@ -44,7 +70,7 @@ class Api extends Authenticated_Controller
     public function pesan()
     {
         $this->auth->restrict('kelola_pengadaan');
-        $hasil = $this->pengadaan_model->pesan($this->input->post('id_supplier'), $this->input->post('items'));
+        $hasil = $this->pengadaan_model->pesan($this->as_id($this->input->post('id_supplier')), $this->as_items($this->input->post('items'), 'jumlah_pesan'));
         if (! $hasil) {
             $this->json(array('success' => false, 'error' => $this->pengadaan_model->error ?: 'Gagal.'), 422);
             return;
@@ -57,7 +83,7 @@ class Api extends Authenticated_Controller
     public function terima()
     {
         $this->auth->restrict('kelola_pengadaan');
-        $hasil = $this->pengadaan_model->terima($this->input->post('id_pengadaan'), $this->input->post('items'));
+        $hasil = $this->pengadaan_model->terima($this->as_id($this->input->post('id_pengadaan')), $this->as_items($this->input->post('items'), 'jumlah_terima'));
         if (! $hasil) {
             $this->json(array('success' => false, 'error' => $this->pengadaan_model->error ?: 'Gagal.'), 422);
             return;
@@ -70,7 +96,8 @@ class Api extends Authenticated_Controller
     public function batalkan($id)
     {
         $this->auth->restrict('kelola_pengadaan');
-        if (! $this->pengadaan_model->batalkan($id)) {
+        $id = $this->as_id($id);
+        if (! $id || ! $this->pengadaan_model->batalkan($id)) {
             $this->json(array('success' => false, 'error' => $this->pengadaan_model->error), 422);
             return;
         }

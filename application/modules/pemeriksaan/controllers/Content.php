@@ -1,8 +1,11 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Content extends App_Controller
 {
 	protected $permission = 'kelola_pemeriksaan';
+
+	/** Context aktif (sidebar/redirect). Child per-context meng-override. */
+	protected $ctx = 'content';
 
 	public function __construct()
 	{
@@ -29,11 +32,11 @@ class Content extends App_Controller
 		$dokter_sendiri = $this->dokter_sendiri();
 		if ($dokter_sendiri === false && $this->hanya_dokter()) {
 			Template::set_message('Akun belum dipetakan ke data dokter.', 'error');
-			redirect(SITE_AREA . '/content/pemeriksaan');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
 		}
 		if (isset($_POST['save']) && $this->save_pemeriksaan($dokter_sendiri)) {
 			Template::set_message('Pemeriksaan berhasil disimpan.', 'success');
-			redirect(SITE_AREA . '/content/pemeriksaan');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
 		}
 		$this->set_kunjungan($dokter_sendiri);
 		Template::set('toolbar_title', 'Tambah Pemeriksaan');
@@ -42,10 +45,11 @@ class Content extends App_Controller
 
 	public function edit($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		$row = $this->pemeriksaan_model->find($id);
 		if (! $row || ! $this->boleh_akses($row->id_dokter)) {
 			Template::set_message('Pemeriksaan tidak ditemukan.', 'error');
-			redirect(SITE_AREA . '/content/pemeriksaan');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
 		}
 		if (isset($_POST['save'])) {
 			$data = array(
@@ -55,7 +59,7 @@ class Content extends App_Controller
 			);
 			if ($this->pemeriksaan_model->update($id, $data)) {
 				Template::set_message('Pemeriksaan diperbarui.', 'success');
-				redirect(SITE_AREA . '/content/pemeriksaan');
+				redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
 			}
 		}
 		Template::set('pemeriksaan', $row);
@@ -65,10 +69,11 @@ class Content extends App_Controller
 
 	public function detail($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		$row = $this->pemeriksaan_model->rekam_medis($id);
 		if (! $row || ! $this->boleh_akses($row->id_dokter)) {
 			Template::set_message('Pemeriksaan tidak ditemukan.', 'error');
-			redirect(SITE_AREA . '/content/pemeriksaan');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
 		}
 		Template::set('pemeriksaan', $row);
 		Template::set('toolbar_title', 'Detail Rekam Medis');
@@ -162,3 +167,4 @@ class Content extends App_Controller
 		return $sendiri === null || ($sendiri !== false && (int) $id_dokter === (int) $sendiri);
 	}
 }
+

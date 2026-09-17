@@ -14,12 +14,15 @@
             </div>
             <?php echo form_open($this->uri->uri_string()); ?>
             <div class="card-body">
+                <div class="row">
+                <div class="col-md-6">
                 <div class="form-group <?php echo form_error('nama_pelayanan') ? 'has-error' : ''; ?>">
                     <label for="nama_pelayanan">Nama Pelayanan <span class="text-danger">*</span></label>
                     <input id="nama_pelayanan" type="text" class="form-control" name="nama_pelayanan" required value="<?php echo set_value('nama_pelayanan', $pelayanan->nama_pelayanan ?? ''); ?>" />
                     <?php echo form_error('nama_pelayanan'); ?>
                 </div>
-
+                </div>
+                <div class="col-md-6">
                 <div class="form-group">
                     <label for="jenis_pelayanan">Jenis Pelayanan</label>
                     <select id="jenis_pelayanan" name="jenis_pelayanan" class="form-control select2">
@@ -33,19 +36,25 @@
                         ?>
                     </select>
                 </div>
-
+                </div>
+                </div>
+                <div class="row">
+                <div class="col-md-6">
                 <div class="form-group <?php echo form_error('tarif') ? 'has-error' : ''; ?>">
                     <label for="tarif">Tarif (Rp) <span class="text-danger">*</span></label>
                     <input id="tarif" type="number" step="1000" min="0" class="form-control" name="tarif" required value="<?php echo set_value('tarif', (int)($pelayanan->tarif ?? 0)); ?>" />
                     <?php echo form_error('tarif'); ?>
                 </div>
-
+                </div>
+                <div class="col-md-6">
                 <div class="form-group">
                     <label for="status">Status</label>
                     <select id="status" name="status" class="form-control select2">
                         <option value="AKTIF" <?php echo ($pelayanan->status ?? '') === 'AKTIF' ? 'selected' : ''; ?>>AKTIF</option>
                         <option value="NONAKTIF" <?php echo ($pelayanan->status ?? '') === 'NONAKTIF' ? 'selected' : ''; ?>>NONAKTIF</option>
                     </select>
+                </div>
+                </div>
                 </div>
             </div>
             <div class="card-footer">

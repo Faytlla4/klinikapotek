@@ -10,12 +10,13 @@
               'penjualan_obat' => 'Penjualan Obat',
               'resep'          => 'Resep',
               'mutasi_stok'    => 'Mutasi Stok',
+              'stok'           => 'Stok',
           );
           foreach ($tabs as $key => $label) :
               $active = ($report === $key) ? ' active' : '';
           ?>
           <li class="nav-item">
-            <a class="nav-link<?php echo $active; ?>" href="<?php echo site_url(SITE_AREA.'/content/laporan?report='.$key.'&dari='.$dari.'&sampai='.$sampai); ?>">
+              <a class="nav-link<?php echo $active; ?>" href="<?php echo site_url(SITE_AREA.'/'.$this->uri->segment(2).'/'.$this->uri->segment(3).'?report='.$key.'&dari='.$dari.'&sampai='.$sampai); ?>">
               <?php echo $label; ?>
             </a>
           </li>
@@ -23,7 +24,7 @@
         </ul>
       </div>
       <div class="card-body">
-        <form method="get" action="<?php echo site_url(SITE_AREA.'/content/laporan'); ?>" class="form-inline mb-3">
+        <form method="get" action="<?php echo site_url(SITE_AREA.'/'.$this->uri->segment(2).'/'.$this->uri->segment(3)); ?>" class="form-inline mb-3">
           <input type="hidden" name="report" value="<?php echo html_escape($report); ?>">
           <label class="mr-2">Dari</label>
           <input type="date" name="dari" class="form-control form-control-sm mr-3" value="<?php echo html_escape($dari); ?>">
@@ -88,6 +89,17 @@
             <tr><td colspan="3" class="text-center text-muted">Tidak ada data</td></tr>
           <?php else : foreach ($data_laporan as $row) : ?>
             <tr><td><?php echo html_escape($row->nama_obat); ?></td><td><?php echo html_escape($row->jenis_mutasi); ?></td><td><?php echo (int) $row->qty; ?></td></tr>
+          <?php endforeach; endif; ?>
+          </tbody>
+        </table>
+        <?php elseif ($report === 'stok') : ?>
+        <table class="table table-bordered table-striped table-sm">
+          <thead><tr><th>Kode</th><th>Nama Obat</th><th>Satuan</th><th>Stok</th><th>Minimum</th><th>Status</th></tr></thead>
+          <tbody>
+          <?php if (empty($data_laporan)) : ?>
+            <tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>
+          <?php else : foreach ($data_laporan as $row) : ?>
+            <tr><td><?php echo html_escape($row->kode_obat); ?></td><td><?php echo html_escape($row->nama_obat); ?></td><td><?php echo html_escape($row->satuan); ?></td><td><?php echo (int) $row->stok; ?></td><td><?php echo (int) $row->stok_minimum; ?></td><td><span class="badge <?php echo (int) $row->stok < (int) $row->stok_minimum ? 'badge-danger' : 'badge-success'; ?>"><?php echo (int) $row->stok < (int) $row->stok_minimum ? 'MENIPIS' : 'AMAN'; ?></span></td></tr>
           <?php endforeach; endif; ?>
           </tbody>
         </table>

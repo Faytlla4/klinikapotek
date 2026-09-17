@@ -2,7 +2,7 @@
 
 $config['module_config'] = array(
 	'description' => 'Pendaftaran dan Data Pasien',
-	'name'        => 'Pasien',
+	'name'        => 'Pendaftaran',
 	'version'     => '1.0.0',
 	'author'      => 'Klinik Apotek Team',
 );

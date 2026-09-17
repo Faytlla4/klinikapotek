@@ -53,9 +53,9 @@ class Pengadaan_model extends BF_Model
         $total = 0;
         $rows = array();
         foreach ($items as $item) {
-            if (empty($item['id_obat']) || (int) $item['jumlah_pesan'] <= 0) {
+            if (empty($item['id_obat']) || ! preg_match('/^\d+$/', (string) ($item['jumlah_pesan'] ?? '')) || (int) $item['jumlah_pesan'] <= 0) {
                 $this->db->trans_complete();
-                $this->error = 'Item pengadaan tidak valid.';
+                $this->error = 'Jumlah pesan harus bilangan bulat positif.';
                 return false;
             }
             $obat = $this->db->where('id_obat', $item['id_obat'])->get('obat')->row();
@@ -116,6 +116,21 @@ class Pengadaan_model extends BF_Model
         }
         $this->load->model('stok/stok_model');
         $this->db->trans_start();
+        // Fase 1: validasi SEMUA item dulu tanpa menulis apa pun, agar
+        // kegagalan logis tak pernah terjadi setelah insert (nested
+        // trans_complete akan COMMIT bila trans_status masih TRUE).
+        foreach ($items as $item) {
+            if (empty($item['id_obat']) || ! preg_match('/^\d+$/', (string) ($item['jumlah_terima'] ?? '')) || (int) $item['jumlah_terima'] <= 0) {
+                $this->db->trans_complete();
+                $this->error = 'Jumlah terima harus bilangan bulat positif.';
+                return false;
+            }
+            if (! $this->db->where('id_obat', $item['id_obat'])->get('obat')->row()) {
+                $this->db->trans_complete();
+                $this->error = 'Obat penerimaan tidak dikenal.';
+                return false;
+            }
+        }
         $nomor = nomor_baru('PN', 'penerimaan_obat', 'nomor_penerimaan');
         $this->db->insert('penerimaan_obat', array(
             'id_pengadaan' => $id_pengadaan, 'nomor_penerimaan' => $nomor,
@@ -124,12 +139,8 @@ class Pengadaan_model extends BF_Model
         $id_penerimaan = $this->db->insert_id();
         $retur_items = array();
         $semua_sesuai = true;
+        // Fase 2: tulis header, detail, stok, retur.
         foreach ($items as $item) {
-            if (empty($item['id_obat']) || (int) $item['jumlah_terima'] <= 0) {
-                $this->db->trans_complete();
-                $this->error = 'Item penerimaan tidak valid.';
-                return false;
-            }
             $kondisi = isset($item['kondisi']) ? $item['kondisi'] : 'Baik';
             $this->db->insert('penerimaan_obat_detail', array(
                 'id_penerimaan' => $id_penerimaan, 'id_obat' => $item['id_obat'],

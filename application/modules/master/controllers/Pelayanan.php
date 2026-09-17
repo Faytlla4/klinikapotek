@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Pelayanan extends App_Controller
 {
@@ -37,6 +37,7 @@ class Pelayanan extends App_Controller
 
 	public function edit($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		if (empty($id)) {
 			Template::set_message('ID Pelayanan tidak valid.', 'error');
 			redirect(SITE_AREA . '/master/pelayanan');
@@ -83,15 +84,15 @@ class Pelayanan extends App_Controller
 
 		$this->db->from('pelayanan');
 		if (!empty($search)) {
-			$this->db->like('nama_pelayanan', $search);
-			$this->db->or_like('jenis_pelayanan', $search);
+			$this->db->where("nama_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("jenis_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 		}
 		$total = $this->db->count_all_results();
 
 		$this->db->from('pelayanan');
 		if (!empty($search)) {
-			$this->db->like('nama_pelayanan', $search);
-			$this->db->or_like('jenis_pelayanan', $search);
+			$this->db->where("nama_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("jenis_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 		}
 		$this->db->order_by('id_pelayanan', 'DESC');
 		$this->db->limit((int) ($request['length'] ?? 10), (int) ($request['start'] ?? 0));
@@ -105,3 +106,5 @@ class Pelayanan extends App_Controller
 		));
 	}
 }
+
+

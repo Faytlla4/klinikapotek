@@ -121,14 +121,17 @@ class Users extends Front_Controller
 	 */
 	public function logout()
 	{
-		if (isset($this->current_user->id)) {
+		// Ambil dari sesi auth (current_user tidak selalu terisi di sini;
+		// skema custom memakai id_user, bukan id).
+		$logout_id = (int) $this->auth->user_id();
+		if ($logout_id > 0) {
 			// Login session is valid. Log the Activity.
 			$this->load->model('audit/audit_log_model');
 			$this->audit_log_model->catat(
-				$this->current_user->id,
+				$logout_id,
 				'logout',
 				'users',
-				$this->current_user->id,
+				$logout_id,
 				'Logout: ' . $this->input->ip_address()
 			);
 		}

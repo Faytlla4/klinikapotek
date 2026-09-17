@@ -1,6 +1,8 @@
+﻿var _p = location.pathname.split('/');
+var ctxBase = _p.slice(0, _p.indexOf('admin') + 3).join('/');
 $('#kunjungan_table').bfDataTable({
-    url: site_url + 'admin/content/kunjungan/get_data',
-    targetUrl: site_url + 'admin/content/kunjungan/detail',
+    url: ctxBase + '/get_data',
+    targetUrl: ctxBase + '/detail',
     filterCols: [0, 1, 2, 3, 4, 5, 6],
     sortCols: { id_kunjungan: 'desc' },
     lengthMenu: [10, 25, 50, 100],
@@ -11,3 +13,4 @@ $('#kunjungan_table').bfDataTable({
     ]
 });
 $('.select2').select2({ theme: 'bootstrap4' });
+

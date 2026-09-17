@@ -15,7 +15,7 @@ class Content extends App_Controller
         $dari   = $this->input->get('dari') ?: date('Y-m-01');
         $sampai = $this->input->get('sampai') ?: date('Y-m-d');
 
-        $valid = array('kunjungan', 'pendapatan', 'penjualan_obat', 'resep', 'mutasi_stok');
+        $valid = array('kunjungan', 'pendapatan', 'penjualan_obat', 'resep', 'mutasi_stok', 'stok');
         if (! in_array($report, $valid)) {
             $report = 'kunjungan';
         }

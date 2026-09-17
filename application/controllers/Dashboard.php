@@ -38,11 +38,30 @@ class Dashboard extends App_Controller
         redirect('/');
     }
 
-    /** Dashboard Pelayanan → halaman Pendaftaran Pasien. */
+    /** Dashboard Pelayanan → ringkasan pendaftaran/kunjungan/antrian/tagihan. */
     public function pelayanan()
     {
         $this->require_role('ADMIN_PELAYANAN');
-        redirect(SITE_AREA . '/content/pasien');
+        $this->load->model('antrian/antrian_model');
+        $hari_ini = date('Y-m-d');
+        $besok = date('Y-m-d', strtotime($hari_ini . ' +1 day'));
+        $antrian = $this->antrian_model->hari_ini();
+        $menunggu = 0;
+        foreach ($antrian as $a) {
+            if ($a->status === 'MENUNGGU') {
+                $menunggu++;
+            }
+        }
+        Template::set(array(
+            'pasien_total' => $this->db->where('status', 'AKTIF')->count_all_results('pasien'),
+            'kunjungan_hari_ini' => $this->db->where('tanggal_kunjungan >=', $hari_ini . ' 00:00:00')->where('tanggal_kunjungan <', $besok . ' 00:00:00')->count_all_results('kunjungan'),
+            'antrian_total' => count($antrian),
+            'antrian_menunggu' => $menunggu,
+            'tagihan_belum' => $this->db->where('status', 'BELUM_DIBAYAR')->count_all_results('tagihan'),
+            'antrian' => $antrian,
+        ));
+        Template::set('toolbar_title', 'Dashboard Pelayanan');
+        Template::render();
     }
 
     /** Dashboard Dokter → ringkasan kerja dokter yang login. */
@@ -92,18 +111,67 @@ class Dashboard extends App_Controller
         Template::render();
     }
 
-    /** Dashboard Apoteker → halaman Obat. */
+    /** Dashboard Apoteker → ringkasan resep/stok/penjualan/pengadaan. */
     public function apoteker()
     {
         $this->require_role('APOTEKER');
-        redirect(SITE_AREA . '/master/obat');
+        $this->load->model('resep/resep_model');
+        $this->load->model('stok/stok_model');
+        $hari_ini = date('Y-m-d');
+        $besok = date('Y-m-d', strtotime($hari_ini . ' +1 day'));
+        Template::set(array(
+            'resep_menunggu' => count($this->resep_model->menunggu()),
+            'stok_menipis' => count($this->stok_model->di_bawah_minimum()),
+            'penjualan_hari_ini' => $this->db->where('tanggal_penjualan >=', $hari_ini . ' 00:00:00')->where('tanggal_penjualan <', $besok . ' 00:00:00')->count_all_results('penjualan_obat'),
+            'pengadaan_aktif' => $this->db->where_in('status', array('DIPESAN', 'DIPROSES'))->count_all_results('pengadaan_obat'),
+            'resep_list' => $this->resep_model->menunggu(),
+        ));
+        Template::set('toolbar_title', 'Dashboard Apoteker');
+        Template::render();
     }
 
-    /** Area Pasien → halaman depan. */
+    /** Portal Pasien → data milik pasien yang login. */
     public function pasien()
     {
         $this->require_role('PASIEN');
-        redirect('/');
+        $pasien = $this->db->where('id_user', $this->auth->user_id())->get('pasien')->row();
+        $kunjungan = array();
+        $antrian = array();
+        $riwayat = array();
+        if ($pasien) {
+            $kunjungan = $this->db->select('kunjungan.*, pelayanan.nama_pelayanan, poli.nama_poli, dokter.nama_dokter')
+                ->join('pelayanan', 'pelayanan.id_pelayanan = kunjungan.id_pelayanan')
+                ->join('poli', 'poli.id_poli = kunjungan.id_poli')
+                ->join('dokter', 'dokter.id_dokter = kunjungan.id_dokter')
+                ->where('kunjungan.id_pasien', $pasien->id_pasien)
+                ->order_by('kunjungan.tanggal_kunjungan', 'DESC')
+                ->get('kunjungan')->result();
+            $this->load->model('antrian/antrian_model');
+            $antrian = $this->antrian_model->untuk_pasien($pasien->id_pasien);
+            $ids = array();
+            foreach ($kunjungan as $k) {
+                $ids[] = $k->id_kunjungan;
+            }
+            if ($ids) {
+                $riwayat = $this->db->select('pemeriksaan.*, kunjungan.tanggal_kunjungan, dokter.nama_dokter')
+                    ->join('kunjungan', 'kunjungan.id_kunjungan = pemeriksaan.id_kunjungan')
+                    ->join('dokter', 'dokter.id_dokter = pemeriksaan.id_dokter')
+                    ->where_in('pemeriksaan.id_kunjungan', $ids)
+                    ->order_by('pemeriksaan.tanggal_pemeriksaan', 'DESC')
+                    ->get('pemeriksaan')->result();
+            }
+        }
+        Template::set(array(
+            'pasien' => $pasien,
+            'kunjungan' => $kunjungan,
+            'antrian' => $antrian,
+            'riwayat' => $riwayat,
+            'keranjang_jml' => $pasien ? count((array) $this->session->userdata('keranjang_online')) : 0,
+            'pesanan_aktif' => $pasien ? $this->db->where('id_pasien', $pasien->id_pasien)->where_not_in('status', array('SELESAI', 'BATAL'))->count_all_results('pesanan_online') : 0,
+            'pesanan_terakhir' => $pasien ? $this->db->where('id_pasien', $pasien->id_pasien)->order_by('id_pesanan', 'DESC')->limit(1)->get('pesanan_online')->row() : null,
+        ));
+        Template::set('toolbar_title', 'Dashboard Pasien');
+        Template::render();
     }
 
     /**

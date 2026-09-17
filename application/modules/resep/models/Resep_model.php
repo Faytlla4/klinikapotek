@@ -68,8 +68,8 @@ class Resep_model extends BF_Model
             $rows = array();
             foreach ($detail as $d) {
                 $obat = $this->db->where('id_obat', $d['id_obat'])->get('obat')->row();
-                if (! $obat || $obat->status !== 'AKTIF' || (int) $d['jumlah'] <= 0) {
-                    $this->error = 'Obat resep tidak valid.';
+                if (! $obat || $obat->status !== 'AKTIF' || ! preg_match('/^\d+$/', (string) ($d['jumlah'] ?? '')) || (int) $d['jumlah'] <= 0) {
+                    $this->error = 'Jumlah obat harus bilangan bulat positif.';
                     $this->db->trans_complete();
                     return false;
                 }

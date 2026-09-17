@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Dokter extends App_Controller
 {
@@ -39,6 +39,7 @@ class Dokter extends App_Controller
 
 	public function edit($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		if (empty($id)) {
 			Template::set_message('ID Dokter tidak valid.', 'error');
 			redirect(SITE_AREA . '/master/dokter');
@@ -92,9 +93,9 @@ class Dokter extends App_Controller
 
 		if (!empty($search)) {
 			$this->db->group_start();
-			$this->db->like('dokter.nama_dokter', $search);
-			$this->db->or_like('dokter.no_sip', $search);
-			$this->db->or_like('spesialis.nama_spesialis', $search);
+			$this->db->where("dokter.nama_dokter ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("dokter.no_sip ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("spesialis.nama_spesialis ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 			$this->db->group_end();
 		}
 		$total = $this->db->count_all_results();
@@ -105,9 +106,9 @@ class Dokter extends App_Controller
 
 		if (!empty($search)) {
 			$this->db->group_start();
-			$this->db->like('dokter.nama_dokter', $search);
-			$this->db->or_like('dokter.no_sip', $search);
-			$this->db->or_like('spesialis.nama_spesialis', $search);
+			$this->db->where("dokter.nama_dokter ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("dokter.no_sip ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("spesialis.nama_spesialis ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 			$this->db->group_end();
 		}
 		$this->db->order_by('dokter.id_dokter', 'DESC');
@@ -122,3 +123,5 @@ class Dokter extends App_Controller
 		));
 	}
 }
+
+

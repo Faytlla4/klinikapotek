@@ -14,12 +14,15 @@
             </div>
             <?php echo form_open($this->uri->uri_string()); ?>
             <div class="card-body">
+                <div class="row">
+                <div class="col-md-6">
                 <div class="form-group <?php echo form_error('nama_ruangan') ? 'has-error' : ''; ?>">
                     <label for="nama_ruangan">Nama Ruangan <span class="text-danger">*</span></label>
                     <input id="nama_ruangan" type="text" class="form-control" name="nama_ruangan" required value="<?php echo set_value('nama_ruangan', $ruangan->nama_ruangan ?? ''); ?>" />
                     <?php echo form_error('nama_ruangan'); ?>
                 </div>
-
+                </div>
+                <div class="col-md-6">
                 <div class="form-group">
                     <label for="id_poli">Poli Terkait</label>
                     <select id="id_poli" name="id_poli" class="form-control select2">
@@ -32,13 +35,18 @@
                         <?php endforeach; ?>
                     </select>
                 </div>
-
+                </div>
+                </div>
+                <div class="row">
+                <div class="col-md-6">
                 <div class="form-group">
                     <label for="status">Status</label>
                     <select id="status" name="status" class="form-control select2">
                         <option value="AKTIF" <?php echo ($ruangan->status ?? '') === 'AKTIF' ? 'selected' : ''; ?>>AKTIF</option>
                         <option value="NONAKTIF" <?php echo ($ruangan->status ?? '') === 'NONAKTIF' ? 'selected' : ''; ?>>NONAKTIF</option>
                     </select>
+                </div>
+                </div>
                 </div>
             </div>
             <div class="card-footer">

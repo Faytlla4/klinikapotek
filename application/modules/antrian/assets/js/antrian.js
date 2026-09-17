@@ -1,5 +1,7 @@
+﻿var _p = location.pathname.split('/');
+var ctxBase = _p.slice(0, _p.indexOf('admin') + 3).join('/');
 $('#antrian_table').bfDataTable({
-    url: site_url + 'admin/content/antrian/get_data',
+    url: ctxBase + '/get_data',
     filterCols: [0, 1, 2, 3, 4],
     sortCols: { id_antrian: 'asc' },
     lengthMenu: [10, 25, 50, 100],
@@ -9,3 +11,4 @@ $('#antrian_table').bfDataTable({
         { data: 'waktu_dipanggil', defaultContent: '-' }
     ]
 });
+

@@ -99,6 +99,89 @@ $route['admin/master/obat'] = 'master/obat/index';
 $route['admin/master/obat/(:any)'] = 'master/obat/$1';
 $route['admin/master/obat/(:any)/(:any)'] = 'master/obat/$1/$2';
 
+// PELAYANAN: Pendaftaran (pasien), Kunjungan, Antrian.
+$route['admin/pelayanan/pasien'] = 'pasien/pelayanan/index';
+$route['admin/pelayanan/pasien/(:any)'] = 'pasien/pelayanan/$1';
+$route['admin/pelayanan/pasien/(:any)/(:any)'] = 'pasien/pelayanan/$1/$2';
+$route['admin/pelayanan/kunjungan'] = 'kunjungan/pelayanan/index';
+$route['admin/pelayanan/kunjungan/(:any)'] = 'kunjungan/pelayanan/$1';
+$route['admin/pelayanan/kunjungan/(:any)/(:any)'] = 'kunjungan/pelayanan/$1/$2';
+$route['admin/pelayanan/antrian'] = 'antrian/pelayanan/index';
+$route['admin/pelayanan/antrian/(:any)'] = 'antrian/pelayanan/$1';
+$route['admin/pelayanan/antrian/(:any)/(:any)'] = 'antrian/pelayanan/$1/$2';
+
+// PEMERIKSAAN & REKAM MEDIS: Antrian Dokter, Pemeriksaan, Resep (dokter).
+$route['admin/pemeriksaan/antrian'] = 'antrian/pemeriksaan/index';
+$route['admin/pemeriksaan/antrian/(:any)'] = 'antrian/pemeriksaan/$1';
+$route['admin/pemeriksaan/antrian/(:any)/(:any)'] = 'antrian/pemeriksaan/$1/$2';
+$route['admin/pemeriksaan/pemeriksaan'] = 'pemeriksaan/pemeriksaan/index';
+$route['admin/pemeriksaan/pemeriksaan/(:any)'] = 'pemeriksaan/pemeriksaan/$1';
+$route['admin/pemeriksaan/pemeriksaan/(:any)/(:any)'] = 'pemeriksaan/pemeriksaan/$1/$2';
+$route['admin/pemeriksaan/resep'] = 'resep/pemeriksaan/index';
+$route['admin/pemeriksaan/resep/(:any)'] = 'resep/pemeriksaan/$1';
+$route['admin/pemeriksaan/resep/(:any)/(:any)'] = 'resep/pemeriksaan/$1/$2';
+
+// APOTEK: Resep & Pesanan, Penjualan, Stok (+mutasi), Pengadaan (+supplier).
+$route['admin/apotek/resep'] = 'resep/apotek/index';
+$route['admin/apotek/resep/(:any)'] = 'resep/apotek/$1';
+$route['admin/apotek/resep/(:any)/(:any)'] = 'resep/apotek/$1/$2';
+$route['admin/apotek/penjualan'] = 'penjualan/apotek/index';
+$route['admin/apotek/penjualan/(:any)'] = 'penjualan/apotek/$1';
+$route['admin/apotek/stok'] = 'stok/apotek/index';
+$route['admin/apotek/stok/(:any)'] = 'stok/apotek/$1';
+$route['admin/apotek/stok/(:any)/(:any)'] = 'stok/apotek/$1/$2';
+$route['admin/apotek/pengadaan'] = 'pengadaan/apotek/index';
+$route['admin/apotek/pengadaan/(:any)'] = 'pengadaan/apotek/$1';
+$route['admin/apotek/pengadaan/(:any)/(:any)'] = 'pengadaan/apotek/$1/$2';
+
+// TRANSAKSI & PEMBAYARAN: Transaksi, Tagihan (+pembayaran), Pembayaran.
+$route['admin/transaksi/transaksi'] = 'transaksi/transaksi/index';
+$route['admin/transaksi/transaksi/(:any)'] = 'transaksi/transaksi/$1';
+$route['admin/transaksi/transaksi/(:any)/(:any)'] = 'transaksi/transaksi/$1/$2';
+$route['admin/transaksi/tagihan'] = 'tagihan/transaksi/index';
+$route['admin/transaksi/tagihan/(:any)'] = 'tagihan/transaksi/$1';
+$route['admin/transaksi/tagihan/(:any)/(:any)'] = 'tagihan/transaksi/$1/$2';
+
+// APOTEK ONLINE sisi APOTEKER (kelola pesanan).
+$route['admin/apotek/pesanan-online'] = 'apotekonline/apotek/index';
+$route['admin/apotek/pesanan-online/(:any)'] = 'apotekonline/apotek/$1';
+$route['admin/apotek/pesanan-online/(:any)/(:any)'] = 'apotekonline/apotek/$1/$2';
+
+// APOTEK ONLINE sisi PASIEN (context online).
+$route['admin/online/obat'] = 'apotekonline/online/obat';
+$route['admin/online/keranjang'] = 'apotekonline/online/keranjang';
+$route['admin/online/checkout'] = 'apotekonline/online/checkout';
+$route['admin/online/pesanan'] = 'apotekonline/online/pesanan';
+$route['admin/online/pesanan/detail/(:num)'] = 'apotekonline/online/pesanan_detail/$1';
+
+// Alias dash /admin/apotek-online/* ke context online yang sama.
+$route['admin/apotek-online/obat'] = 'apotekonline/online/obat';
+$route['admin/apotek-online/keranjang'] = 'apotekonline/online/keranjang';
+$route['admin/apotek-online/checkout'] = 'apotekonline/online/checkout';
+$route['admin/apotek-online/pesanan'] = 'apotekonline/online/pesanan';
+$route['admin/apotek-online/pesanan/detail/(:num)'] = 'apotekonline/online/pesanan_detail/$1';
+
+// LAPORAN.
+$route['admin/laporan/laporan'] = 'laporan/laporan/index';
+
+// MASTER DATA: supplier dikelola lewat pengadaan.
+$route['admin/master/pengadaan'] = 'pengadaan/master/index';
+$route['admin/master/pengadaan/(:any)'] = 'pengadaan/master/$1';
+
+// MANAJEMEN SISTEM: audit log.
+$route['admin/settings/audit'] = 'audit/settings/index';
+$route['admin/settings/audit/(:any)'] = 'audit/settings/$1';
+
+// MANAJEMEN SISTEM: user & role via modul pengguna (pengganti Bonfire
+// legacy yang tak kompatibel dengan skema custom).
+$route['admin/settings/users'] = 'pengguna/users/index';
+$route['admin/settings/users/(:any)'] = 'pengguna/users/$1';
+$route['admin/settings/users/(:any)/(:any)'] = 'pengguna/users/$1/$2';
+$route['admin/settings/roles'] = 'pengguna/roles/index';
+$route['admin/settings/roles/(:any)'] = 'pengguna/roles/$1';
+$route['admin/settings/roles/(:any)/(:any)'] = 'pengguna/roles/$1/$2';
+
+// Alias lama admin/content/* (kompatibilitas; sidebar memakai context baru).
 // Pendaftaran dan data pasien.
 $route['admin/content/pasien'] = 'pasien/content/index';
 $route['admin/content/pasien/(:any)'] = 'pasien/content/$1';

@@ -77,4 +77,16 @@ class Laporan_model extends CI_Model
             ->get('mutasi_stok')
             ->result();
     }
+
+    /** Posisi stok terkini per obat (snapshot; abaikan rentang tanggal). */
+    public function stok($dari, $sampai)
+    {
+        return $this->db->select('obat.kode_obat, obat.nama_obat, obat.satuan,
+                COALESCE(stok_obat.jumlah_stok, 0) AS stok, obat.stok_minimum', false)
+            ->join('stok_obat', 'stok_obat.id_obat = obat.id_obat', 'left')
+            ->where('obat.status', 'AKTIF')
+            ->order_by('obat.nama_obat', 'ASC')
+            ->get('obat')
+            ->result();
+    }
 }

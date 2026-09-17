@@ -22,6 +22,13 @@ class Api extends Authenticated_Controller
             ->set_output(json_encode($data));
     }
 
+    /** ID -> int positif; 0 bila tidak valid (hindari SQL error). */
+    private function as_id($v)
+    {
+        $id = (int) $v;
+        return $id > 0 ? $id : 0;
+    }
+
     /** POST: id_kunjungan, id_dokter, keluhan?, hasil_pemeriksaan?, catatan_dokter? */
     public function buka()
     {
@@ -35,6 +42,8 @@ class Api extends Authenticated_Controller
         if ($sendiri) {
             $post['id_dokter'] = $sendiri;
         }
+        $post['id_kunjungan'] = $this->as_id($post['id_kunjungan'] ?? null);
+        $post['id_dokter'] = $this->as_id($post['id_dokter'] ?? null);
         if (empty($post['id_kunjungan']) || empty($post['id_dokter'])) {
             $this->json(array('success' => false, 'error' => 'Kunjungan dan dokter wajib diisi.'), 422);
             return;
@@ -52,7 +61,8 @@ class Api extends Authenticated_Controller
     public function rekam_medis($id)
     {
         $this->auth->restrict('kelola_pemeriksaan');
-        $row = $this->pemeriksaan_model->rekam_medis($id);
+        $id = $this->as_id($id);
+        $row = $id ? $this->pemeriksaan_model->rekam_medis($id) : false;
         if (! $row || ! $this->boleh_akses($row->id_dokter)) {
             $this->json(array('success' => false, 'error' => 'Tidak ditemukan.'), 404);
             return;
@@ -138,6 +148,7 @@ class Api extends Authenticated_Controller
     /** True bila pemeriksaan ada dan boleh diakses user saat ini. */
     private function milik_sendiri($id_pemeriksaan)
     {
+        $id_pemeriksaan = $this->as_id($id_pemeriksaan);
         if (empty($id_pemeriksaan)) {
             return false;
         }

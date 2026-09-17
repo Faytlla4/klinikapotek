@@ -12,5 +12,5 @@
     </dl><hr><h4>Riwayat Kunjungan</h4>
     <table class="table table-bordered table-hover"><thead><tr><th>Tanggal</th><th>Pelayanan</th><th>Status</th></tr></thead><tbody>
         <?php if (empty($pasien->kunjungan)): ?><tr><td colspan="3" class="text-center">Belum ada kunjungan.</td></tr><?php else: foreach ($pasien->kunjungan as $k): ?><tr><td><?php echo html_escape($k->tanggal_kunjungan); ?></td><td><?php echo html_escape($k->nama_pelayanan ?: '-'); ?></td><td><?php echo html_escape($k->status); ?></td></tr><?php endforeach; endif; ?>
-    </tbody></table></div><div class="card-footer"><a href="<?php echo site_url(SITE_AREA . '/content/pasien'); ?>" class="btn btn-default">Kembali</a></div>
+    </tbody></table></div><div class="card-footer"><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a></div>
 </div></div></div>

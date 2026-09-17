@@ -67,6 +67,11 @@ class Transaksi_model extends BF_Model
         $this->db->trans_start();
         $trx = $this->db->where(array('id_tagihan' => $id_tagihan, 'status' => 'BELUM_DIBAYAR'))
             ->get('transaksi')->row();
+        if ($trx && $this->db->where('id_transaksi', $trx->id_transaksi)->get('pembayaran')->row()) {
+            $this->db->trans_complete();
+            $this->error = 'Transaksi ini sudah dibayar.';
+            return false;
+        }
         if (! $trx) {
             $id_transaksi = $this->insert(array(
                 'id_tagihan' => $id_tagihan,
@@ -77,12 +82,6 @@ class Transaksi_model extends BF_Model
             ));
         } else {
             $id_transaksi = $trx->id_transaksi;
-        }
-        $sudah = $this->db->where('id_transaksi', $id_transaksi)->get('pembayaran')->row();
-        if ($sudah) {
-            $this->db->trans_complete();
-            $this->error = 'Transaksi ini sudah dibayar.';
-            return false;
         }
 
         $kembalian = $jumlah_bayar - $sisa;

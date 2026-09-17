@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 class Content extends App_Controller
 {
     public function __construct()
@@ -8,7 +8,7 @@ class Content extends App_Controller
     }
     public function index() { Template::set('toolbar_title', 'Resep Obat'); Template::render(); }
     public function get_data() { $sendiri = $this->dokter_sendiri(); $rows = $sendiri === false ? array() : $this->resep_model->menunggu($sendiri); echo json_encode(array('draw' => (int)($this->input->post('draw') ?: 1), 'recordsTotal' => count($rows), 'recordsFiltered' => count($rows), 'data' => $rows)); }
-    public function detail($id) { $row = $this->resep_model->detail($id); if (!$row || !$this->boleh_akses($row->id_dokter)) { show_404(); } Template::set('resep', $row); Template::set('toolbar_title', 'Detail Resep'); Template::render(); }
+    public function detail($id) { $row = $this->resep_model->detail((int) $id); if (!$row || !$this->boleh_akses($row->id_dokter)) { show_404(); } Template::set('resep', $row); Template::set('toolbar_title', 'Detail Resep'); Template::render(); }
 
     /** True bila user dokter murni (apoteker memproses semua resep, admin melihat semua). */
     private function hanya_dokter()
@@ -34,3 +34,4 @@ class Content extends App_Controller
         return $sendiri === null || ($sendiri !== false && (int) $id_dokter === (int) $sendiri);
     }
 }
+

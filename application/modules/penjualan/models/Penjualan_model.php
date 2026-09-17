@@ -40,15 +40,15 @@ class Penjualan_model extends BF_Model
     public function jual($jenis, $id_resep, $id_pasien, $items)
     {
         $jenis = strtoupper($jenis);
-        if (! in_array($jenis, array('RESEP', 'LANGSUNG'))) {
-            $this->error = 'Jenis penjualan harus RESEP atau LANGSUNG.';
+        if (! in_array($jenis, array('RESEP', 'LANGSUNG', 'ONLINE'))) {
+            $this->error = 'Jenis penjualan harus RESEP, LANGSUNG, atau ONLINE.';
             return false;
         }
         if ($jenis === 'RESEP' && empty($id_resep)) {
             $this->error = 'Penjualan resep wajib menyertakan id_resep.';
             return false;
         }
-        if ($jenis === 'RESEP') {
+        if (in_array($jenis, array('RESEP', 'ONLINE')) && ! empty($id_resep)) {
             $resep = $this->db->where('id_resep', $id_resep)->get('resep')->row();
             if (! $resep || in_array($resep->status, array('DISERAHKAN', 'BATAL'))) {
                 $this->error = 'Resep tidak tersedia atau sudah diserahkan.';
@@ -70,13 +70,16 @@ class Penjualan_model extends BF_Model
 
         $this->load->model('stok/stok_model');
         $this->db->trans_start();
-        // Kunci: cek & kurangi stok dulu per item (gagal -> rollback semua).
+        // Kunci: cek & kunci stok SEMUA item dulu (FOR UPDATE) sebelum ada
+        // tulisan apa pun, agar kegagalan logis tak pernah terjadi
+        // setelah insert (nested trans_complete akan COMMIT bila
+        // trans_status masih TRUE).
         $total = 0;
         $rows = array();
         foreach ($items as $item) {
-            if (empty($item['id_obat']) || (int) $item['jumlah'] <= 0) {
+            if (empty($item['id_obat']) || ! preg_match('/^\d+$/', (string) ($item['jumlah'] ?? '')) || (int) $item['jumlah'] <= 0) {
                 $this->db->trans_complete();
-                $this->error = 'Item obat tidak valid.';
+                $this->error = 'Jumlah obat harus bilangan bulat positif.';
                 return false;
             }
             $obat = $this->db->where('id_obat', $item['id_obat'])->get('obat')->row();
@@ -85,16 +88,23 @@ class Penjualan_model extends BF_Model
                 $this->error = "Obat ID {$item['id_obat']} tidak tersedia.";
                 return false;
             }
-            if ($jenis === 'RESEP') {
+            if (in_array($jenis, array('RESEP', 'ONLINE')) && ! empty($id_resep)) {
                 $rd = $this->db->where(array('id_resep' => $id_resep, 'id_obat' => $item['id_obat']))->get('resep_detail')->row();
                 if (! $rd || (int) $item['jumlah'] > (int) $rd->jumlah) {
                     $this->db->trans_complete();
                     $this->error = 'Jumlah obat melebihi detail resep.';
                     return false;
                 }
-            } elseif ($obat->wajib_resep) {
+            } elseif (in_array($obat->wajib_resep, array(true, 1, '1', 't', 'T'), true)) {
                 $this->db->trans_complete();
                 $this->error = 'Obat wajib resep.';
+                return false;
+            }
+            $stok_row = $this->db->query('SELECT jumlah_stok FROM stok_obat WHERE id_obat = ? FOR UPDATE', array($item['id_obat']))->row();
+            $stok_tersedia = $stok_row ? (int) $stok_row->jumlah_stok : 0;
+            if ($stok_tersedia < (int) $item['jumlah']) {
+                $this->db->trans_complete();
+                $this->error = "Stok tidak cukup (tersedia {$stok_tersedia}, diminta {$item['jumlah']}).";
                 return false;
             }
             $harga = (float) $obat->harga;
@@ -109,7 +119,7 @@ class Penjualan_model extends BF_Model
         }
 
         $id_penjualan = $this->insert(array(
-            'id_resep'         => $jenis === 'RESEP' ? $id_resep : null,
+            'id_resep'         => in_array($jenis, array('RESEP', 'ONLINE')) ? ($id_resep ?: null) : null,
             'id_pasien'        => $id_pasien,
             'nomor_penjualan'  => nomor_baru('PJ', 'penjualan_obat', 'nomor_penjualan'),
             'tanggal_penjualan'=> date('Y-m-d H:i:s'),
@@ -134,7 +144,7 @@ class Penjualan_model extends BF_Model
                 return false;
             }
         }
-        if ($jenis === 'RESEP') {
+        if (in_array($jenis, array('RESEP', 'ONLINE')) && ! empty($id_resep)) {
             $this->db->where('id_resep', $id_resep)->update('resep', array('status' => 'DISERAHKAN'));
         }
         $this->db->trans_complete();

@@ -1,8 +1,11 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Content extends App_Controller
 {
 	protected $permission = 'kelola_pasien';
+
+	/** Context aktif (sidebar/redirect). Child per-context meng-override. */
+	protected $ctx = 'content';
 
 	public function __construct()
 	{
@@ -25,7 +28,7 @@ class Content extends App_Controller
 	{
 		if (isset($_POST['save']) && $this->save_pasien('insert')) {
 			Template::set_message('Pasien berhasil ditambahkan.', 'success');
-			redirect(SITE_AREA . '/content/pasien');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pasien');
 		}
 		Template::set('toolbar_title', 'Tambah Pasien');
 		Template::render();
@@ -33,13 +36,14 @@ class Content extends App_Controller
 
 	public function edit($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		if (empty($id) || ! $this->pasien_model->find($id)) {
 			Template::set_message('ID Pasien tidak valid.', 'error');
-			redirect(SITE_AREA . '/content/pasien');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pasien');
 		}
 		if (isset($_POST['save']) && $this->save_pasien('update', $id)) {
 			Template::set_message('Data pasien berhasil diperbarui.', 'success');
-			redirect(SITE_AREA . '/content/pasien');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pasien');
 		}
 		Template::set('pasien', $this->pasien_model->find($id));
 		Template::set('toolbar_title', 'Edit Pasien');
@@ -48,10 +52,11 @@ class Content extends App_Controller
 
 	public function detail($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		$pasien = $this->pasien_model->detail($id);
 		if (! $pasien) {
 			Template::set_message('Pasien tidak ditemukan.', 'error');
-			redirect(SITE_AREA . '/content/pasien');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pasien');
 		}
 		Template::set('pasien', $pasien);
 		Template::set('toolbar_title', 'Detail Pasien');
@@ -108,9 +113,9 @@ class Content extends App_Controller
 			$this->db->from('pasien');
 			if ($search !== '') {
 				$this->db->group_start();
-				$this->db->like('no_rm', $search);
-				$this->db->or_like('nik', $search);
-				$this->db->or_like('nama', $search);
+				$this->db->where("no_rm ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->or_where("nik ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->or_where("nama ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 				$this->db->group_end();
 			}
 		};
@@ -122,3 +127,5 @@ class Content extends App_Controller
 		echo json_encode(array('draw' => $draw, 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data ?: array()));
 	}
 }
+
+

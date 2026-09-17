@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Obat extends App_Controller
 {
@@ -36,6 +36,7 @@ class Obat extends App_Controller
 
 	public function edit($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		if (empty($id)) {
 			Template::set_message('ID Obat tidak valid.', 'error');
 			redirect(SITE_AREA . '/master/obat');
@@ -83,9 +84,9 @@ class Obat extends App_Controller
 				->join('stok_obat', 'stok_obat.id_obat = obat.id_obat', 'left');
 			if (!empty($search)) {
 				$this->db->group_start();
-				$this->db->like('obat.kode_obat', $search);
-				$this->db->or_like('obat.nama_obat', $search);
-				$this->db->or_like('obat.jenis_obat', $search);
+				$this->db->where("obat.kode_obat ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->or_where("obat.nama_obat ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->or_where("obat.jenis_obat ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 				$this->db->group_end();
 			}
 		};
@@ -98,3 +99,5 @@ class Obat extends App_Controller
 		echo json_encode(array('draw' => $draw, 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data ?: array()));
 	}
 }
+
+

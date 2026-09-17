@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') || exit('No direct script access allowed');
+﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Poli extends App_Controller
 {
@@ -37,6 +37,7 @@ class Poli extends App_Controller
 
 	public function edit($id = null)
 	{
+        $id = (int) $id > 0 ? (int) $id : 0;
 		if (empty($id)) {
 			Template::set_message('ID Poli tidak valid.', 'error');
 			redirect(SITE_AREA . '/master/poli');
@@ -81,13 +82,13 @@ class Poli extends App_Controller
 
 		$this->db->from('poli');
 		if (!empty($search)) {
-			$this->db->like('nama_poli', $search);
+			$this->db->where("nama_poli ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 		}
 		$total = $this->db->count_all_results();
 
 		$this->db->from('poli');
 		if (!empty($search)) {
-			$this->db->like('nama_poli', $search);
+			$this->db->where("nama_poli ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 		}
 		$this->db->order_by('id_poli', 'DESC');
 		$this->db->limit((int) ($request['length'] ?? 10), (int) ($request['start'] ?? 0));
@@ -101,3 +102,5 @@ class Poli extends App_Controller
 		));
 	}
 }
+
+

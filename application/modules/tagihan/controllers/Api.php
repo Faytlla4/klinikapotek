@@ -21,10 +21,22 @@ class Api extends Authenticated_Controller
             ->set_output(json_encode($data));
     }
 
+    /** ID URI/POST -> int positif; 0 bila tidak valid (hindari SQL error). */
+    private function as_id($v)
+    {
+        $id = (int) $v;
+        return $id > 0 ? $id : 0;
+    }
+
     /** POST /tagihan/api/susun/{id_kunjungan} (otomatis dari tarif+tindakan+obat) */
     public function susun($id_kunjungan)
     {
         $this->auth->restrict('kelola_tagihan');
+        $id_kunjungan = $this->as_id($id_kunjungan);
+        if (! $id_kunjungan) {
+            $this->json(array('success' => false, 'error' => 'Kunjungan tidak valid.'), 422);
+            return;
+        }
         $hasil = $this->tagihan_model->susun_dari_kunjungan($id_kunjungan);
         if (! $hasil) {
             $this->json(array('success' => false, 'error' => $this->tagihan_model->error ?: 'Gagal.'), 422);
@@ -38,7 +50,8 @@ class Api extends Authenticated_Controller
     public function detail($id)
     {
         $this->auth->restrict('kelola_tagihan');
-        $row = $this->tagihan_model->detail($id);
+        $id = $this->as_id($id);
+        $row = $id ? $this->tagihan_model->detail($id) : false;
         if (! $row) {
             $this->json(array('success' => false, 'error' => 'Tagihan tidak ditemukan.'), 404);
             return;
@@ -50,7 +63,8 @@ class Api extends Authenticated_Controller
     public function batalkan($id)
     {
         $this->auth->restrict('kelola_tagihan');
-        if (! $this->tagihan_model->batalkan($id)) {
+        $id = $this->as_id($id);
+        if (! $id || ! $this->tagihan_model->batalkan($id)) {
             $this->json(array('success' => false, 'error' => $this->tagihan_model->error), 422);
             return;
         }
@@ -62,7 +76,7 @@ class Api extends Authenticated_Controller
     public function bayar()
     {
         $this->auth->restrict('kelola_pembayaran');
-        $hasil = $this->transaksi_model->bayar($this->input->post('id_tagihan'), $this->input->post('jumlah_bayar'));
+        $hasil = $this->transaksi_model->bayar($this->as_id($this->input->post('id_tagihan')), $this->input->post('jumlah_bayar'));
         if (! $hasil) {
             $this->json(array('success' => false, 'error' => $this->transaksi_model->error ?: 'Gagal.'), 422);
             return;
@@ -75,7 +89,8 @@ class Api extends Authenticated_Controller
     public function bukti($id_transaksi)
     {
         $this->auth->restrict('kelola_transaksi');
-        $row = $this->transaksi_model->bukti($id_transaksi);
+        $id_transaksi = $this->as_id($id_transaksi);
+        $row = $id_transaksi ? $this->transaksi_model->bukti($id_transaksi) : false;
         if (! $row) {
             $this->json(array('success' => false, 'error' => 'Transaksi tidak ditemukan.'), 404);
             return;

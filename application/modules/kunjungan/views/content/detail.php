@@ -9,5 +9,5 @@
         <dt class="col-sm-3">Dokter</dt><dd class="col-sm-9"><?php echo html_escape($kunjungan->nama_dokter); ?></dd>
         <dt class="col-sm-3">Ruangan</dt><dd class="col-sm-9"><?php echo html_escape($kunjungan->nama_ruangan); ?></dd>
         <dt class="col-sm-3">Status</dt><dd class="col-sm-9"><?php echo html_escape($kunjungan->status); ?></dd>
-    </dl></div><div class="card-footer"><a href="<?php echo site_url(SITE_AREA . '/content/kunjungan'); ?>" class="btn btn-default">Kembali</a></div>
+    </dl></div><div class="card-footer"><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a></div>
 </div></div></div>

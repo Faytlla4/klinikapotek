@@ -21,6 +21,13 @@ class Api extends Authenticated_Controller
             ->set_output(json_encode($data));
     }
 
+    /** ID -> int positif; 0 bila tidak valid (hindari SQL error). */
+    private function as_id($v)
+    {
+        $id = (int) $v;
+        return $id > 0 ? $id : 0;
+    }
+
     /** POST: id_pemeriksaan, id_pasien, id_dokter, catatan?, items[] */
     public function buat()
     {
@@ -34,8 +41,23 @@ class Api extends Authenticated_Controller
         if ($sendiri) {
             $post['id_dokter'] = $sendiri;
         }
+        foreach (array('id_pemeriksaan', 'id_pasien', 'id_dokter') as $k) {
+            if (isset($post[$k])) {
+                $post[$k] = $this->as_id($post[$k]);
+            }
+        }
         $items = isset($post['items']) && is_array($post['items']) ? $post['items'] : null;
         unset($post['items']);
+        if (is_array($items)) {
+            // id_* dinormalisasi; jumlah DIBIARKAN mentah agar validasi
+            // bilangan bulat di model dapat menolak desimal.
+            foreach ($items as &$it) {
+                if (isset($it['id_obat'])) {
+                    $it['id_obat'] = $this->as_id($it['id_obat']);
+                }
+            }
+            unset($it);
+        }
         $hasil = $this->resep_model->buat($post, $items);
         if (! $hasil) {
             $this->json(array('success' => false, 'error' => $this->resep_model->error ?: 'Gagal.'), 422);
@@ -58,7 +80,8 @@ class Api extends Authenticated_Controller
     public function detail($id)
     {
         $this->auth->restrict('kelola_resep');
-        $row = $this->resep_model->detail($id);
+        $id = $this->as_id($id);
+        $row = $id ? $this->resep_model->detail($id) : false;
         if (! $row || ! $this->boleh_akses($row->id_dokter)) {
             $this->json(array('success' => false, 'error' => 'Resep tidak ditemukan.'), 404);
             return;
@@ -70,7 +93,8 @@ class Api extends Authenticated_Controller
     public function status($id)
     {
         $this->auth->restrict('kelola_resep');
-        $row = $this->db->where('id_resep', $id)->get('resep')->row();
+        $id = $this->as_id($id);
+        $row = $id ? $this->db->where('id_resep', $id)->get('resep')->row() : false;
         if (! $row || ! $this->boleh_akses($row->id_dokter)) {
             $this->json(array('success' => false, 'error' => 'Resep tidak ditemukan.'), 404);
             return;

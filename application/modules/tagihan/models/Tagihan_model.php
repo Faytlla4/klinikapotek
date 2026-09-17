@@ -26,6 +26,21 @@ class Tagihan_model extends BF_Model
         parent::__construct();
     }
 
+    /** Tagihan belum lunas + info pasien (halaman Pembayaran). */
+    public function belum_lunas()
+    {
+        return $this->db->select("tagihan.*, pasien.no_rm, pasien.nama AS nama_pasien,
+                COALESCE((SELECT SUM(pembayaran.jumlah_bayar) FROM pembayaran
+                    JOIN transaksi ON transaksi.id_transaksi = pembayaran.id_transaksi
+                    WHERE transaksi.id_tagihan = tagihan.id_tagihan), 0) AS sudah_dibayar", false)
+            ->join('kunjungan', 'kunjungan.id_kunjungan = tagihan.id_kunjungan', 'left')
+            ->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien', 'left')
+            ->where('tagihan.status', 'BELUM_DIBAYAR')
+            ->order_by('tagihan.id_tagihan', 'DESC')
+            ->get('tagihan')
+            ->result();
+    }
+
     /**
      * Susun tagihan kunjungan otomatis: tarif pelayanan + tarif dokter +
      * total tindakan + total penjualan obat terkait kunjungan.
@@ -92,7 +107,7 @@ class Tagihan_model extends BF_Model
      */
     public function buat($id_kunjungan, $items)
     {
-        if (! $this->db->where('id_kunjungan', $id_kunjungan)->get('kunjungan')->row()) {
+        if ($id_kunjungan && ! $this->db->where('id_kunjungan', $id_kunjungan)->get('kunjungan')->row()) {
             $this->error = 'Kunjungan tidak ditemukan.';
             return false;
         }
