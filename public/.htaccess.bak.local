@@ -1,0 +1,77 @@
+# Helpful sections not specific to CodeIgniter - excerpted from
+# https://github.com/h5bp/server-configs/
+
+# ----------------------------------------------------------------------
+# A little more security
+# ----------------------------------------------------------------------
+
+# To avoid displaying the exact version number of Apache being used, add the
+# following to httpd.conf (it will not work in .htaccess):
+# ServerTokens Prod
+
+# "-Indexes" will have Apache block users from browsing folders without a
+# default document Usually you should leave this activated, because you
+# shouldn't allow everybody to surf through every folder on your server (which
+# includes rather private places like CMS system folders).
+<IfModule mod_autoindex.c>
+  Options -Indexes
+</IfModule>
+
+# Block access to "hidden" directories or files whose names begin with a
+# period. This includes directories used by version control systems such as
+# Subversion or Git.
+<IfModule mod_rewrite.c>
+  RewriteCond %{SCRIPT_FILENAME} -d [OR]
+  RewriteCond %{SCRIPT_FILENAME} -f
+  RewriteRule "(^|/)\." - [F]
+</IfModule>
+
+# ----------------------------------------------------------------------
+# Start rewrite engine
+# ----------------------------------------------------------------------
+
+# Turning on the rewrite engine is necessary for the following rules and features.
+# FollowSymLinks must be enabled for this to work.
+
+<IfModule mod_rewrite.c>
+  Options +FollowSymlinks
+  RewriteEngine On
+
+  # If you installed Bonfire in a subfolder, you will need to
+  # change the following line to match the subfolder you need.
+  # http://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewritebase
+  #RewriteBase /var/www/template_apk/pariwisata/public/
+  RewriteBase /template/public/
+
+  # Removes access to the system folder by users.
+  # Additionally this will allow you to create a System.php controller,
+  # previously this would not have been possible.
+  # 'system' can be replaced if you have renamed your system folder.
+  RewriteCond %{REQUEST_URI} ^bonfire/codeigniter.*
+  RewriteRule ^(.*)$ /index.php?/$1 [L]
+</IfModule>
+
+# Rewrite "www.example.com -> example.com"
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# Checks to see if the user is attempting to access a valid file,
+# such as an image or css document, if this isn't true it sends the
+# request to index.php
+
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    # If we don't have mod_rewrite installed, all 404's
+    # can be sent to index.php, and everything works as normal.
+    # Submitted by: ElliotHaughin
+
+    ErrorDocument 404 index.php
+</IfModule>

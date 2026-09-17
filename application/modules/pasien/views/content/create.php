@@ -1,0 +1,14 @@
+<?php if (validation_errors()): ?><div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button><?php echo validation_errors(); ?></div><?php endif; ?>
+<div class="row"><div class="col-md-12"><div class="card card-primary">
+    <div class="card-header"><h3 class="card-title">Form Tambah Pasien</h3></div>
+    <?php echo form_open($this->uri->uri_string()); ?><div class="card-body">
+        <div class="form-group"><label for="nama">Nama <span class="text-danger">*</span></label><input id="nama" name="nama" class="form-control" required value="<?php echo set_value('nama'); ?>"><?php echo form_error('nama'); ?></div>
+        <div class="form-group"><label for="nik">NIK</label><input id="nik" name="nik" class="form-control" maxlength="20" value="<?php echo set_value('nik'); ?>"><?php echo form_error('nik'); ?></div>
+        <div class="form-group"><label for="tanggal_lahir">Tanggal Lahir</label><input id="tanggal_lahir" type="date" name="tanggal_lahir" class="form-control" value="<?php echo set_value('tanggal_lahir'); ?>"></div>
+        <div class="form-group"><label for="jenis_kelamin">Jenis Kelamin</label><select id="jenis_kelamin" name="jenis_kelamin" class="form-control select2"><option value="">-- Pilih --</option><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+        <div class="form-group"><label for="alamat">Alamat</label><textarea id="alamat" name="alamat" class="form-control" rows="3"><?php echo set_value('alamat'); ?></textarea></div>
+        <div class="form-group"><label for="no_hp">No. HP</label><input id="no_hp" name="no_hp" class="form-control" value="<?php echo set_value('no_hp'); ?>"></div>
+        <div class="form-group"><label for="status">Status</label><select id="status" name="status" class="form-control select2"><option value="AKTIF">AKTIF</option><option value="NONAKTIF">NONAKTIF</option></select></div>
+        <div class="alert alert-info">Nomor Rekam Medis dibuat otomatis oleh sistem.</div>
+    </div><div class="card-footer"><button type="submit" name="save" class="btn btn-primary">Simpan</button><a href="<?php echo site_url(SITE_AREA . '/content/pasien'); ?>" class="btn btn-default float-right">Batal</a></div><?php echo form_close(); ?>
+</div></div></div>

@@ -1,0 +1,1 @@
+<div class="row"><div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title">Penjualan Obat</h3></div><div class="card-body"><p>Gunakan API penjualan untuk transaksi resep atau pembelian langsung.</p></div></div></div></div>
