@@ -1,11 +1,4 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-<style>
-/* Label menu panjang wrap agar tidak terpotong di sidebar 250px. */
-.main-sidebar .nav-sidebar .nav-link > p { white-space: normal; overflow: visible; }
-.main-sidebar .nav-sidebar .nav-treeview .nav-link > p { font-weight: 400; text-transform: none; font-size: 1rem; letter-spacing: normal; }
-/* Heading grup (parent, href #) tegas dibedakan dari link item. */
-.main-sidebar .nav-sidebar .nav-link[href='#'] > p { font-weight: 700; text-transform: uppercase; font-size: .8rem; letter-spacing: .3px; }
-</style>
     <a href="<?php echo base_url(); ?>" class="brand-link">
         <img src="<?php echo base_url('assets/images/logo.png'); ?>" class="brand-image img-circle elevation-3" style="opacity: .8">
         <span class="brand-text font-weight-light">
@@ -14,6 +7,13 @@
     </a>
 
     <div class="sidebar">
+        <style>
+            /* Fix: kurangi indentasi nesting sidebar dari 2rem → 0.5rem per level */
+            .sidebar .nav-treeview { padding-left: .5rem; }
+            /* Fix: prevent horizontal overflow pada layout */
+            .wrapper { overflow-x: hidden; }
+            .content-wrapper { overflow-x: hidden; }
+        </style>
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
                 <img src="<?php echo base_url('assets/images/anonym.png'); ?>" class="img-circle elevation-2">

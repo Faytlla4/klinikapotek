@@ -17,6 +17,8 @@ class Apotek extends App_Controller
     public function index()
     {
         $status = $this->input->get('status');
+        // Sync status_bayar dari tagihan agar list selalu terkini.
+        $this->pesanan_model->sync_semua_bayar();
         $this->db->select('pesanan_online.*, pasien.nama AS nama_pasien')
             ->join('pasien', 'pasien.id_pasien = pesanan_online.id_pasien')
             ->order_by('pesanan_online.id_pesanan', 'DESC');
@@ -39,6 +41,8 @@ class Apotek extends App_Controller
         if (! $row) {
             show_404();
         }
+        // Sync status_bayar dari tagihan sebelum tampil.
+        $this->pesanan_model->selaraskan_bayar($row);
         $row->items = $this->db->select('pesanan_online_detail.*, obat.nama_obat, obat.satuan')
             ->join('obat', 'obat.id_obat = pesanan_online_detail.id_obat')
             ->where('id_pesanan', $id)
@@ -78,6 +82,7 @@ class Apotek extends App_Controller
         }
         // Muat ulang setelah aksi.
         $row = $this->pesanan_model->find($id);
+        $this->pesanan_model->selaraskan_bayar($row);
         $row->items = $this->db->select('pesanan_online_detail.*, obat.nama_obat, obat.satuan')
             ->join('obat', 'obat.id_obat = pesanan_online_detail.id_obat')
             ->where('id_pesanan', $id)

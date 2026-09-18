@@ -365,8 +365,11 @@ class Pesanan_model extends BF_Model
         return array('id_penjualan' => $jual['id_penjualan'], 'id_tagihan' => $tagihan['id_tagihan']);
     }
 
-    /** Selaraskan status_bayar dari tagihan (dipanggil saat baca). */
-    private function selaraskan_bayar($row)
+    /**
+     * Selaraskan status_bayar dari tagihan (dipanggil saat baca).
+     * Publik agar controller bisa memanggil saat list/detail.
+     */
+    public function selaraskan_bayar($row)
     {
         if (empty($row->id_tagihan) || $row->status_bayar === 'LUNAS') {
             return;
@@ -376,5 +379,23 @@ class Pesanan_model extends BF_Model
             $this->update($row->id_pesanan, array('status_bayar' => 'LUNAS', 'updated_at' => date('Y-m-d H:i:s')));
             $row->status_bayar = 'LUNAS';
         }
+    }
+
+    /**
+     * Sinkronkan SEMUA pesanan yang tagihannya sudah LUNAS tapi
+     * status_bayar masih BELUM_DIBAYAR. Satu query, bukan N+1.
+     */
+    public function sync_semua_bayar()
+    {
+        $this->db->query("
+            UPDATE pesanan_online
+               SET status_bayar = 'LUNAS',
+                   updated_at   = NOW()
+             WHERE status_bayar <> 'LUNAS'
+               AND id_tagihan IS NOT NULL
+               AND id_tagihan IN (
+                   SELECT id_tagihan FROM tagihan WHERE status = 'LUNAS'
+               )
+        ");
     }
 }

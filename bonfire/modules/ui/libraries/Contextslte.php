@@ -269,7 +269,7 @@ class Contextslte
 			array('{class}', '{extra}', '{menu}'),
 			array(
 				self::$outer_class,
-				(trim(self::$outer_id) == '' ? '' : ' id="' . self::$outer_id . '"') . ' data-widget="treeview" role="menu" data-accordion="true"',
+				(trim(self::$outer_id) == '' ? '' : ' id="' . self::$outer_id . '"') . ' data-widget="treeview" role="menu" data-accordion="false"',
 				$menu,
 			),
 			self::$templateContextNav

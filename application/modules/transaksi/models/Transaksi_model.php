@@ -95,6 +95,8 @@ class Transaksi_model extends BF_Model
         ));
         $this->db->where('id_tagihan', $id_tagihan)->update('tagihan', array('status' => 'LUNAS'));
         $this->db->where('id_transaksi', $id_transaksi)->update('transaksi', array('status' => 'LUNAS'));
+        // ponytail: write-time sync, pesanan_online ikut LUNAS saat bayar (tanpa ini apoteker lihat status basi sampai buka detail)
+        $this->db->where('id_tagihan', $id_tagihan)->update('pesanan_online', array('status_bayar' => 'LUNAS', 'updated_at' => date('Y-m-d H:i:s')));
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === false) {

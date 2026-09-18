@@ -187,6 +187,20 @@ class App_hooks
         }
     }
 
+    //--------------------------------------------------------------------------
+    /**
+     * Set no-cache headers supaya browser tak menampilkan versi cache
+     * setelah logout (prevent stale authenticated pages).
+     *
+     * @return void
+     */
+    public function setNoCache()
+    {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+    }
+
     protected function ruriInArray(array $ruriArray)
     {
         // Output of uri->ruri_string() is considerably different in CI 3 when using

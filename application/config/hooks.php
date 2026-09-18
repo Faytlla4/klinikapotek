@@ -24,6 +24,15 @@ $hook['post_controller'][] = array(
     'params'   => ''
 );
 
+// Prevent browser caching (no stale pages after logout).
+$hook['post_controller_constructor'][] = array(
+    'class'    => 'App_hooks',
+    'function' => 'setNoCache',
+    'filename' => 'App_hooks.php',
+    'filepath' => 'hooks',
+    'params'   => ''
+);
+
 // Check whether the site is in maintenance mode.
 $hook['post_controller_constructor'][] = array(
     'class'    => 'App_hooks',
