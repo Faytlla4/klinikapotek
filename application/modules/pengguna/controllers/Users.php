@@ -1,4 +1,4 @@
-﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
+<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 /**
  * Kelola User (skema custom apotek). Guard: kelola_user.

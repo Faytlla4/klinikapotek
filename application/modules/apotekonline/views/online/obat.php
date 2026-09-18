@@ -23,10 +23,13 @@
                     <div class="form-inline">
                         <input type="hidden" name="id_obat" value="<?php echo $o->id_obat; ?>">
                         <?php if ($wajib): ?>
+                        <?php if (empty($resep_map[$o->id_obat])): ?><small class="text-danger d-block mb-1">Belum ada resep dokter yang valid.<br>Silakan periksa ke dokter terlebih dahulu.</small>
+                        <?php else: ?>
                         <select name="id_resep" class="form-control form-control-sm mr-2" required>
                             <option value="">-- Resep --</option>
                             <?php foreach (($resep_map[$o->id_obat] ?? array()) as $r): ?><option value="<?php echo $r->id_resep; ?>"><?php echo html_escape($r->nomor_resep . ' (' . $r->jml_resep . ')'); ?></option><?php endforeach; ?>
                         </select>
+                        <?php endif; ?>
                         <?php endif; ?>
                         <input type="number" min="1" max="<?php echo (int) $o->stok; ?>" name="jumlah" value="1" class="form-control form-control-sm mr-2" style="width:80px;" required>
                         <button type="submit" name="tambah" value="1" class="btn btn-sm btn-success">+ Keranjang</button>

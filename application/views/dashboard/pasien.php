@@ -14,6 +14,7 @@
         <dt class="col-sm-4">Nama</dt><dd class="col-sm-8"><?php echo html_escape($pasien->nama); ?></dd>
         <dt class="col-sm-4">NIK</dt><dd class="col-sm-8"><?php echo html_escape($pasien->nik ?: '-'); ?></dd>
         <dt class="col-sm-4">No. HP</dt><dd class="col-sm-8"><?php echo html_escape($pasien->no_hp ?: '-'); ?></dd>
+        <dt class="col-sm-4">Alamat</dt><dd class="col-sm-8"><?php echo html_escape($pasien->alamat ?: '-'); ?></dd>
     </dl></div>
 </div></div>
 <div class="col-md-8"><div class="card">

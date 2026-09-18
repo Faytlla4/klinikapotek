@@ -1,4 +1,4 @@
-﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
+<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Content extends App_Controller
 {

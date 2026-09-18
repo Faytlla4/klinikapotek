@@ -1,4 +1,4 @@
-﻿<ul>
+<ul>
 <?php
 $laporan_tabs = array(
     'kunjungan'      => 'Pelayanan',

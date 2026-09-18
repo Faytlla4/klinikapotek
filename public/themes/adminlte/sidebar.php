@@ -1,4 +1,11 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
+<style>
+/* Label menu panjang wrap agar tidak terpotong di sidebar 250px. */
+.main-sidebar .nav-sidebar .nav-link > p { white-space: normal; overflow: visible; }
+.main-sidebar .nav-sidebar .nav-treeview .nav-link > p { font-weight: 400; text-transform: none; font-size: 1rem; letter-spacing: normal; }
+/* Heading grup (parent, href #) tegas dibedakan dari link item. */
+.main-sidebar .nav-sidebar .nav-link[href='#'] > p { font-weight: 700; text-transform: uppercase; font-size: .8rem; letter-spacing: .3px; }
+</style>
     <a href="<?php echo base_url(); ?>" class="brand-link">
         <img src="<?php echo base_url('assets/images/logo.png'); ?>" class="brand-image img-circle elevation-3" style="opacity: .8">
         <span class="brand-text font-weight-light">

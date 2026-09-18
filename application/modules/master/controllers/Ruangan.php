@@ -1,4 +1,4 @@
-﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
+<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 class Ruangan extends App_Controller
 {

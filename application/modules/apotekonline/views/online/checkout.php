@@ -12,6 +12,6 @@
     <div class="card-header"><h3 class="card-title">Pengiriman &amp; Konfirmasi</h3></div>
     <?php echo form_open($this->uri->uri_string()); ?><div class="card-body">
         <div class="form-group"><label for="alamat">Alamat Pengiriman <span class="text-danger">*</span></label><textarea id="alamat" name="alamat" class="form-control" rows="4" required><?php echo html_escape(set_value('alamat', $pasien->alamat ?: '')); ?></textarea><small class="text-muted">Alamat tersimpan sebagai snapshot pada pesanan.</small></div>
-        <div class="form-group"><label>No. HP</label><input class="form-control" readonly value="<?php echo html_escape($pasien->no_hp ?: '-'); ?>"></div>
+        <div class="form-group"><label for="no_hp">No. HP <span class="text-danger">*</span></label><input id="no_hp" name="no_hp" class="form-control" required value="<?php echo html_escape(set_value('no_hp', $pasien->no_hp ?: '')); ?>"><small class="text-muted">Untuk kurir menghubungi. Tersimpan ke data pasien.</small></div>
     </div><div class="card-footer"><button type="submit" name="checkout" value="1" class="btn btn-primary">Buat Pesanan</button><a href="<?php echo site_url(SITE_AREA . '/online/keranjang'); ?>" class="btn btn-default float-right">Kembali</a></div><?php echo form_close(); ?>
 </div></div></div>

@@ -51,6 +51,9 @@ class Apotek extends App_Controller
         if ($row->id_tagihan) {
             $row->tagihan = $this->db->where('id_tagihan', $row->id_tagihan)->get('tagihan')->row();
         }
+        $psn = $this->db->select('nama, no_hp')->where('id_pasien', $row->id_pasien)->get('pasien')->row();
+        $row->nama_pasien = $psn ? $psn->nama : '-';
+        $row->no_hp_pasien = ($psn && $psn->no_hp) ? $psn->no_hp : '-';
         $aksi = $this->input->post('aksi');
         if ($aksi === 'validasi') {
             $ok = $this->pesanan_model->ubah_status($id, 'DIVERIFIKASI');
@@ -86,6 +89,9 @@ class Apotek extends App_Controller
         if ($row->id_tagihan) {
             $row->tagihan = $this->db->where('id_tagihan', $row->id_tagihan)->get('tagihan')->row();
         }
+        $psn = $this->db->select('nama, no_hp')->where('id_pasien', $row->id_pasien)->get('pasien')->row();
+        $row->nama_pasien = $psn ? $psn->nama : '-';
+        $row->no_hp_pasien = ($psn && $psn->no_hp) ? $psn->no_hp : '-';
         Template::set('pesanan', $row);
         Template::set('toolbar_title', 'Detail Pesanan Online');
         Template::set_view('online/kelola_detail');

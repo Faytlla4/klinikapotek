@@ -1,4 +1,4 @@
-<ul class="nav nav-treeview">
+<ul>
 <?php if ($this->auth->has_permission('kelola_master_data')): ?>
     <li class="nav-item">
         <a href="<?php echo site_url(SITE_AREA . '/master/pelayanan'); ?>" class="nav-link <?php echo $this->uri->segment(3) == 'pelayanan' ? 'active' : ''; ?>">

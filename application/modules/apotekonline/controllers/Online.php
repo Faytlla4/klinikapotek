@@ -1,4 +1,4 @@
-﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
+<?php defined('BASEPATH') || exit('No direct script access allowed');
 
 /**
  * Apotek Online sisi PASIEN (context online). Orchestration di atas
@@ -162,7 +162,22 @@ class Online extends App_Controller
             foreach ($k as $id_obat => $it) {
                 $items[] = array('id_obat' => (int) $id_obat, 'jumlah' => (int) $it['jumlah'], 'id_resep' => isset($it['id_resep']) ? $it['id_resep'] : null);
             }
-            $id = $this->pesanan_model->buat($pasien->id_pasien, $this->input->post('alamat'), $items);
+            $no_hp = trim($this->input->post('no_hp') ?: '');
+            if ($no_hp === '') {
+                Template::set_message('No. HP wajib diisi.', 'error');
+            } else {
+                $alamat_in = trim($this->input->post('alamat') ?: '');
+                $upd = array('no_hp' => $no_hp);
+                if ($alamat_in !== '') {
+                    $upd['alamat'] = $alamat_in;
+                }
+                $this->db->where('id_pasien', $pasien->id_pasien)->update('pasien', $upd);
+                $pasien->no_hp = $no_hp;
+                if ($alamat_in !== '') {
+                    $pasien->alamat = $alamat_in;
+                }
+            }
+            $id = ($no_hp === '') ? false : $this->pesanan_model->buat($pasien->id_pasien, $this->input->post('alamat'), $items);
             if (! $id) {
                 Template::set_message($this->pesanan_model->error, 'error');
             } else {

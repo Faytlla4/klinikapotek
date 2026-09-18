@@ -6,6 +6,7 @@
             <dt class="col-sm-3">Status</dt><dd class="col-sm-9"><span class="badge badge-info"><?php echo html_escape($pesanan->status); ?></span></dd>
             <dt class="col-sm-3">Pembayaran</dt><dd class="col-sm-9"><span class="badge <?php echo $pesanan->status_bayar === 'LUNAS' ? 'badge-success' : 'badge-warning'; ?>"><?php echo html_escape($pesanan->status_bayar); ?></span><?php if (! empty($pesanan->tagihan)): ?> (Tagihan: <?php echo html_escape($pesanan->tagihan->nomor_tagihan . ' - ' . $pesanan->tagihan->status); ?>)<?php endif; ?></dd>
             <dt class="col-sm-3">Alamat Kirim</dt><dd class="col-sm-9"><?php echo html_escape($pesanan->alamat_kirim); ?></dd>
+            <dt class="col-sm-3">No. HP Pasien</dt><dd class="col-sm-9"><?php echo html_escape($pesanan->no_hp_pasien); ?></dd>
             <dt class="col-sm-3">Total</dt><dd class="col-sm-9"><strong>Rp <?php echo number_format((float) $pesanan->total, 0, ',', '.'); ?></strong></dd>
         </dl>
         <div class="table-responsive"><table class="table table-bordered table-striped">

@@ -1,4 +1,4 @@
-﻿<?php defined('BASEPATH') || exit('No direct script access allowed');
+<?php defined('BASEPATH') || exit('No direct script access allowed');
 class Content extends App_Controller
 {
     public function __construct() { parent::__construct(); $this->auth->restrict('kelola_tagihan'); $this->load->model('tagihan/tagihan_model'); Assets::add_module_js('tagihan', 'tagihan.js'); }
