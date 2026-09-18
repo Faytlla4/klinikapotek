@@ -45,11 +45,18 @@ class Api extends Authenticated_Controller
         $this->json(array('success' => true, 'data' => $row));
     }
 
-    /** POST /kunjungan/api/status/{id}: status=MENUNGGU|DIPROSES|SELESAI|BATAL */
+    /** POST /kunjungan/api/status/{id}: status=BATAL.
+     * Perubahan status pelayanan normal dikelola oleh alur antrian, supaya
+     * kunjungan dan antrian tidak dapat berada pada state yang berbeda.
+     */
     public function status($id)
     {
         $this->auth->restrict('kelola_pendaftaran');
-        if (! $this->kunjungan_model->ubah_status($id, $this->input->post('status'))) {
+        if ($this->input->post('status') !== 'BATAL') {
+            $this->json(array('success' => false, 'error' => 'Status kunjungan selain BATAL harus diubah melalui antrian.'), 422);
+            return;
+        }
+        if (! $this->kunjungan_model->ubah_status($id, 'BATAL')) {
             $this->json(array('success' => false, 'error' => $this->kunjungan_model->error), 422);
             return;
         }

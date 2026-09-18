@@ -53,6 +53,35 @@ class Content extends App_Controller
 		Template::render();
 	}
 
+	/**
+	 * POST: ubah status kunjungan (TERDAFTAR→MENUNGGU→DIPROSES→SELESAI / BATAL)
+	 */
+	public function ubah_status($id = null)
+	{
+		$id = (int) $id > 0 ? (int) $id : 0;
+		$status_baru = $this->input->post('status');
+		$status_valid = array('MENUNGGU', 'DIPROSES', 'SELESAI', 'BATAL');
+
+		if (! in_array($status_baru, $status_valid)) {
+			Template::set_message('Status tidak valid.', 'error');
+			redirect(SITE_AREA . '/' . $this->ctx . '/kunjungan/detail/' . $id);
+		}
+
+		$kunjungan = $this->kunjungan_model->detail($id);
+		if (! $kunjungan) {
+			Template::set_message('Kunjungan tidak ditemukan.', 'error');
+			redirect(SITE_AREA . '/' . $this->ctx . '/kunjungan');
+		}
+
+		if (! $this->kunjungan_model->ubah_status($id, $status_baru)) {
+			Template::set_message($this->kunjungan_model->error ?: 'Gagal mengubah status.', 'error');
+		} else {
+			$this->audit_log_model->catat($this->auth->user_id(), 'update', 'kunjungan', $id, 'Status -> ' . $status_baru);
+			Template::set_message('Status kunjungan berhasil diubah menjadi <strong>' . $status_baru . '</strong>.', 'success');
+		}
+		redirect(SITE_AREA . '/' . $this->ctx . '/kunjungan/detail/' . $id);
+	}
+
 	private function set_master_data()
 	{
 		Template::set('pasien_list', $this->pasien_model->find_all() ?: array());
@@ -65,11 +94,11 @@ class Content extends App_Controller
 	private function save_kunjungan()
 	{
 		$rules = array(
-			array('field' => 'id_pasien', 'label' => 'Pasien', 'rules' => 'required|integer'),
-			array('field' => 'id_pelayanan', 'label' => 'Pelayanan', 'rules' => 'required|integer'),
-			array('field' => 'id_poli', 'label' => 'Poli', 'rules' => 'required|integer'),
-			array('field' => 'id_dokter', 'label' => 'Dokter', 'rules' => 'required|integer'),
-			array('field' => 'id_ruangan', 'label' => 'Ruangan', 'rules' => 'required|integer'),
+			array('field' => 'id_pasien',   'label' => 'Pasien',    'rules' => 'required|integer'),
+			array('field' => 'id_pelayanan','label' => 'Pelayanan', 'rules' => 'required|integer'),
+			array('field' => 'id_poli',     'label' => 'Poli',      'rules' => 'required|integer'),
+			array('field' => 'id_dokter',   'label' => 'Dokter',    'rules' => 'required|integer'),
+			array('field' => 'id_ruangan',  'label' => 'Ruangan',   'rules' => 'required|integer'),
 		);
 		$this->form_validation->set_rules($rules);
 		if ($this->form_validation->run() === false) {
@@ -77,36 +106,37 @@ class Content extends App_Controller
 		}
 
 		$data = array(
-			'id_pasien' => $this->input->post('id_pasien'),
+			'id_pasien'    => $this->input->post('id_pasien'),
 			'id_pelayanan' => $this->input->post('id_pelayanan'),
-			'id_poli' => $this->input->post('id_poli'),
-			'id_dokter' => $this->input->post('id_dokter'),
-			'id_ruangan' => $this->input->post('id_ruangan'),
+			'id_poli'      => $this->input->post('id_poli'),
+			'id_dokter'    => $this->input->post('id_dokter'),
+			'id_ruangan'   => $this->input->post('id_ruangan'),
 		);
-		// Tahap C berhenti di TERDAFTAR; nomor antrian dibuat Tahap D.
-		$result = $this->kunjungan_model->daftar($data, false);
+		// Semua jalur pendaftaran membuat kunjungan dan antrian melalui
+		// service yang sama agar tidak ada perbedaan dengan endpoint API.
+		$result = $this->kunjungan_model->daftar($data);
 		if (! $result) {
 			Template::set_message($this->kunjungan_model->error ?: 'Gagal membuat kunjungan.', 'error');
 			return false;
 		}
-		$this->audit_log_model->catat($this->auth->user_id(), 'create', 'kunjungan', $result['id_kunjungan'], 'TERDAFTAR');
+		$this->audit_log_model->catat($this->auth->user_id(), 'create', 'kunjungan', $result['id_kunjungan'], 'No. antrian ' . $result['nomor_antrian']);
 		return true;
 	}
 
 	public function get_data()
 	{
 		$request = $this->input->post();
-		$draw = (int) ($request['draw'] ?? 1);
-		$search = trim($request['search']['value'] ?? '');
-		$build = function () use ($search) {
+		$draw    = (int) ($request['draw'] ?? 1);
+		$search  = trim($request['search']['value'] ?? '');
+		$build   = function () use ($search) {
 			$this->db->select('kunjungan.*, pasien.no_rm, pasien.nama AS nama_pasien,
 				pelayanan.nama_pelayanan, poli.nama_poli, dokter.nama_dokter, ruangan.nama_ruangan')
 				->from('kunjungan')
-				->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien')
+				->join('pasien',    'pasien.id_pasien = kunjungan.id_pasien')
 				->join('pelayanan', 'pelayanan.id_pelayanan = kunjungan.id_pelayanan')
-				->join('poli', 'poli.id_poli = kunjungan.id_poli')
-				->join('dokter', 'dokter.id_dokter = kunjungan.id_dokter')
-				->join('ruangan', 'ruangan.id_ruangan = kunjungan.id_ruangan');
+				->join('poli',      'poli.id_poli = kunjungan.id_poli')
+				->join('dokter',    'dokter.id_dokter = kunjungan.id_dokter')
+				->join('ruangan',   'ruangan.id_ruangan = kunjungan.id_ruangan');
 			if ($search !== '') {
 				$this->db->group_start()
 					->where("pasien.no_rm ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
@@ -124,6 +154,21 @@ class Content extends App_Controller
 		$data = $this->db->get()->result();
 		echo json_encode(array('draw' => $draw, 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data ?: array()));
 	}
+
+	/**
+	 * Mengembalikan 5 kunjungan terakhir milik pasien (JSON).
+	 * Dipanggil via AJAX dari form tambah kunjungan.
+	 *
+	 * @param int $id_pasien
+	 */
+	public function get_riwayat($id_pasien)
+	{
+		$id_pasien = (int) $id_pasien;
+		if ($id_pasien <= 0) {
+			echo json_encode(array('status' => false, 'message' => 'ID pasien tidak valid.'));
+			return;
+		}
+		$riwayat = $this->kunjungan_model->get_riwayat_by_pasien($id_pasien, 5);
+		echo json_encode(array('status' => true, 'data' => $riwayat));
+	}
 }
-
-

@@ -10,6 +10,7 @@ class Content extends App_Controller
 		}
 		$this->load->model('antrian/antrian_model');
 		$this->load->model('master/dokter_model');
+		$this->load->model('audit/audit_log_model');
 		Template::set_block('sub_nav', 'content/_sub_nav');
 		Assets::add_module_js('antrian', 'antrian.js');
 	}
@@ -18,6 +19,39 @@ class Content extends App_Controller
 	{
 		Template::set('toolbar_title', 'Data Antrian');
 		Template::render();
+	}
+
+	/**
+	 * POST: ubah status antrian.
+	 * Dipanggil dari tombol aksi di halaman antrian.
+	 *
+	 * @param int $id id_antrian
+	 */
+	public function ubah_status($id = null)
+	{
+		$id = (int) $id;
+		$status_baru = $this->input->post('status');
+		$status_valid = array('DIPANGGIL', 'SEDANG_DIPERIKSA', 'DILEWATI', 'SELESAI', 'BATAL');
+
+		if ($id <= 0 || ! in_array($status_baru, $status_valid)) {
+			Template::set_message('Permintaan tidak valid.', 'error');
+			redirect(SITE_AREA . '/content/antrian');
+		}
+
+		if (! $this->antrian_model->ubah_status($id, $status_baru)) {
+			Template::set_message($this->antrian_model->error ?: 'Gagal mengubah status.', 'error');
+		} else {
+			$this->audit_log_model->catat($this->auth->user_id(), 'update', 'antrian', $id, 'Status -> ' . $status_baru);
+			$label = array(
+				'DIPANGGIL'        => 'Dipanggil',
+				'SEDANG_DIPERIKSA' => 'Sedang Diperiksa',
+				'DILEWATI'         => 'Dilewati',
+				'SELESAI'          => 'Selesai',
+				'BATAL'            => 'Batal',
+			);
+			Template::set_message('Status antrian berhasil diubah menjadi <strong>' . ($label[$status_baru] ?? $status_baru) . '</strong>.', 'success');
+		}
+		redirect(SITE_AREA . '/content/antrian');
 	}
 
 	public function get_data()

@@ -12,5 +12,14 @@
     </dl><hr><h4>Riwayat Kunjungan</h4>
     <table class="table table-bordered table-hover"><thead><tr><th>Tanggal</th><th>Pelayanan</th><th>Status</th></tr></thead><tbody>
         <?php if (empty($pasien->kunjungan)): ?><tr><td colspan="3" class="text-center">Belum ada kunjungan.</td></tr><?php else: foreach ($pasien->kunjungan as $k): ?><tr><td><?php echo html_escape($k->tanggal_kunjungan); ?></td><td><?php echo html_escape($k->nama_pelayanan ?: '-'); ?></td><td><?php echo html_escape($k->status); ?></td></tr><?php endforeach; endif; ?>
+    </tbody></table><h4>Riwayat Pemeriksaan</h4>
+    <table class="table table-bordered table-hover"><thead><tr><th>Tanggal</th><th>Dokter</th><th>Keluhan</th><th>Status</th></tr></thead><tbody>
+        <?php if (empty($pasien->pemeriksaan)): ?><tr><td colspan="4" class="text-center">Belum ada pemeriksaan.</td></tr><?php else: foreach ($pasien->pemeriksaan as $p): ?><tr><td><?php echo html_escape($p->tanggal_pemeriksaan); ?></td><td><?php echo html_escape($p->nama_dokter ?: '-'); ?></td><td><?php echo html_escape($p->keluhan ?: '-'); ?></td><td><?php echo html_escape($p->status); ?></td></tr><?php endforeach; endif; ?>
+    </tbody></table><h4>Riwayat Resep</h4>
+    <table class="table table-bordered table-hover"><thead><tr><th>Nomor</th><th>Tanggal</th><th>Dokter</th><th>Status</th></tr></thead><tbody>
+        <?php if (empty($pasien->resep)): ?><tr><td colspan="4" class="text-center">Belum ada resep.</td></tr><?php else: foreach ($pasien->resep as $r): ?><tr><td><?php echo html_escape($r->nomor_resep); ?></td><td><?php echo html_escape($r->tanggal_resep); ?></td><td><?php echo html_escape($r->nama_dokter ?: '-'); ?></td><td><?php echo html_escape($r->status); ?></td></tr><?php endforeach; endif; ?>
+    </tbody></table><h4>Riwayat Transaksi Pelayanan</h4>
+    <table class="table table-bordered table-hover"><thead><tr><th>Nomor</th><th>Tagihan</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead><tbody>
+        <?php if (empty($pasien->transaksi)): ?><tr><td colspan="5" class="text-center">Belum ada transaksi pelayanan.</td></tr><?php else: foreach ($pasien->transaksi as $t): ?><tr><td><?php echo html_escape($t->nomor_transaksi); ?></td><td><?php echo html_escape($t->nomor_tagihan); ?></td><td><?php echo html_escape($t->tanggal_transaksi); ?></td><td><?php echo html_escape($t->total); ?></td><td><?php echo html_escape($t->status); ?></td></tr><?php endforeach; endif; ?>
     </tbody></table></div><div class="card-footer"><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a></div>
 </div></div></div>

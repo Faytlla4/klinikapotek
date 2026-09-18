@@ -137,6 +137,26 @@ class Pasien_model extends BF_Model
             ->order_by('kunjungan.tanggal_kunjungan', 'DESC')
             ->get('kunjungan')
             ->result();
+        $pasien->pemeriksaan = $this->db->select('pemeriksaan.*, dokter.nama_dokter')
+            ->join('kunjungan', 'kunjungan.id_kunjungan = pemeriksaan.id_kunjungan')
+            ->join('dokter', 'dokter.id_dokter = pemeriksaan.id_dokter', 'left')
+            ->where('kunjungan.id_pasien', $id_pasien)
+            ->order_by('pemeriksaan.tanggal_pemeriksaan', 'DESC')
+            ->get('pemeriksaan')
+            ->result();
+        $pasien->resep = $this->db->select('resep.*, dokter.nama_dokter')
+            ->join('dokter', 'dokter.id_dokter = resep.id_dokter', 'left')
+            ->where('resep.id_pasien', $id_pasien)
+            ->order_by('resep.tanggal_resep', 'DESC')
+            ->get('resep')
+            ->result();
+        $pasien->transaksi = $this->db->select('transaksi.*, tagihan.nomor_tagihan')
+            ->join('tagihan', 'tagihan.id_tagihan = transaksi.id_tagihan')
+            ->join('kunjungan', 'kunjungan.id_kunjungan = tagihan.id_kunjungan')
+            ->where('kunjungan.id_pasien', $id_pasien)
+            ->order_by('transaksi.tanggal_transaksi', 'DESC')
+            ->get('transaksi')
+            ->result();
         return $pasien;
     }
 }

@@ -119,15 +119,38 @@ class Pengadaan_model extends BF_Model
         // Fase 1: validasi SEMUA item dulu tanpa menulis apa pun, agar
         // kegagalan logis tak pernah terjadi setelah insert (nested
         // trans_complete akan COMMIT bila trans_status masih TRUE).
+        $detail_po = array();
+        foreach ($this->db->where('id_pengadaan', $id_pengadaan)->get('pengadaan_obat_detail')->result() as $detail) {
+            $detail_po[(int) $detail->id_obat] = (int) $detail->jumlah_pesan;
+        }
+        $sudah_diterima = array();
+        foreach ($this->db->select('penerimaan_obat_detail.id_obat, SUM(penerimaan_obat_detail.jumlah_terima) AS jumlah')
+            ->join('penerimaan_obat', 'penerimaan_obat.id_penerimaan = penerimaan_obat_detail.id_penerimaan')
+            ->where('penerimaan_obat.id_pengadaan', $id_pengadaan)
+            ->group_by('penerimaan_obat_detail.id_obat')
+            ->get('penerimaan_obat_detail')->result() as $terima) {
+            $sudah_diterima[(int) $terima->id_obat] = (int) $terima->jumlah;
+        }
+        $diminta = array();
         foreach ($items as $item) {
             if (empty($item['id_obat']) || ! preg_match('/^\d+$/', (string) ($item['jumlah_terima'] ?? '')) || (int) $item['jumlah_terima'] <= 0) {
                 $this->db->trans_complete();
                 $this->error = 'Jumlah terima harus bilangan bulat positif.';
                 return false;
             }
-            if (! $this->db->where('id_obat', $item['id_obat'])->get('obat')->row()) {
+            $id_obat = (int) $item['id_obat'];
+            if (! isset($detail_po[$id_obat])) {
                 $this->db->trans_complete();
-                $this->error = 'Obat penerimaan tidak dikenal.';
+                $this->error = 'Obat penerimaan tidak ada pada detail pengadaan.';
+                return false;
+            }
+            $diminta[$id_obat] = ($diminta[$id_obat] ?? 0) + (int) $item['jumlah_terima'];
+        }
+        foreach ($diminta as $id_obat => $jumlah_diminta) {
+            $sisa = $detail_po[$id_obat] - ($sudah_diterima[$id_obat] ?? 0);
+            if ($jumlah_diminta > $sisa) {
+                $this->db->trans_complete();
+                $this->error = "Jumlah penerimaan obat ID {$id_obat} melebihi sisa pesanan ({$sisa}).";
                 return false;
             }
         }

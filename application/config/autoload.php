@@ -61,7 +61,10 @@ $autoload['packages'] = array(
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array('database');
+// Base_Controller and App_hooks persist navigation state in the session on
+// every request. Load it here so those components never dereference a missing
+// session library (which otherwise causes a fatal error during bootstrap).
+$autoload['libraries'] = array('database', 'session');
 
 
 /*

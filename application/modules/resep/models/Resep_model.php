@@ -46,11 +46,24 @@ class Resep_model extends BF_Model
             $this->error = 'Detail resep kosong.';
             return false;
         }
-        $pemeriksaan = $this->db->where('id_pemeriksaan', $data['id_pemeriksaan'])->get('pemeriksaan')->row();
+        if (empty($data['id_pemeriksaan']) || empty($data['id_dokter'])) {
+            $this->error = 'Pemeriksaan dan dokter wajib diisi.';
+            return false;
+        }
+        $pemeriksaan = $this->db->select('pemeriksaan.id_pemeriksaan, pemeriksaan.id_dokter, kunjungan.id_pasien')
+            ->join('kunjungan', 'kunjungan.id_kunjungan = pemeriksaan.id_kunjungan')
+            ->where('pemeriksaan.id_pemeriksaan', $data['id_pemeriksaan'])
+            ->get('pemeriksaan')->row();
         if (! $pemeriksaan || (int) $pemeriksaan->id_dokter !== (int) $data['id_dokter']) {
             $this->error = 'Pemeriksaan dan dokter tidak sesuai.';
             return false;
         }
+        if (! isset($data['id_pasien']) || (int) $pemeriksaan->id_pasien !== (int) $data['id_pasien']) {
+            $this->error = 'Pasien resep harus sesuai dengan pasien pada kunjungan pemeriksaan.';
+            return false;
+        }
+        // Nilai server-side ini adalah satu-satunya pasien yang disimpan.
+        $data['id_pasien'] = (int) $pemeriksaan->id_pasien;
         if ($this->db->where('id_pemeriksaan', $data['id_pemeriksaan'])->get('resep')->row()) {
             $this->error = 'Pemeriksaan sudah memiliki resep.';
             return false;

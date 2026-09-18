@@ -23,8 +23,11 @@ class Pesanan_model extends BF_Model
     private $alur = array(
         'MENUNGGU'    => array('DIVERIFIKASI', 'BATAL'),
         'DIVERIFIKASI'=> array('DIPROSES', 'BATAL'),
-        'DIPROSES'    => array('SIAP', 'BATAL'),
-        'SIAP'        => array('SELESAI', 'BATAL'),
+        // Setelah DIPROSES, stok sudah keluar melalui Penjualan_model. Tidak
+        // ada alur retur/restock otomatis di modul ini, sehingga pembatalan
+        // harus ditolak agar stok dan penjualan tidak menjadi inkonsisten.
+        'DIPROSES'    => array('SIAP'),
+        'SIAP'        => array('SELESAI'),
         'SELESAI'     => array(),
         'BATAL'       => array(),
     );
@@ -242,6 +245,18 @@ class Pesanan_model extends BF_Model
             $this->error = "Status {$row->status} tidak dapat berubah ke {$status_baru}.";
             return false;
         }
+        // Pengiriman/penyelesaian hanya boleh dilakukan setelah tagihan yang
+        // terkait benar-benar LUNAS. Baca tagihan langsung, bukan nilai cache
+        // status_bayar pada pesanan.
+        if (in_array($status_baru, array('SIAP', 'SELESAI'))) {
+            $tagihan = ! empty($row->id_tagihan)
+                ? $this->db->where('id_tagihan', $row->id_tagihan)->get('tagihan')->row()
+                : false;
+            if (! $tagihan || $tagihan->status !== 'LUNAS') {
+                $this->error = 'Pesanan hanya dapat disiapkan/diselesaikan setelah pembayaran lunas.';
+                return false;
+            }
+        }
         return $this->update($id_pesanan, array('status' => $status_baru, 'updated_at' => date('Y-m-d H:i:s')));
     }
 
@@ -269,7 +284,7 @@ class Pesanan_model extends BF_Model
             $this->error = 'Pesanan tidak ditemukan.';
             return false;
         }
-        if (! in_array($row->status, array('MENUNGGU', 'DIVERIFIKASI'))) {
+        if ($row->status !== 'DIVERIFIKASI') {
             $this->db->trans_complete();
             $this->error = "Pesanan berstatus {$row->status}, tidak dapat diproses.";
             return false;

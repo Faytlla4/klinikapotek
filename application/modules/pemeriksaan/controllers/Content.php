@@ -75,8 +75,29 @@ class Content extends App_Controller
 			Template::set_message('Pemeriksaan tidak ditemukan.', 'error');
 			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
 		}
+		
+		$this->load->model('master/obat_model');
+		$this->load->model('resep/resep_model');
+		
+		// Jika sudah ada resep, ambil detail obatnya
+		if (!empty($row->resep)) {
+			foreach ($row->resep as $rs) {
+				$rs->detail = $this->db->select('resep_detail.*, obat.nama_obat, obat.satuan')
+									   ->join('obat', 'obat.id_obat = resep_detail.id_obat')
+									   ->where('id_resep', $rs->id_resep)
+									   ->get('resep_detail')->result();
+			}
+		} else {
+			// Jika belum ada resep, siapkan list obat aktif untuk form
+			Template::set('obat_list', $this->obat_model->aktif());
+		}
+		
+		// Ambil data kunjungan untuk mendapatkan id_pasien
+		$kunjungan = $this->db->where('id_kunjungan', $row->id_kunjungan)->get('kunjungan')->row();
+		Template::set('kunjungan', $kunjungan);
+		
 		Template::set('pemeriksaan', $row);
-		Template::set('toolbar_title', 'Detail Rekam Medis');
+		Template::set('toolbar_title', 'Detail Rekam Medis & Resep');
 		Template::render();
 	}
 
@@ -85,7 +106,7 @@ class Content extends App_Controller
 		$this->db->select('kunjungan.*, pasien.no_rm, pasien.nama AS nama_pasien, dokter.nama_dokter')
 			->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien')
 			->join('dokter', 'dokter.id_dokter = kunjungan.id_dokter')
-			->where('kunjungan.status', 'DIPROSES')
+			->where_in('kunjungan.status', array('TERDAFTAR', 'MENUNGGU', 'DIPROSES'))
 			->where('kunjungan.id_kunjungan NOT IN (SELECT id_kunjungan FROM pemeriksaan)', null, false);
 		if ($dokter_sendiri) {
 			$this->db->where('kunjungan.id_dokter', $dokter_sendiri);
@@ -132,6 +153,10 @@ class Content extends App_Controller
 			$rows = array_values(array_filter($rows, function ($row) use ($search) {
 				return stripos($row->nama_pasien, $search) !== false || stripos($row->no_rm, $search) !== false || stripos($row->nama_dokter, $search) !== false;
 			}));
+		}
+		// Tambahkan property id untuk bfDataTable
+		foreach ($rows as $r) {
+			$r->id = $r->id_pemeriksaan;
 		}
 		$start = (int) ($request['start'] ?? 0);
 		$length = (int) ($request['length'] ?? 10);

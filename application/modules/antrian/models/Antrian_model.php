@@ -61,6 +61,11 @@ class Antrian_model extends BF_Model
             return false;
         }
         $today = date('Y-m-d');
+        // COUNT + 1 is safe only when concurrent requests for the same
+        // poli/day are serialized. This transaction-scoped PostgreSQL lock is
+        // released automatically on commit/rollback and keeps the existing
+        // queue number format intact.
+        $this->db->query('SELECT pg_advisory_xact_lock(hashtext(?))', array('antrian:' . $id_poli . ':' . $today));
         $count = $this->db->select('antrian.id_antrian')
             ->join('kunjungan', 'kunjungan.id_kunjungan = antrian.id_kunjungan')
             ->where(array('antrian.tanggal_antrian' => $today, 'kunjungan.id_poli' => $id_poli))
@@ -158,7 +163,7 @@ class Antrian_model extends BF_Model
         }
         $this->db->trans_start();
         $updated = $this->update($id_antrian, $data);
-        if ($updated && $status_baru === 'SEDANG_DIPERIKSA') {
+        if ($updated && in_array($status_baru, array('DIPANGGIL', 'SEDANG_DIPERIKSA'))) {
             $this->db->where('id_kunjungan', $row->id_kunjungan)
                 ->update('kunjungan', array('status' => 'DIPROSES'));
         } elseif ($updated && $status_baru === 'SELESAI') {

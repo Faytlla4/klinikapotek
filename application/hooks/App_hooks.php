@@ -193,7 +193,7 @@ class App_hooks
         // the BF_Router, so the following normalizes the output for the comparison
         // with $this->ignore_pages.
         $ruriString = '/' . ltrim(
-            str_replace($this->ci->router->directory, '', $this->ci->uri->ruri_string()),
+            str_replace((string) $this->ci->router->directory, '', (string) $this->ci->uri->ruri_string()),
             '/'
         );
         return in_array($ruriString, $ruriArray);

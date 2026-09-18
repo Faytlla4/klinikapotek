@@ -3,9 +3,10 @@
 /**
  * Transaksi & Pembayaran Model (§17).
  *
- * Alur: Buat Tagihan -> bayar(jumlah) [boleh bertahap] ->
- *   total bayar >= total tagihan => tagihan Lunas + transaksi Selesai (cetak),
- *   bila dibatalkan sebelum lunas => transaksi Batal.
+ * Alur saat ini: Buat Tagihan -> bayar penuh dalam satu pembayaran ->
+ * tagihan Lunas + transaksi Lunas (cetak). Pembayaran kurang ditolak;
+ * cicilan belum didukung. Bila transaksi belum dibayar dibatalkan,
+ * status transaksi menjadi Batal.
  */
 class Transaksi_model extends BF_Model
 {

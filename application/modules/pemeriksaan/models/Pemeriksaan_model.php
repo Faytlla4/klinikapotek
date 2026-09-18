@@ -45,9 +45,18 @@ class Pemeriksaan_model extends BF_Model
             $this->error = 'Dokter tidak sesuai dengan kunjungan.';
             return false;
         }
-        if ($kunjungan->status !== 'DIPROSES') {
-            $this->error = 'Kunjungan harus berstatus DIPROSES.';
+        if (! in_array($kunjungan->status, array('TERDAFTAR', 'MENUNGGU', 'DIPROSES'))) {
+            $this->error = 'Kunjungan belum siap diperiksa (status: ' . $kunjungan->status . ').';
             return false;
+        }
+        
+        // Pastikan status kunjungan di-update menjadi DIPROSES ketika pemeriksaan dimulai
+        if ($kunjungan->status !== 'DIPROSES') {
+            $this->db->where('id_kunjungan', $id_kunjungan)->update('kunjungan', array('status' => 'DIPROSES'));
+            $this->db->where('id_kunjungan', $id_kunjungan)
+                     ->where('status !=', 'SELESAI')
+                     ->where('status !=', 'BATAL')
+                     ->update('antrian', array('status' => 'SEDANG_DIPERIKSA', 'waktu_mulai' => date('Y-m-d H:i:s')));
         }
         if ($this->db->where('id_kunjungan', $id_kunjungan)->get('pemeriksaan')->row()) {
             $this->error = 'Kunjungan sudah memiliki pemeriksaan.';

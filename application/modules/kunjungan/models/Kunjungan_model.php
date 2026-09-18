@@ -59,9 +59,16 @@ class Kunjungan_model extends BF_Model
     public function daftar($data, $buat_antrian = true)
     {
         // Validasi relasi ke master (FK logis).
-        foreach (array('pasien' => 'id_pasien', 'pelayanan' => 'id_pelayanan', 'poli' => 'id_poli',
-                       'dokter' => 'id_dokter', 'ruangan' => 'id_ruangan') as $tabel => $kolom) {
-            if (! $this->db->where($kolom, $data[$kolom])->get($tabel)->row()) {
+        $master = array(
+            'pasien'    => array('input' => 'id_pasien', 'key' => 'id_pasien'),
+            'pelayanan' => array('input' => 'id_pelayanan', 'key' => 'id_pelayanan'),
+            'poli'      => array('input' => 'id_poli', 'key' => 'id_poli'),
+            'dokter'    => array('input' => 'id_dokter', 'key' => 'id_dokter'),
+            'ruangan'   => array('input' => 'id_ruangan', 'key' => 'id_ruangan'),
+        );
+        foreach ($master as $tabel => $relasi) {
+            $kolom = $relasi['input'];
+            if (empty($data[$kolom]) || ! $this->db->where($relasi['key'], $data[$kolom])->get($tabel)->row()) {
                 $this->error = "Data {$tabel} tidak ditemukan.";
                 return false;
             }
@@ -123,6 +130,49 @@ class Kunjungan_model extends BF_Model
             $this->error = "Status {$row->status} tidak dapat berubah ke {$status_baru}.";
             return false;
         }
-        return $this->update($id_kunjungan, array('status' => $status_baru));
+        if ($status_baru !== 'BATAL') {
+            return $this->update($id_kunjungan, array('status' => $status_baru));
+        }
+
+        // A cancellation must not leave a live queue entry behind. A visit
+        // already being examined/completed cannot be cancelled by this path.
+        $this->db->trans_start();
+        $antrian = $this->db->where('id_kunjungan', $id_kunjungan)->get('antrian')->row();
+        if ($antrian && ! in_array($antrian->status, array('MENUNGGU', 'DIPANGGIL', 'DILEWATI', 'BATAL'))) {
+            $this->db->trans_complete();
+            $this->error = 'Kunjungan yang sedang atau sudah diperiksa tidak dapat dibatalkan.';
+            return false;
+        }
+        $updated = $this->update($id_kunjungan, array('status' => 'BATAL'));
+        if ($updated && $antrian && $antrian->status !== 'BATAL') {
+            $this->db->where('id_antrian', $antrian->id_antrian)->update('antrian', array('status' => 'BATAL'));
+        }
+        $this->db->trans_complete();
+        if (! $updated || $this->db->trans_status() === false) {
+            $this->error = 'Gagal membatalkan kunjungan.';
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Dapatkan riwayat kunjungan pasien
+     * 
+     * @param int $id_pasien
+     * @param int $limit
+     * @return array
+     */
+    public function get_riwayat_by_pasien($id_pasien, $limit = 5)
+    {
+        return $this->db->select('kunjungan.*, pelayanan.nama_pelayanan, poli.nama_poli, dokter.nama_dokter, ruangan.nama_ruangan')
+            ->join('pelayanan', 'pelayanan.id_pelayanan = kunjungan.id_pelayanan', 'left')
+            ->join('poli', 'poli.id_poli = kunjungan.id_poli', 'left')
+            ->join('dokter', 'dokter.id_dokter = kunjungan.id_dokter', 'left')
+            ->join('ruangan', 'ruangan.id_ruangan = kunjungan.id_ruangan', 'left')
+            ->where('kunjungan.id_pasien', $id_pasien)
+            ->order_by('kunjungan.tanggal_kunjungan', 'DESC')
+            ->limit($limit)
+            ->get($this->table_name)
+            ->result();
     }
 }

@@ -13,8 +13,9 @@ Nama database: `apotek` (PostgreSQL).
    psql -U postgres -d apotek -f database/apotek_latest.sql
    ```
 3. Sesuaikan koneksi di `application/config/database.php`
-   (`hostname`, `username`, `password`, `port`) dengan PostgreSQL masing-masing.
-   Nilai bawaan di repository (`postgres`/`postgres`) hanya untuk development lokal.
+   (`hostname`, `username`, `port`) dengan PostgreSQL masing-masing, lalu tetapkan
+   environment variable `DB_PASSWORD` pada web server/PHP. Password tidak disimpan
+   di repository.
 4. Buka aplikasi di browser (contoh: `http://localhost/klinikapotek/public/`)
    dan login dengan salah satu akun testing di bawah.
 

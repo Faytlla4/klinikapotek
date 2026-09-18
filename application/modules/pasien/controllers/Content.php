@@ -124,7 +124,20 @@ class Content extends App_Controller
 		$build();
 		$this->db->order_by('id_pasien', 'DESC')->limit((int) ($request['length'] ?? 10), (int) ($request['start'] ?? 0));
 		$data = $this->db->get()->result();
-		echo json_encode(array('draw' => $draw, 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data ?: array()));
+		// bfDataTable builds row links from `id`; expose the module's primary
+		// key under that conventional name without changing the database data.
+		foreach ($data as $row) {
+			$row->id = (int) $row->id_pasien;
+		}
+		$payload = array('draw' => $draw, 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data ?: array());
+		// Data lama yang tidak valid UTF-8 must not turn the entire AJAX
+		// response into an empty string (which DataTables reports as invalid JSON).
+		$json = json_encode($payload, JSON_INVALID_UTF8_SUBSTITUTE);
+		if ($json === false) {
+			log_message('error', 'Gagal membuat JSON tabel pasien: ' . json_last_error_msg());
+			$json = json_encode(array('draw' => $draw, 'recordsTotal' => 0, 'recordsFiltered' => 0, 'data' => array()));
+		}
+		$this->output->set_content_type('application/json')->set_output($json);
 	}
 }
 

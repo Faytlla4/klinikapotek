@@ -89,7 +89,10 @@ class Api extends Authenticated_Controller
         $this->json(array('success' => true, 'data' => $row));
     }
 
-    /** POST /resep/api/status/{id}: DIPROSES|SIAP|DISERAHKAN|BATAL */
+    /** POST /resep/api/status/{id}: DIPROSES|SIAP|BATAL.
+     * DISERAHKAN hanya boleh terjadi dari Penjualan_model::jual(), yang
+     * mengurangi stok dan mencatat mutasi dalam transaksi yang sama.
+     */
     public function status($id)
     {
         $this->auth->restrict('kelola_resep');
@@ -100,7 +103,7 @@ class Api extends Authenticated_Controller
             return;
         }
         $status = $this->input->post('status');
-        if (! in_array($status, array('DIPROSES', 'SIAP', 'DISERAHKAN', 'BATAL'))) {
+        if (! in_array($status, array('DIPROSES', 'SIAP', 'BATAL'))) {
             $this->json(array('success' => false, 'error' => 'Status tidak valid.'), 422);
             return;
         }
