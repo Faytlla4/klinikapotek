@@ -38,6 +38,149 @@
             animation: none !important;
         }
         .preloader { display: none !important; }
+
+        /* === Pharmacy Emerald Theme === */
+        :root {
+            --primary: #059669;
+            --primary-light: #34d399;
+            --bs-primary: #059669;
+            --bs-primary-rgb: 5, 150, 105;
+        }
+
+        /* Sidebar - subtle emerald gradient */
+        .main-sidebar.sidebar-dark-primary,
+        .main-sidebar.sidebar-dark-primary .sidebar {
+            background: linear-gradient(180deg, #065F46 0%, #047857 40%, #059669 100%) !important;
+        }
+        .brand-link {
+            background: #065F46 !important;
+            border-bottom: 1px solid rgba(255,255,255,.06) !important;
+        }
+        .brand-link .brand-text { color: #fff !important; }
+
+        /* Nav links - background sendiri */
+        .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link {
+            color: rgba(255,255,255,.85) !important;
+            background-color: rgba(255,255,255,.08);
+            margin: 2px 8px;
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+        .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link:hover {
+            color: #fff !important;
+            background-color: rgba(255,255,255,.18) !important;
+        }
+        .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+            color: #fff !important;
+            background-color: rgba(255,255,255,.25) !important;
+            font-weight: 600;
+        }
+        .sidebar-dark-primary .nav-treeview {
+            background-color: transparent;
+        }
+        .sidebar-dark-primary .nav-treeview > .nav-item > .nav-link {
+            margin: 1px 8px 1px 20px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: rgba(255,255,255,.75) !important;
+            background-color: rgba(255,255,255,.06);
+        }
+        .sidebar-dark-primary .nav-treeview > .nav-item > .nav-link:hover {
+            background-color: rgba(255,255,255,.15) !important;
+            color: #fff !important;
+        }
+        .sidebar-dark-primary .nav-link .nav-icon {
+            color: rgba(255,255,255,.7);
+        }
+        .sidebar-dark-primary .nav-link.active .nav-icon,
+        .sidebar-dark-primary .nav-link:hover .nav-icon {
+            color: #fff;
+        }
+        /* Allow long text to wrap */
+        .nav-sidebar .nav-link,
+        .nav-sidebar .nav-link p {
+            white-space: normal !important;
+        }
+
+        /* User panel */
+        .sidebar-dark-primary .user-panel {
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            margin-bottom: 0;
+            padding-bottom: 12px;
+        }
+        .sidebar-dark-primary .user-panel a { color: rgba(255,255,255,.9) !important; }
+
+        /* Sidebar collapsed hover */
+        body.sidebar-mini.sidebar-collapse .main-sidebar {
+            background: linear-gradient(180deg, #065F46, #059669) !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover,
+        .sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused {
+            background: linear-gradient(180deg, #065F46 0%, #047857 40%, #059669 100%) !important;
+        }
+
+        /* Expanded state text */
+        body.sidebar-mini:not(.sidebar-collapse) .sidebar .nav-sidebar > .nav-item > .nav-link {
+            color: rgba(255,255,255,.85) !important;
+        }
+        body.sidebar-mini:not(.sidebar-collapse) .sidebar .nav-sidebar > .nav-item > .nav-link:hover,
+        body.sidebar-mini:not(.sidebar-collapse) .sidebar .nav-sidebar > .nav-item > .nav-link.active {
+            color: #fff !important;
+        }
+
+        /* Navbar */
+        .main-header.navbar {
+            background: #059669 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,.08);
+        }
+        .main-header .nav-link,
+        .main-header .navbar-nav .nav-link {
+            color: #fff !important;
+        }
+
+        /* Content header */
+        .content-header h1 { color: #047857; }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: #059669 !important;
+            border-color: #059669 !important;
+        }
+        .btn-primary:hover {
+            background-color: #047857 !important;
+            border-color: #047857 !important;
+        }
+        .btn-outline-primary {
+            color: #059669;
+            border-color: #059669;
+        }
+        .btn-outline-primary:hover {
+            background-color: #059669;
+            color: #fff;
+        }
+
+        /* Cards */
+        .card-primary:not(.card-outline) > .card-header {
+            background-color: #059669 !important;
+            border-color: #059669 !important;
+            color: #fff;
+        }
+        .card-primary.card-outline > .card-header {
+            border-top: 3px solid #059669;
+        }
+
+        /* Tables */
+        thead.table-primary th {
+            background-color: #059669 !important;
+            color: #fff;
+            border-color: #047857;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-item.active { color: #047857; }
+
+        /* Text utilities */
+        .text-primary { color: #059669 !important; }
     </style>
 
     <script type="text/javascript" async>
@@ -56,7 +199,7 @@
     </script>
 </head>
 
-    <body class="layout-fixed">
+    <body class="sidebar-mini layout-fixed">
     <div class="wrapper">
 
         <?php
@@ -112,7 +255,12 @@
     	], 'external', true);
     	echo Assets::js();
     ?>
-
+    <script>
+    $(document).ready(function () {
+        $('body').removeClass('sidebar-collapse');
+        try { localStorage.removeItem('sidebar-collapse'); } catch (e) {}
+    });
+    </script>
 </body>
 
 </html>

@@ -68,6 +68,13 @@ class Users extends Front_Controller
 	 */
 	public function login()
 	{
+		// Force no-cache supaya browser tak serve redirect lama setelah logout
+		header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+		header('Pragma: no-cache');
+		header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+		header_remove('ETag');
+		header_remove('Last-Modified');
+
 		// If the user is already logged in, go home.
 		if ($this->auth->is_logged_in() !== false) {
 			Template::redirect('/');
@@ -121,6 +128,10 @@ class Users extends Front_Controller
 	 */
 	public function logout()
 	{
+		// Force no-cache supaya redirect setelah logout tak di-cache browser
+		header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+		header('Pragma: no-cache');
+
 		// Ambil dari sesi auth (current_user tidak selalu terisi di sini;
 		// skema custom memakai id_user, bukan id).
 		$logout_id = (int) $this->auth->user_id();
@@ -170,9 +181,7 @@ class Users extends Front_Controller
 			$user_id = $this->current_user->id;
 			if ($this->saveUser('update', $user_id, $meta_fields)) {
 				$user = $this->user_model->find($user_id);
-				$log_name = empty($user->display_name) ?
-				($this->settings_lib->item('auth.use_usernames') ? $user->username : $user->email)
-				: $user->display_name;
+				$log_name = !empty($user->nama) ? $user->nama : $user->username;
 
 				log_activity(
 					$this->current_user->id,

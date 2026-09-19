@@ -128,5 +128,37 @@ class Users extends App_Controller
         Template::set('toolbar_title', 'Edit User');
         Template::render();
     }
+
+    public function profile()
+    {
+        $user_id = $this->current_user->id;
+
+        if (isset($_POST['save'])) {
+            $nama = $this->input->post('nama');
+            $password = $this->input->post('password');
+            $pass_confirm = $this->input->post('pass_confirm');
+
+            $update = ['nama' => $nama];
+            if (!empty($password)) {
+                if ($password !== $pass_confirm) {
+                    Template::set_message('Konfirmasi password tidak cocok.', 'error');
+                    Template::set('toolbar_title', 'Profil Saya');
+                    Template::render();
+                    return;
+                }
+                $hashed = $this->auth->hash_password($password);
+                $update['password'] = $hashed['hash'];
+            }
+
+            $this->db->where('id_user', $user_id)->update('users', $update);
+            Template::set_message('Profil berhasil diperbarui.', 'success');
+            Template::redirect('admin/pengguna/profile');
+        }
+
+        $user = $this->db->where('id_user', $user_id)->get('users')->row();
+        Template::set('pengguna', $user);
+        Template::set('toolbar_title', 'Profil Saya');
+        Template::render();
+    }
 }
 

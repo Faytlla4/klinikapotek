@@ -28,6 +28,9 @@ class User_model extends BF_Model
     /** @var string Name of the users table. */
     protected $table_name = 'users';
 
+    /** @var string Primary key for the users table. */
+    protected $key = 'id_user';
+
     /** @var string Name of the user meta table. */
     protected $meta_table = 'user_meta';
 
@@ -387,10 +390,11 @@ class User_model extends BF_Model
      */
     public function count_by_roles()
     {
-        $this->select(["{$this->roles_table}.role_name", 'count(1) as count'])
+        $this->select(["{$this->roles_table}.nama_role", 'count(1) as count'])
             ->from($this->table_name)
-            ->join($this->roles_table, "{$this->roles_table}.role_id = {$this->table_name}.role_id", 'left')
-            ->group_by("{$this->roles_table}.role_name");
+            ->join('user_roles', "user_roles.id_user = {$this->table_name}.id_user", 'left')
+            ->join($this->roles_table, "roles.id_role = user_roles.id_role", 'left')
+            ->group_by("{$this->roles_table}.nama_role");
 
         $query = $this->db->get();
         $result = $query->result();
@@ -567,11 +571,13 @@ class User_model extends BF_Model
         }
 
         // Get the meta data for this user and join it to the user profile data.
-        $this->where('user_id', $user_id);
-        $query = $this->db->get($this->meta_table);
-        foreach ($query->result() as $row) {
-            $key = $row->meta_key;
-            $result->{$key} = $row->meta_value;
+        if ($this->db->table_exists($this->meta_table)) {
+            $this->where('user_id', $user_id);
+            $query = $this->db->get($this->meta_table);
+            foreach ($query->result() as $row) {
+                $key = $row->meta_key;
+                $result->{$key} = $row->meta_value;
+            }
         }
 
         return $result;
@@ -918,12 +924,17 @@ class User_model extends BF_Model
     protected function preFind()
     {
         if (empty($this->selects)) {
-            $this->select(["{$this->table_name}.*", 'role_name']);
+            $this->select(["{$this->table_name}.*", 'nama_role as role_name']);
         }
 
-        $this->join(
+        $this->db->join(
+            'user_roles',
+            "user_roles.id_user = {$this->table_name}.id_user",
+            'left'
+        );
+        $this->db->join(
             $this->roles_table,
-            "{$this->roles_table}.role_id = {$this->table_name}.role_id",
+            "roles.id_role = user_roles.id_role",
             'left'
         );
     }
