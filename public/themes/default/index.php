@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,13 +15,10 @@
         ?>
     </title>
     <link rel="shortcut icon" href="<?php echo base_url(); ?>favicon.ico">
-
     <?php
         Assets::add_css([
             'plugins/fontawesome-free/css/all.min.css',
-            'css/bootstrap.min.css',
-            'css/home.css',
-            'css/login.css',
+            'css/landing.css',
         ]);
         echo Assets::css();
     ?>
