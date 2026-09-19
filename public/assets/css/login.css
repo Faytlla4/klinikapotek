@@ -1,0 +1,125 @@
+/* === LOGIN PAGE === */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body {
+    background: #F7FAF8;
+    color: #343A40;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* === LOGIN CARD === */
+.login-wrapper {
+    width: 100%;
+    max-width: 400px;
+    padding: 24px;
+}
+.login-card {
+    background: #FFFFFF;
+    border: 1px solid #E9ECEF;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    padding: 32px;
+}
+.login-logo {
+    text-align: center;
+    margin-bottom: 24px;
+}
+.login-logo img {
+    height: 48px;
+}
+.login-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #198754;
+    text-align: center;
+    margin-bottom: 4px;
+}
+.login-subtitle {
+    font-size: 14px;
+    color: #6C757D;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+/* === FORM === */
+.login-form .form-group {
+    margin-bottom: 16px;
+}
+.login-form label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #343A40;
+    margin-bottom: 6px;
+}
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #Dee2E6;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #343A40;
+    transition: border-color 0.15s;
+    background: #FFFFFF;
+}
+.login-form input:focus {
+    border-color: #198754;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(25,135,84,0.1);
+}
+.login-form .btn-login {
+    width: 100%;
+    background: #198754;
+    color: #FFFFFF;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 8px;
+}
+.login-form .btn-login:hover {
+    background: #157347;
+}
+.login-form .btn-login:active {
+    background: #146c43;
+}
+
+.login-link {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+}
+.login-link a {
+    color: #198754;
+    text-decoration: none;
+}
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* === ALERT === */
+.login-alert {
+    background: #FFF5F5;
+    border: 1px solid #FCD3D3;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #721C24;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 480px) {
+    .login-wrapper { padding: 16px; }
+    .login-card { padding: 24px; }
+}
