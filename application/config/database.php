@@ -75,7 +75,7 @@ $query_builder = true;
 // Credential tidak disimpan di repository. Tetapkan DB_PASSWORD pada
 // environment web server/PHP untuk development maupun deployment.
 $db_password = getenv('DB_PASSWORD');
-$db_password = $db_password === false ? '' : $db_password;
+$db_password = $db_password === false ? 'postgres' : $db_password;
 
 $db['default'] = array(
 	'dsn' => '',

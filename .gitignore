@@ -57,6 +57,7 @@ fresh_cookies.txt
 # Artefak dev lokal.
 compare/
 .qodo/
+.env
 
 # Remove PHPStorm Project folders
 bonfire/.ideas
