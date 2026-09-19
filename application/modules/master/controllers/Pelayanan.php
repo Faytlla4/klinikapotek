@@ -97,6 +97,9 @@ class Pelayanan extends App_Controller
 		$this->db->order_by('id_pelayanan', 'DESC');
 		$this->db->limit((int) ($request['length'] ?? 10), (int) ($request['start'] ?? 0));
 		$data = $this->db->get()->result();
+		foreach ($data as $row) {
+			$row->id = (int) $row->id_pelayanan;
+		}
 
 		echo json_encode(array(
 			'draw'            => $draw,

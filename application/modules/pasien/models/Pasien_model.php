@@ -61,6 +61,10 @@ class Pasien_model extends BF_Model
      */
     public function daftar($data)
     {
+        // PostgreSQL UNIQUE menganggap string kosong sebagai nilai nyata.
+        // NIK bersifat opsional, jadi representasikan input kosong sebagai NULL
+        // agar lebih dari satu pasien tanpa NIK tetap dapat disimpan.
+        $data['nik'] = $this->normalisasi_nik(isset($data['nik']) ? $data['nik'] : null);
         if (! empty($data['nik']) && $this->find_by('nik', $data['nik'])) {
             $this->error = 'NIK sudah terdaftar.';
             return false;
@@ -78,9 +82,29 @@ class Pasien_model extends BF_Model
         return $this->insert($data);
     }
 
+    /** Normalisasi NIK opsional sebelum disimpan ke kolom UNIQUE. */
+    private function normalisasi_nik($nik)
+    {
+        $nik = trim((string) $nik);
+        return $nik === '' ? null : $nik;
+    }
+
+    /**
+     * Pastikan jalur API maupun form edit juga tidak menyimpan NIK kosong
+     * sebagai string kosong.
+     */
+    public function update($where = null, $data = null)
+    {
+        if (is_array($data) && array_key_exists('nik', $data)) {
+            $data['nik'] = $this->normalisasi_nik($data['nik']);
+        }
+        return parent::update($where, $data);
+    }
+
     /** Cek NIK unik, mengabaikan pasien saat edit. */
     public function nik_tersedia($nik, $abaikan_id = null)
     {
+        $nik = $this->normalisasi_nik($nik);
         if (empty($nik)) {
             return true;
         }

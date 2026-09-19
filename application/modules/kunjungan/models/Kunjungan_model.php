@@ -130,6 +130,24 @@ class Kunjungan_model extends BF_Model
             $this->error = "Status {$row->status} tidak dapat berubah ke {$status_baru}.";
             return false;
         }
+        if ($status_baru === 'SELESAI') {
+            // Jangan menyelesaikan kunjungan secara terpisah dari pemeriksaan.
+            // Pemeriksaan_model::selesaikan() juga menutup antrian dan menyusun
+            // tagihan, sehingga data siap muncul di menu Transaksi/Pembayaran.
+            $pemeriksaan = $this->db->where('id_kunjungan', $id_kunjungan)
+                ->where('status !=', 'SELESAI')
+                ->get('pemeriksaan')
+                ->row();
+            if ($pemeriksaan) {
+                $this->load->model('pemeriksaan/pemeriksaan_model');
+                if (! $this->pemeriksaan_model->selesaikan($pemeriksaan->id_pemeriksaan)) {
+                    $this->error = $this->pemeriksaan_model->error ?: 'Gagal menyelesaikan pemeriksaan.';
+                    return false;
+                }
+                return true;
+            }
+        }
+
         if ($status_baru !== 'BATAL') {
             return $this->update($id_kunjungan, array('status' => $status_baru));
         }

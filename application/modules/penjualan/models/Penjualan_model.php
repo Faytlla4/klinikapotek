@@ -147,6 +147,17 @@ class Penjualan_model extends BF_Model
         if (in_array($jenis, array('RESEP', 'ONLINE')) && ! empty($id_resep)) {
             $this->db->where('id_resep', $id_resep)->update('resep', array('status' => 'DISERAHKAN'));
         }
+        if ($jenis === 'RESEP') {
+            // Penjualan resep harus langsung masuk antrean tagihan agar
+            // administrasi dapat menagih obat tanpa menunggu input manual.
+            $this->load->model('tagihan/tagihan_model');
+            $tagihan = $this->tagihan_model->tambahkan_penjualan_resep($id_penjualan);
+            if (! $tagihan) {
+                $this->db->trans_rollback();
+                $this->error = $this->tagihan_model->error ?: 'Gagal membuat tagihan resep.';
+                return false;
+            }
+        }
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === false) {

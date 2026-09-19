@@ -14,6 +14,9 @@ class Pemeriksaan_model extends BF_Model
     protected $set_modified = false;
     protected $return_insert_id = true;
 
+    /** True bila tagihan ditunda sampai resep selesai diserahkan apoteker. */
+    public $menunggu_resep = false;
+
     protected $validation_rules = array(
         array('field' => 'id_kunjungan', 'label' => 'Kunjungan', 'rules' => 'integer'),
         array('field' => 'id_dokter', 'label' => 'Dokter', 'rules' => 'integer'),
@@ -95,7 +98,9 @@ class Pemeriksaan_model extends BF_Model
             return false;
         }
         if ($row->status === 'SELESAI') {
-            return true;
+            // Pulihkan data lama yang pemeriksaannya telah selesai, tetapi
+            // tagihannya belum pernah tersusun.
+            return $this->susun_tagihan_jika_siap($row->id_kunjungan);
         }
         $this->db->trans_start();
         $this->update($id_pemeriksaan, array('status' => 'SELESAI'));
@@ -109,9 +114,49 @@ class Pemeriksaan_model extends BF_Model
                  WHERE id_kunjungan = ? AND status != 'SELESAI'",
                 array($row->id_kunjungan)
             );
+
+            if (! $this->susun_tagihan_jika_siap($row->id_kunjungan)) {
+                $this->db->trans_complete();
+                return false;
+            }
         }
         $this->db->trans_complete();
         return $this->db->trans_status();
+    }
+
+    /**
+     * Tagihan tanpa resep langsung siap dibayar. Bila ada resep yang masih
+     * ditangani apoteker, penjualan resep akan menyusun satu tagihan final
+     * berisi jasa pelayanan, tindakan, dan obat.
+     */
+    private function susun_tagihan_jika_siap($id_kunjungan)
+    {
+        $this->menunggu_resep = false;
+        $resep_menunggu = $this->db->select('resep.id_resep')
+            ->join('pemeriksaan', 'pemeriksaan.id_pemeriksaan = resep.id_pemeriksaan')
+            ->where('pemeriksaan.id_kunjungan', $id_kunjungan)
+            ->where_in('resep.status', array('DIBUAT', 'DIPROSES', 'SIAP'))
+            ->get('resep')
+            ->row();
+        if ($resep_menunggu) {
+            $this->menunggu_resep = true;
+            return true;
+        }
+
+        $tagihan_aktif = $this->db->where('id_kunjungan', $id_kunjungan)
+            ->where('status !=', 'BATAL')
+            ->get('tagihan')
+            ->row();
+        if ($tagihan_aktif) {
+            return true;
+        }
+
+        $this->load->model('tagihan/tagihan_model');
+        if (! $this->tagihan_model->susun_dari_kunjungan($id_kunjungan)) {
+            $this->error = $this->tagihan_model->error ?: 'Gagal membuat tagihan pemeriksaan.';
+            return false;
+        }
+        return true;
     }
 
     /** Daftar pemeriksaan dengan seluruh konteks pasien dan kunjungan. */

@@ -109,6 +109,9 @@ class Ruangan extends App_Controller
 		$this->db->order_by('ruangan.id_ruangan', 'DESC');
 		$this->db->limit((int) ($request['length'] ?? 10), (int) ($request['start'] ?? 0));
 		$data = $this->db->get()->result();
+		foreach ($data as $row) {
+			$row->id = (int) $row->id_ruangan;
+		}
 
 		echo json_encode(array(
 			'draw'            => $draw,

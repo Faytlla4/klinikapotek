@@ -1,25 +1,51 @@
 var _p = location.pathname.split('/');
 var ctxBase = _p.slice(0, _p.indexOf('admin') + 3).join('/');
-$(document).on('change', '#jenis_penjualan', function () {
-    var isResep = $(this).val() === 'RESEP';
-    $('#wrap_resep').toggle(isResep);
-    if (!isResep) { $('#id_resep').val('').trigger('change'); }
-});
-$(document).on('change', '#id_resep', function () {
-    var idResep = $(this).val();
-    var idPasien = $(this).find('option:selected').data('pasien');
-    if (idPasien) { $('#id_pasien').val(idPasien).trigger('change'); }
-    if (!idResep) { return; }
-    $.getJSON(site_url + 'resep/api/detail/' + idResep, function (res) {
-        if (!res.success) { return; }
-        var box = $('#item_rows');
-        box.empty();
-        $.each(res.data.detail, function (i, d) {
-            box.append(rowObat(d.id_obat, d.jumlah, d.nama_obat));
-        });
-        box.find('.select2').select2({ theme: 'bootstrap4' });
+
+$(document).ready(function () {
+
+    // Inisialisasi Select2 pada elemen yang sudah ada di DOM
+    if ($.fn.select2) {
+        $('.select2').select2({ theme: 'bootstrap4', width: '100%' });
+    }
+
+    $(document).on('change', '#jenis_penjualan', function () {
+        var isResep = $(this).val() === 'RESEP';
+        $('#wrap_resep').toggle(isResep);
+        if (!isResep) { $('#id_resep').val('').trigger('change'); }
     });
+
+    $(document).on('change', '#id_resep', function () {
+        var idResep = $(this).val();
+        var idPasien = $(this).find('option:selected').data('pasien');
+        if (idPasien) { $('#id_pasien').val(idPasien).trigger('change'); }
+        if (!idResep) { return; }
+        $.getJSON(site_url + 'resep/api/detail/' + idResep, function (res) {
+            if (!res.success) { return; }
+            var box = $('#item_rows');
+            box.empty();
+            $.each(res.data.detail, function (i, d) {
+                box.append(rowObat(d.id_obat, d.jumlah, d.nama_obat));
+            });
+            if ($.fn.select2) {
+                box.find('.select2').select2({ theme: 'bootstrap4', width: '100%' });
+            }
+        });
+    });
+
+    $(document).on('click', '#btn_add_row', function () {
+        var newRow = $(rowObat(0, '', ''));
+        $('#item_rows').append(newRow);
+        if ($.fn.select2) {
+            newRow.find('.select2').select2({ theme: 'bootstrap4', width: '100%' });
+        }
+    });
+
+    $(document).on('click', '.btn-del-row', function () {
+        if ($('.item-row').length > 1) { $(this).closest('.item-row').remove(); }
+    });
+
 });
+
 function rowObat(idObat, jumlah, namaObat) {
     var opt;
     if (idObat) {
@@ -38,11 +64,3 @@ function rowObat(idObat, jumlah, namaObat) {
         + '<div class="col-md-2"><button type="button" class="btn btn-danger btn-block btn-del-row">Hapus</button></div>'
         + '</div>';
 }
-$(document).on('click', '#btn_add_row', function () {
-    $('#item_rows').append(rowObat(0, '', ''));
-    $('#item_rows').find('.select2').select2({ theme: 'bootstrap4' });
-});
-$(document).on('click', '.btn-del-row', function () {
-    if ($('.item-row').length > 1) { $(this).closest('.item-row').remove(); }
-});
-$('.select2').select2({ theme: 'bootstrap4' });

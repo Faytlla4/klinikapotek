@@ -101,6 +101,31 @@ class Content extends App_Controller
 		Template::render();
 	}
 
+	/** Selesaikan pemeriksaan dan buat tagihan kunjungan secara otomatis. */
+	public function selesaikan($id = null)
+	{
+		$id = (int) $id > 0 ? (int) $id : 0;
+		$row = $this->pemeriksaan_model->find($id);
+		if (! $row || ! $this->boleh_akses($row->id_dokter)) {
+			Template::set_message('Pemeriksaan tidak ditemukan.', 'error');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
+		}
+
+		if (! $this->pemeriksaan_model->selesaikan($id)) {
+			Template::set_message($this->pemeriksaan_model->error ?: 'Gagal menyelesaikan pemeriksaan.', 'error');
+		} else {
+			$this->load->model('audit/audit_log_model');
+			$this->audit_log_model->catat($this->auth->user_id(), 'update', 'pemeriksaan', $id, 'Selesai dan tagihan disusun');
+			Template::set_message(
+				$this->pemeriksaan_model->menunggu_resep
+					? 'Pemeriksaan selesai. Resep menunggu diserahkan apoteker; tagihan gabungan akan siap setelah obat selesai.'
+					: 'Pemeriksaan selesai. Tagihan pasien telah disusun dan siap dibayar.',
+				'success'
+			);
+		}
+		redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan/detail/' . $id);
+	}
+
 	private function set_kunjungan($dokter_sendiri = null)
 	{
 		$this->db->select('kunjungan.*, pasien.no_rm, pasien.nama AS nama_pasien, dokter.nama_dokter')

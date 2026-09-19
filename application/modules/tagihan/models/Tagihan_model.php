@@ -101,6 +101,56 @@ class Tagihan_model extends BF_Model
     }
 
     /**
+     * Kirim penjualan resep ke tagihan kunjungan pasien.
+     * Jika tagihan belum ada, seluruh tagihan kunjungan disusun; jika sudah
+     * ada dan masih belum dibayar, hanya detail obat dari penjualan ini yang
+     * ditambahkan.
+     */
+    public function tambahkan_penjualan_resep($id_penjualan)
+    {
+        $penjualan = $this->db->select('penjualan_obat.id_penjualan, pemeriksaan.id_kunjungan')
+            ->join('resep', 'resep.id_resep = penjualan_obat.id_resep')
+            ->join('pemeriksaan', 'pemeriksaan.id_pemeriksaan = resep.id_pemeriksaan')
+            ->where('penjualan_obat.id_penjualan', $id_penjualan)
+            ->get('penjualan_obat')->row();
+        if (! $penjualan) {
+            $this->error = 'Penjualan resep tidak ditemukan.';
+            return false;
+        }
+
+        $tagihan = $this->db->where('id_kunjungan', $penjualan->id_kunjungan)
+            ->where('status !=', 'BATAL')->get('tagihan')->row();
+        if (! $tagihan) {
+            return $this->susun_dari_kunjungan($penjualan->id_kunjungan);
+        }
+        if ($tagihan->status !== 'BELUM_DIBAYAR') {
+            $this->error = 'Tagihan kunjungan sudah lunas; obat tidak dapat ditambahkan.';
+            return false;
+        }
+
+        $details = $this->db->select('penjualan_obat_detail.*, obat.nama_obat')
+            ->join('obat', 'obat.id_obat = penjualan_obat_detail.id_obat')
+            ->where('id_penjualan', $id_penjualan)->get('penjualan_obat_detail')->result();
+        $tambahan = 0;
+        foreach ($details as $detail) {
+            $subtotal = (float) $detail->subtotal;
+            $this->db->insert('tagihan_detail', array(
+                'id_tagihan' => $tagihan->id_tagihan, 'jenis_item' => 'OBAT',
+                'id_referensi' => $detail->id_detail, 'nama_item' => $detail->nama_obat,
+                'jumlah' => (int) $detail->jumlah, 'harga' => (float) $detail->harga,
+                'subtotal' => $subtotal,
+            ));
+            $tambahan += $subtotal;
+        }
+        if (! empty($details)) {
+            $this->db->where('id_tagihan', $tagihan->id_tagihan)->update('tagihan', array(
+                'total' => (float) $tagihan->total + $tambahan,
+            ));
+        }
+        return array('id_tagihan' => $tagihan->id_tagihan, 'total' => (float) $tagihan->total + $tambahan);
+    }
+
+    /**
      * Buat tagihan dari daftar item.
      *
      * @return array|bool

@@ -115,6 +115,13 @@ $route['admin/pemeriksaan/antrian'] = 'antrian/pemeriksaan/index';
 $route['admin/pemeriksaan/antrian/(:any)'] = 'antrian/pemeriksaan/$1';
 $route['admin/pemeriksaan/antrian/(:any)/(:any)'] = 'antrian/pemeriksaan/$1/$2';
 $route['admin/pemeriksaan/pemeriksaan'] = 'pemeriksaan/pemeriksaan/index';
+// API pemeriksaan harus berada sebelum wildcard agar tidak masuk ke
+// controller Pemeriksaan biasa.
+$route['admin/pemeriksaan/pemeriksaan/api/buka'] = 'pemeriksaan/api/buka';
+$route['admin/pemeriksaan/pemeriksaan/api/rekam_medis/(:num)'] = 'pemeriksaan/api/rekam_medis/$1';
+$route['admin/pemeriksaan/pemeriksaan/api/diagnosis'] = 'pemeriksaan/api/diagnosis';
+$route['admin/pemeriksaan/pemeriksaan/api/tindakan'] = 'pemeriksaan/api/tindakan';
+$route['admin/pemeriksaan/pemeriksaan/api/selesai/(:num)'] = 'pemeriksaan/api/selesai/$1';
 $route['admin/pemeriksaan/pemeriksaan/(:any)'] = 'pemeriksaan/pemeriksaan/$1';
 $route['admin/pemeriksaan/pemeriksaan/(:any)/(:any)'] = 'pemeriksaan/pemeriksaan/$1/$2';
 $route['admin/pemeriksaan/resep'] = 'resep/pemeriksaan/index';
@@ -139,6 +146,13 @@ $route['admin/transaksi/transaksi'] = 'transaksi/transaksi/index';
 $route['admin/transaksi/transaksi/(:any)'] = 'transaksi/transaksi/$1';
 $route['admin/transaksi/transaksi/(:any)/(:any)'] = 'transaksi/transaksi/$1/$2';
 $route['admin/transaksi/tagihan'] = 'tagihan/transaksi/index';
+// API harus didefinisikan sebelum rute wildcard tagihan agar tidak diarahkan
+// ke controller Transaksi (yang tidak memiliki method API tersebut).
+$route['admin/transaksi/tagihan/api/susun/(:num)'] = 'tagihan/api/susun/$1';
+$route['admin/transaksi/tagihan/api/detail/(:num)'] = 'tagihan/api/detail/$1';
+$route['admin/transaksi/tagihan/api/batalkan/(:num)'] = 'tagihan/api/batalkan/$1';
+$route['admin/transaksi/tagihan/api/bayar'] = 'tagihan/api/bayar';
+$route['admin/transaksi/tagihan/api/bukti/(:num)'] = 'tagihan/api/bukti/$1';
 $route['admin/transaksi/tagihan/(:any)'] = 'tagihan/transaksi/$1';
 $route['admin/transaksi/tagihan/(:any)/(:any)'] = 'tagihan/transaksi/$1/$2';
 

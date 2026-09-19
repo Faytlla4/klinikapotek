@@ -162,6 +162,13 @@
             </div>
             <div class="card-footer">
                 <a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a>
+                <?php if ($pemeriksaan->status === 'DIPROSES'): ?>
+                    <?php echo form_open(site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3) . '/selesaikan/' . $pemeriksaan->id_pemeriksaan), array('class' => 'float-right')); ?>
+                        <button type="submit" class="btn btn-success" onclick="return confirm('Selesaikan pemeriksaan dan susun tagihan pasien?');">
+                            <i class="fas fa-check"></i> Selesaikan Pemeriksaan &amp; Buat Tagihan
+                        </button>
+                    <?php echo form_close(); ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
