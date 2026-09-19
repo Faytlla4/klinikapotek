@@ -31,6 +31,15 @@
     	echo Assets::css();
     ?>
 
+    <style>
+        /* ponytail: kill ALL transitions and animations in admin */
+        *, *::before, *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+        .preloader { display: none !important; }
+    </style>
+
     <script type="text/javascript" async>
     var run_title_text = " <?=$title_text?> ";
     var run_title_speed = 300;
@@ -47,11 +56,8 @@
     </script>
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="sidebar-mini layout-fixed">
     <div class="wrapper">
-        <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__shake" src="<?php echo base_url('assets/images/logo.png'); ?>" height="300" width="300">
-        </div>
 
         <?php
         	echo theme_view('header');
