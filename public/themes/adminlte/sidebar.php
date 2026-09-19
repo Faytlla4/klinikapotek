@@ -8,8 +8,11 @@
 
     <div class="sidebar">
         <style>
-            /* Fix: kurangi indentasi nesting sidebar dari 2rem → 0.5rem per level */
+            /* Fix: kurangi indentasi nesting sidebar */
             .sidebar .nav-treeview { padding-left: .5rem; }
+            /* Fix: rapikan padding-left agar tidak terlalu lebar di kiri */
+            .sidebar .nav-treeview > .nav-item > .nav-link { padding-left: .5rem; }
+            .sidebar .nav-treeview > .nav-item > .nav-link > .nav-icon { margin-right: .4rem; }
             /* Fix: prevent horizontal overflow pada layout */
             .wrapper { overflow-x: hidden; }
             .content-wrapper { overflow-x: hidden; }

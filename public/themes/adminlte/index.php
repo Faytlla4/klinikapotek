@@ -112,6 +112,14 @@
     	], 'external', true);
     	echo Assets::js();
     ?>
+    <script>
+    /* Force sidebar expanded on page load, clear stale localStorage state. */
+    $(document).ready(function () {
+        $('body').removeClass('sidebar-collapse');
+        /* Remove saved state so sidebar stays expanded on next visit too. */
+        try { localStorage.removeItem('sidebar-collapse'); } catch (e) {}
+    });
+    </script>
 </body>
 
 </html>
