@@ -17,6 +17,20 @@
  */
 class App_Controller extends Authenticated_Controller
 {
+	/** Dokter aktif dari sesi; false bila tidak ada/tidak lagi aktif. */
+	protected function dokter_aktif()
+	{
+		$id = (int) $this->session->userdata('id_dokter_aktif');
+		if ($id <= 0) {
+			return false;
+		}
+		$row = $this->db->where('id_dokter', $id)->where('status', 'AKTIF')->get('dokter')->row();
+		if (! $row) {
+			$this->session->unset_userdata('id_dokter_aktif');
+			return false;
+		}
+		return $row;
+	}
 
 	//--------------------------------------------------------------------
 

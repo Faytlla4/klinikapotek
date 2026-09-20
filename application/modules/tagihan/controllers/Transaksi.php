@@ -29,7 +29,11 @@ class Transaksi extends Content
             if ($hasil) {
                 $this->load->model('audit/audit_log_model');
                 $this->audit_log_model->catat($this->auth->user_id(), 'transaksi', 'pembayaran', $hasil['id_transaksi'], 'Status: ' . $hasil['status']);
-                Template::set_message('Pembayaran berhasil dicatat (' . $hasil['status'] . ').', 'success');
+                $pesan = 'Pembayaran berhasil dicatat (' . $hasil['status'] . ').';
+                if ($hasil['kembalian'] > 0) {
+                    $pesan .= ' Kembalian: <strong>Rp ' . number_format($hasil['kembalian'], 0, ',', '.') . '</strong>.';
+                }
+                Template::set_message($pesan, 'success');
                 redirect(SITE_AREA . '/transaksi/tagihan/pembayaran');
             }
             Template::set_message($this->transaksi_model->error ?: 'Pembayaran gagal.', 'error');

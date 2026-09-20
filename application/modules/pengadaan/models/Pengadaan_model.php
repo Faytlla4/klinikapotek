@@ -30,6 +30,7 @@ class Pengadaan_model extends BF_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->helper('nomor');
     }
 
     /**
@@ -101,28 +102,39 @@ class Pengadaan_model extends BF_Model
      */
     public function terima($id_pengadaan, $items)
     {
-        $pengadaan = $this->find($id_pengadaan);
-        if (! $pengadaan) {
+        if ($id_pengadaan <= 0) {
             $this->error = 'Pengadaan tidak ditemukan.';
-            return false;
-        }
-        if (in_array($pengadaan->status, array('SELESAI', 'DIBATALKAN'))) {
-            $this->error = "Pengadaan sudah {$pengadaan->status}.";
             return false;
         }
         if (empty($items)) {
             $this->error = 'Item penerimaan kosong.';
             return false;
         }
+
         $this->load->model('stok/stok_model');
         $this->db->trans_start();
-        // Fase 1: validasi SEMUA item dulu tanpa menulis apa pun, agar
-        // kegagalan logis tak pernah terjadi setelah insert (nested
-        // trans_complete akan COMMIT bila trans_status masih TRUE).
+
+        // Lock row pengadaan untuk cegah race condition / double submit
+        $pengadaan = $this->db->query('SELECT * FROM pengadaan_obat WHERE id_pengadaan = ? FOR UPDATE', array($id_pengadaan))->row();
+        if (! $pengadaan) {
+            $this->db->trans_complete();
+            $this->error = 'Pengadaan tidak ditemukan.';
+            return false;
+        }
+
+        $status_upper = strtoupper($pengadaan->status);
+        if (in_array($status_upper, array('SELESAI', 'DIBATALKAN'))) {
+            $this->db->trans_complete();
+            $this->error = "Pengadaan sudah {$pengadaan->status}.";
+            return false;
+        }
+
+        // Fase 1: validasi SEMUA item dulu tanpa menulis apa pun
         $detail_po = array();
         foreach ($this->db->where('id_pengadaan', $id_pengadaan)->get('pengadaan_obat_detail')->result() as $detail) {
             $detail_po[(int) $detail->id_obat] = (int) $detail->jumlah_pesan;
         }
+
         $sudah_diterima = array();
         foreach ($this->db->select('penerimaan_obat_detail.id_obat, SUM(penerimaan_obat_detail.jumlah_terima) AS jumlah')
             ->join('penerimaan_obat', 'penerimaan_obat.id_penerimaan = penerimaan_obat_detail.id_penerimaan')
@@ -131,6 +143,7 @@ class Pengadaan_model extends BF_Model
             ->get('penerimaan_obat_detail')->result() as $terima) {
             $sudah_diterima[(int) $terima->id_obat] = (int) $terima->jumlah;
         }
+
         $diminta = array();
         foreach ($items as $item) {
             if (empty($item['id_obat']) || ! preg_match('/^\d+$/', (string) ($item['jumlah_terima'] ?? '')) || (int) $item['jumlah_terima'] <= 0) {
@@ -146,6 +159,7 @@ class Pengadaan_model extends BF_Model
             }
             $diminta[$id_obat] = ($diminta[$id_obat] ?? 0) + (int) $item['jumlah_terima'];
         }
+
         foreach ($diminta as $id_obat => $jumlah_diminta) {
             $sisa = $detail_po[$id_obat] - ($sudah_diterima[$id_obat] ?? 0);
             if ($jumlah_diminta > $sisa) {
@@ -154,20 +168,26 @@ class Pengadaan_model extends BF_Model
                 return false;
             }
         }
+
         $nomor = nomor_baru('PN', 'penerimaan_obat', 'nomor_penerimaan');
         $this->db->insert('penerimaan_obat', array(
-            'id_pengadaan' => $id_pengadaan, 'nomor_penerimaan' => $nomor,
-            'tanggal_terima' => date('Y-m-d H:i:s'), 'status' => 'SESUAI',
+            'id_pengadaan' => $id_pengadaan,
+            'nomor_penerimaan' => $nomor,
+            'tanggal_terima' => date('Y-m-d H:i:s'),
+            'status' => 'SESUAI',
         ));
         $id_penerimaan = $this->db->insert_id();
         $retur_items = array();
         $semua_sesuai = true;
+
         // Fase 2: tulis header, detail, stok, retur.
         foreach ($items as $item) {
             $kondisi = isset($item['kondisi']) ? $item['kondisi'] : 'Baik';
             $this->db->insert('penerimaan_obat_detail', array(
-                'id_penerimaan' => $id_penerimaan, 'id_obat' => $item['id_obat'],
-                'jumlah_terima' => (int) $item['jumlah_terima'], 'kondisi' => $kondisi,
+                'id_penerimaan' => $id_penerimaan,
+                'id_obat' => $item['id_obat'],
+                'jumlah_terima' => (int) $item['jumlah_terima'],
+                'kondisi' => $kondisi,
             ));
             if (strtoupper($kondisi) === 'BAIK') {
                 if (! $this->stok_model->masuk($item['id_obat'], (int) $item['jumlah_terima'], 'PENGADAAN', $id_penerimaan)) {
@@ -178,17 +198,21 @@ class Pengadaan_model extends BF_Model
             } else {
                 $semua_sesuai = false;
                 $retur_items[] = array(
-                    'id_obat' => $item['id_obat'], 'jumlah' => (int) $item['jumlah_terima'],
+                    'id_obat' => $item['id_obat'],
+                    'jumlah' => (int) $item['jumlah_terima'],
                     'alasan' => "Kondisi: {$kondisi}",
                 );
             }
         }
+
         $id_retur = null;
         if (! empty($retur_items)) {
             $this->db->where('id_penerimaan', $id_penerimaan)->update('penerimaan_obat', array('status' => 'TIDAK_SESUAI'));
             $this->db->insert('retur_pengadaan', array(
-                'id_penerimaan' => $id_penerimaan, 'nomor_retur' => nomor_baru('RT', 'retur_pengadaan', 'nomor_retur'),
-                'tanggal_retur' => date('Y-m-d H:i:s'), 'status' => 'Diajukan',
+                'id_penerimaan' => $id_penerimaan,
+                'nomor_retur' => nomor_baru('RT', 'retur_pengadaan', 'nomor_retur'),
+                'tanggal_retur' => date('Y-m-d H:i:s'),
+                'status' => 'Diajukan',
                 'keterangan' => 'Otomatis dari penerimaan tidak sesuai',
             ));
             $id_retur = $this->db->insert_id();
@@ -197,14 +221,29 @@ class Pengadaan_model extends BF_Model
             }
             $this->db->insert_batch('retur_pengadaan_detail', $retur_items);
         }
+
+        // Cek total akumulasi penerimaan setelah transaksi ini untuk menentukan status pengadaan
+        $lunas_semua = true;
+        foreach ($detail_po as $id_o => $pesan_qty) {
+            $terima_total = ($sudah_diterima[$id_o] ?? 0) + ($diminta[$id_o] ?? 0);
+            if ($terima_total < $pesan_qty) {
+                $lunas_semua = false;
+                break;
+            }
+        }
+
+        $new_status = ($lunas_semua && $semua_sesuai) ? 'SELESAI' : 'DITERIMA_SEBAGIAN';
         $this->db->where('id_pengadaan', $id_pengadaan)->update('pengadaan_obat', array(
-            'status' => $semua_sesuai ? 'SELESAI' : 'DITERIMA_SEBAGIAN',
+            'status' => $new_status,
+            'updated_at' => date('Y-m-d H:i:s'),
         ));
+
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
             $this->error = 'Gagal menyimpan penerimaan.';
             return false;
         }
+
         return array('id_penerimaan' => $id_penerimaan, 'nomor_penerimaan' => $nomor, 'id_retur' => $id_retur);
     }
 

@@ -188,12 +188,18 @@ class Pesanan_model extends BF_Model
             return false;
         }
         $valid = array();
+        $obat_ids = array();
         $resep_ids = array();
         foreach ($items as $it) {
             $v = $this->validasi_item($id_pasien, $it['id_obat'], $it['jumlah'], isset($it['id_resep']) ? $it['id_resep'] : null);
             if (! $v) {
                 return false;
             }
+            if (isset($obat_ids[$v['id_obat']])) {
+                $this->error = 'Obat tidak boleh muncul lebih dari sekali dalam satu pesanan.';
+                return false;
+            }
+            $obat_ids[$v['id_obat']] = true;
             if ($v['id_resep']) {
                 $resep_ids[$v['id_resep']] = true;
             }

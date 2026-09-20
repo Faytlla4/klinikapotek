@@ -23,6 +23,10 @@ class Content extends App_Controller
 
 	public function index()
 	{
+		if ($this->hanya_dokter() && ! $this->dokter_aktif()) {
+			redirect('dokter-bertugas');
+			return;
+		}
 		Template::set('toolbar_title', 'Pemeriksaan dan Rekam Medis');
 		Template::render();
 	}
@@ -51,6 +55,10 @@ class Content extends App_Controller
 			Template::set_message('Pemeriksaan tidak ditemukan.', 'error');
 			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
 		}
+		if ($row->status !== 'DIPROSES') {
+			Template::set_message('Pemeriksaan yang sudah selesai tidak dapat diedit.', 'attention');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan/detail/' . $id);
+		}
 		if (isset($_POST['save'])) {
 			$data = array(
 				'keluhan' => $this->input->post('keluhan'),
@@ -76,6 +84,26 @@ class Content extends App_Controller
 			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan');
 		}
 		
+		if ($this->input->post('aksi')) {
+			if ($row->status !== 'DIPROSES') {
+				Template::set_message('Diagnosis dan tindakan tidak dapat diubah setelah pemeriksaan selesai.', 'error');
+				redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan/detail/' . $id);
+			}
+			$aksi = $this->input->post('aksi');
+			if ($aksi === 'diagnosis') {
+				$data = array('id_pemeriksaan' => $id, 'nama_diagnosis' => trim($this->input->post('nama_diagnosis')), 'keterangan' => trim($this->input->post('keterangan')));
+				$ok = $data['nama_diagnosis'] !== '' && $this->diagnosis_model->insert($data);
+			} elseif ($aksi === 'tindakan') {
+				$biaya = $this->input->post('biaya');
+				$data = array('id_pemeriksaan' => $id, 'nama_tindakan' => trim($this->input->post('nama_tindakan')), 'biaya' => $biaya, 'keterangan' => trim($this->input->post('keterangan')));
+				$ok = $data['nama_tindakan'] !== '' && is_numeric($biaya) && (float) $biaya >= 0 && $this->tindakan_model->insert($data);
+			} else {
+				$ok = false;
+			}
+			Template::set_message($ok ? 'Data rekam medis disimpan.' : 'Data rekam medis tidak valid atau gagal disimpan.', $ok ? 'success' : 'error');
+			redirect(SITE_AREA . '/' . $this->ctx . '/pemeriksaan/detail/' . $id);
+		}
+
 		$this->load->model('master/obat_model');
 		$this->load->model('resep/resep_model');
 		
@@ -92,9 +120,29 @@ class Content extends App_Controller
 			Template::set('obat_list', $this->obat_model->aktif());
 		}
 		
-		// Ambil data kunjungan untuk mendapatkan id_pasien
-		$kunjungan = $this->db->where('id_kunjungan', $row->id_kunjungan)->get('kunjungan')->row();
+		// Konteks relasi yang sudah ada; hanya ditampilkan, tidak membuat data baru.
+		$kunjungan = $this->db->select('kunjungan.*, pasien.no_rm, pasien.nama AS nama_pasien, pasien.tanggal_lahir, pasien.jenis_kelamin, dokter.nama_dokter, poli.nama_poli, ruangan.nama_ruangan, antrian.nomor_antrian, antrian.status AS status_antrian')
+			->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien')
+			->join('dokter', 'dokter.id_dokter = kunjungan.id_dokter')
+			->join('poli', 'poli.id_poli = kunjungan.id_poli')
+			->join('ruangan', 'ruangan.id_ruangan = kunjungan.id_ruangan', 'left')
+			->join('antrian', 'antrian.id_kunjungan = kunjungan.id_kunjungan', 'left')
+			->where('kunjungan.id_kunjungan', $row->id_kunjungan)->get('kunjungan')->row();
+		$riwayat = array();
+		if ($kunjungan) {
+			$riwayat = $this->db->select('pemeriksaan.id_pemeriksaan, pemeriksaan.tanggal_pemeriksaan, pemeriksaan.keluhan, pemeriksaan.status')
+				->join('kunjungan', 'kunjungan.id_kunjungan = pemeriksaan.id_kunjungan')
+				->where('kunjungan.id_pasien', $kunjungan->id_pasien)
+				->where('pemeriksaan.id_pemeriksaan !=', $id)
+				->order_by('pemeriksaan.tanggal_pemeriksaan', 'DESC')->limit(5)->get('pemeriksaan')->result();
+			foreach ($riwayat as $h) {
+				$h->diagnosis = $this->db->select('nama_diagnosis')->where('id_pemeriksaan', $h->id_pemeriksaan)->get('diagnosis')->result();
+				$h->tindakan = $this->db->select('nama_tindakan')->where('id_pemeriksaan', $h->id_pemeriksaan)->get('tindakan')->result();
+			}
+		}
 		Template::set('kunjungan', $kunjungan);
+		Template::set('riwayat', $riwayat);
+		Template::set('boleh_edit_rekam_medis', $row->status === 'DIPROSES');
 		
 		Template::set('pemeriksaan', $row);
 		Template::set('toolbar_title', 'Detail Rekam Medis & Resep');
@@ -206,7 +254,7 @@ class Content extends App_Controller
 		if (! $this->hanya_dokter()) {
 			return null;
 		}
-		$dokter = $this->dokter_model->dari_user($this->auth->user_id());
+		$dokter = $this->dokter_aktif();
 		return $dokter ? (int) $dokter->id_dokter : false;
 	}
 

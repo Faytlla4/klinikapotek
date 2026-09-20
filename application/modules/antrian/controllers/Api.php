@@ -3,7 +3,7 @@
 /**
  * API Antrian (§12). Guard: kelola_antrian (pelayanan) / kelola_antrian_dokter.
  */
-class Api extends Authenticated_Controller
+class Api extends App_Controller
 {
     public function __construct()
     {
@@ -61,7 +61,7 @@ class Api extends Authenticated_Controller
     {
         $this->auth->restrict('kelola_antrian_dokter');
         if (! $this->auth->has_permission('kelola_antrian')) {
-            $dokter = $this->dokter_model->dari_user($this->auth->user_id());
+            $dokter = $this->dokter_aktif();
             if (! $dokter) {
                 $this->json(array('success' => false, 'error' => 'Akun belum dipetakan ke data dokter.'), 403);
                 return;
@@ -82,7 +82,7 @@ class Api extends Authenticated_Controller
         $status = $this->input->post('status');
         if (! $this->auth->has_permission('kelola_antrian')) {
             // Dokter hanya boleh mengubah antrian pasiennya sendiri.
-            $dokter = $this->dokter_model->dari_user($this->auth->user_id());
+            $dokter = $this->dokter_aktif();
             $milik = $dokter ? $this->db->select('kunjungan.id_dokter')
                 ->join('kunjungan', 'kunjungan.id_kunjungan = antrian.id_kunjungan')
                 ->where('antrian.id_antrian', $id)->get('antrian')->row() : null;

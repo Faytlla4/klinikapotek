@@ -39,17 +39,26 @@ class Pemeriksaan_model extends BF_Model
      */
     public function buka($id_kunjungan, $id_dokter, $data = array())
     {
-        $kunjungan = $this->db->where('id_kunjungan', $id_kunjungan)->get('kunjungan')->row();
+        $this->db->trans_begin();
+        $kunjungan = $this->db->query('SELECT * FROM kunjungan WHERE id_kunjungan = ? FOR UPDATE', array($id_kunjungan))->row();
         if (! $kunjungan) {
+            $this->db->trans_rollback();
             $this->error = 'Kunjungan tidak ditemukan.';
             return false;
         }
         if ((int) $kunjungan->id_dokter !== (int) $id_dokter) {
+            $this->db->trans_rollback();
             $this->error = 'Dokter tidak sesuai dengan kunjungan.';
             return false;
         }
         if (! in_array($kunjungan->status, array('TERDAFTAR', 'MENUNGGU', 'DIPROSES'))) {
+            $this->db->trans_rollback();
             $this->error = 'Kunjungan belum siap diperiksa (status: ' . $kunjungan->status . ').';
+            return false;
+        }
+        if ($this->db->where('id_kunjungan', $id_kunjungan)->get('pemeriksaan')->row()) {
+            $this->db->trans_rollback();
+            $this->error = 'Kunjungan sudah memiliki pemeriksaan.';
             return false;
         }
         
@@ -61,10 +70,6 @@ class Pemeriksaan_model extends BF_Model
                      ->where('status !=', 'BATAL')
                      ->update('antrian', array('status' => 'SEDANG_DIPERIKSA', 'waktu_mulai' => date('Y-m-d H:i:s')));
         }
-        if ($this->db->where('id_kunjungan', $id_kunjungan)->get('pemeriksaan')->row()) {
-            $this->error = 'Kunjungan sudah memiliki pemeriksaan.';
-            return false;
-        }
         $data = array_intersect_key($data, array_flip(array(
             'id_kunjungan', 'id_dokter', 'keluhan', 'hasil_pemeriksaan', 'catatan_dokter',
             'tanggal_pemeriksaan', 'status',
@@ -73,7 +78,13 @@ class Pemeriksaan_model extends BF_Model
         $data['id_dokter'] = $id_dokter;
         $data['tanggal_pemeriksaan'] = date('Y-m-d H:i:s');
         $data['status'] = 'DIPROSES';
-        return $this->insert($data);
+        $id = $this->insert($data);
+        $this->db->trans_complete();
+        if (! $id || $this->db->trans_status() === false) {
+            $this->error = 'Gagal membuka pemeriksaan.';
+            return false;
+        }
+        return $id;
     }
 
     /** Pemeriksaan + diagnosis + tindakan + resep (rekam medis satu kunjungan). */

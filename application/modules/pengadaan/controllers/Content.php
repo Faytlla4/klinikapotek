@@ -41,6 +41,112 @@ class Content extends App_Controller
         ));
     }
 
+    public function detail($id = null)
+    {
+        $id = (int) $id;
+        if ($id <= 0) {
+            Template::set_message('ID pengadaan tidak valid.', 'error');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan');
+        }
+
+        $pengadaan = $this->db->select('pengadaan_obat.*, supplier.nama_supplier, supplier.kode_supplier, supplier.alamat, supplier.no_hp')
+            ->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')
+            ->where('pengadaan_obat.id_pengadaan', $id)
+            ->get('pengadaan_obat')
+            ->row();
+
+        if (!$pengadaan) {
+            Template::set_message('Data pengadaan tidak ditemukan.', 'error');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan');
+        }
+
+        // Ambil detail item pesanan
+        $details = $this->db->select('pengadaan_obat_detail.*, obat.nama_obat, obat.kode_obat, obat.satuan')
+            ->join('obat', 'obat.id_obat = pengadaan_obat_detail.id_obat')
+            ->where('pengadaan_obat_detail.id_pengadaan', $id)
+            ->get('pengadaan_obat_detail')
+            ->result();
+
+        // Ambil akumulasi penerimaan per item obat
+        $terima_map = array();
+        $terima_rows = $this->db->select('penerimaan_obat_detail.id_obat, SUM(penerimaan_obat_detail.jumlah_terima) AS total_terima')
+            ->join('penerimaan_obat', 'penerimaan_obat.id_penerimaan = penerimaan_obat_detail.id_penerimaan')
+            ->where('penerimaan_obat.id_pengadaan', $id)
+            ->group_by('penerimaan_obat_detail.id_obat')
+            ->get('penerimaan_obat_detail')
+            ->result();
+
+        foreach ($terima_rows as $tr) {
+            $terima_map[(int)$tr->id_obat] = (int)$tr->total_terima;
+        }
+
+        foreach ($details as $d) {
+            $d->jumlah_sudah_terima = isset($terima_map[(int)$d->id_obat]) ? $terima_map[(int)$d->id_obat] : 0;
+            $d->sisa_pesanan = max(0, (int)$d->jumlah_pesan - $d->jumlah_sudah_terima);
+        }
+
+        // Ambil riwayat penerimaan
+        $riwayat_penerimaan = $this->db->select('penerimaan_obat.*, penerimaan_obat_detail.id_obat, penerimaan_obat_detail.jumlah_terima, penerimaan_obat_detail.kondisi, obat.nama_obat')
+            ->join('penerimaan_obat_detail', 'penerimaan_obat_detail.id_penerimaan = penerimaan_obat.id_penerimaan')
+            ->join('obat', 'obat.id_obat = penerimaan_obat_detail.id_obat')
+            ->where('penerimaan_obat.id_pengadaan', $id)
+            ->order_by('penerimaan_obat.id_penerimaan', 'DESC')
+            ->get('penerimaan_obat')
+            ->result();
+
+        Template::set('pengadaan', $pengadaan);
+        Template::set('details', $details);
+        Template::set('riwayat_penerimaan', $riwayat_penerimaan);
+        Template::set('toolbar_title', 'Detail Pengadaan #' . $pengadaan->nomor_pengadaan);
+        Template::set_view('content/detail');
+        Template::render();
+    }
+
+    public function terima($id = null)
+    {
+        $id = (int) $id;
+        if ($id <= 0) {
+            Template::set_message('ID pengadaan tidak valid.', 'error');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan');
+        }
+
+        if ($this->input->post('save_terima')) {
+            $items_input = $this->input->post('items');
+            $items = array();
+
+            if (is_array($items_input)) {
+                foreach ($items_input as $id_obat => $row) {
+                    $qty = isset($row['jumlah_terima']) ? trim($row['jumlah_terima']) : 0;
+                    if ($qty !== '' && (int)$qty > 0) {
+                        $items[] = array(
+                            'id_obat'       => (int) $id_obat,
+                            'jumlah_terima' => (int) $qty,
+                            'kondisi'       => isset($row['kondisi']) ? $row['kondisi'] : 'Baik',
+                        );
+                    }
+                }
+            }
+
+            if (empty($items)) {
+                Template::set_message('Masukkan setidaknya satu jumlah penerimaan obat yang valid.', 'error');
+                redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+            }
+
+            $result = $this->pengadaan_model->terima($id, $items);
+            if ($result) {
+                $this->load->model('audit/audit_log_model');
+                $this->audit_log_model->catat($this->auth->user_id(), 'stok', 'penerimaan_obat', $result['id_penerimaan'], $result['nomor_penerimaan']);
+                Template::set_message('Penerimaan obat berhasil disimpan dan stok telah diperbarui.', 'success');
+                redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+            } else {
+                Template::set_message($this->pengadaan_model->error ?: 'Gagal menyimpan penerimaan obat.', 'error');
+                redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+            }
+        }
+
+        redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+    }
+
     public function delete($id = null)
     {
         $id = (int) $id;

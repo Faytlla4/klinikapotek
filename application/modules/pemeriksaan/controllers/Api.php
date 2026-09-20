@@ -3,7 +3,7 @@
 /**
  * API Pemeriksaan/Diagnosis/Tindakan (§13). Guard: kelola_pemeriksaan (DOKTER).
  */
-class Api extends Authenticated_Controller
+class Api extends App_Controller
 {
     public function __construct()
     {
@@ -134,7 +134,7 @@ class Api extends Authenticated_Controller
         if (! $this->hanya_dokter()) {
             return null;
         }
-        $dokter = $this->dokter_model->dari_user($this->auth->user_id());
+        $dokter = $this->dokter_aktif();
         return $dokter ? (int) $dokter->id_dokter : false;
     }
 

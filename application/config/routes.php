@@ -61,6 +61,8 @@ Route::block('users/login');
 Route::block('users/register');
 
 Route::any('logout', 'users/logout');
+Route::any('dokter-bertugas', 'dokter_bertugas/index');
+Route::any('dokter-bertugas/ganti', 'dokter_bertugas/ganti');
 Route::any('forgot_password', 'users/forgot_password');
 Route::any('reset_password/(:any)/(:any)', 'users/reset_password/$1/$2');
 
@@ -216,6 +218,7 @@ $route['admin/content/pemeriksaan/(:any)'] = 'pemeriksaan/content/$1';
 $route['admin/content/pemeriksaan/(:any)/(:any)'] = 'pemeriksaan/content/$1/$2';
 
 // Resep, stok, penjualan Tahap F.
+$route['admin/content/penjualan/api/retur/(:num)'] = 'penjualan/api/retur/$1';
 $route['admin/content/resep'] = 'resep/content/index';
 $route['admin/content/resep/(:any)'] = 'resep/content/$1';
 $route['admin/content/resep/(:any)/(:any)'] = 'resep/content/$1/$2';

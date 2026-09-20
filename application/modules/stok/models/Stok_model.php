@@ -78,7 +78,7 @@ class Stok_model extends BF_Model
             return false;
         }
         $this->db->trans_start();
-        $row = $this->db->where('id_obat', $id_obat)->get('stok_obat')->row();
+        $row = $this->db->query('SELECT * FROM stok_obat WHERE id_obat = ? FOR UPDATE', array($id_obat))->row();
         if ($row) {
             $this->db->where('id_obat', $id_obat)->update('stok_obat', array(
                 'jumlah_stok' => (int) $row->jumlah_stok + $jumlah,

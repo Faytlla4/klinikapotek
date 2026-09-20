@@ -51,20 +51,21 @@ class Antrian_model extends BF_Model
      */
     public function buat($id_kunjungan, $id_poli)
     {
+        $this->db->trans_begin();
         $kunjungan = $this->db->where('id_kunjungan', $id_kunjungan)->get('kunjungan')->row();
         if (! $kunjungan || (int) $kunjungan->id_poli !== (int) $id_poli) {
+            $this->db->trans_rollback();
             $this->error = 'Kunjungan atau poli tidak valid.';
             return false;
         }
         if ($this->db->where('id_kunjungan', $id_kunjungan)->get('antrian')->row()) {
+            $this->db->trans_rollback();
             $this->error = 'Kunjungan sudah memiliki antrian.';
             return false;
         }
         $today = date('Y-m-d');
-        // COUNT + 1 is safe only when concurrent requests for the same
-        // poli/day are serialized. This transaction-scoped PostgreSQL lock is
-        // released automatically on commit/rollback and keeps the existing
-        // queue number format intact.
+        // Lock PostgreSQL ini hanya efektif di dalam transaksi aktif. Ia
+        // menserialkan pembentukan nomor per poli/tanggal sampai insert usai.
         $this->db->query('SELECT pg_advisory_xact_lock(hashtext(?))', array('antrian:' . $id_poli . ':' . $today));
         $count = $this->db->select('antrian.id_antrian')
             ->join('kunjungan', 'kunjungan.id_kunjungan = antrian.id_kunjungan')
@@ -77,7 +78,12 @@ class Antrian_model extends BF_Model
             'tanggal_antrian' => $today,
             'status'          => 'MENUNGGU',
         ));
-        return $id ? array('id_antrian' => $id, 'nomor_antrian' => $nomor) : false;
+        $this->db->trans_complete();
+        if (! $id || $this->db->trans_status() === false) {
+            $this->error = 'Gagal membuat antrian.';
+            return false;
+        }
+        return array('id_antrian' => $id, 'nomor_antrian' => $nomor);
     }
 
     /** Buat antrian untuk kunjungan TERDAFTAR pada Tahap D. */

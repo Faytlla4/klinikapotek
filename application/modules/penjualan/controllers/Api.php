@@ -67,4 +67,18 @@ class Api extends Authenticated_Controller
         }
         $this->json(array('success' => true, 'data' => $row));
     }
+
+    /** POST /penjualan/api/retur/{id}: items[][id_obat,jumlah], keterangan? */
+    public function retur($id)
+    {
+        $this->auth->restrict('kelola_penjualan_obat');
+        $items = $this->input->post('items');
+        $hasil = $this->penjualan_model->retur($this->as_id($id), $items, trim($this->input->post('keterangan') ?: ''));
+        if (! $hasil) {
+            $this->json(array('success' => false, 'error' => $this->penjualan_model->error ?: 'Gagal.'), 422);
+            return;
+        }
+        $this->audit_log_model->catat($this->auth->user_id(), 'stok', 'retur_penjualan', $hasil['id_retur'], 'Retur penjualan ' . $id);
+        $this->json(array('success' => true, 'data' => $hasil), 201);
+    }
 }

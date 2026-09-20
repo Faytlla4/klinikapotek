@@ -17,6 +17,10 @@ class Content extends App_Controller
 
 	public function index()
 	{
+		if ($this->auth->has_permission('kelola_antrian_dokter') && ! $this->auth->has_permission('kelola_antrian') && ! $this->dokter_aktif()) {
+			redirect('dokter-bertugas');
+			return;
+		}
 		Template::set('toolbar_title', 'Data Antrian');
 		Template::render();
 	}
@@ -62,7 +66,7 @@ class Content extends App_Controller
 		$id_dokter = $this->input->get('id_dokter');
 		if ($this->auth->has_permission('kelola_antrian_dokter') && ! $this->auth->has_permission('kelola_antrian')) {
 			// Dokter hanya melihat antriannya sendiri; parameter URL diabaikan (anti-IDOR).
-			$dokter = $this->dokter_model->dari_user($this->auth->user_id());
+			$dokter = $this->dokter_aktif();
 			$rows = $dokter ? $this->antrian_model->untuk_dokter($dokter->id_dokter) : array();
 		} else {
 			$rows = $id_dokter ? $this->antrian_model->untuk_dokter($id_dokter) : $this->antrian_model->hari_ini();

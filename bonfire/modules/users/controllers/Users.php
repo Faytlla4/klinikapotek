@@ -111,6 +111,12 @@ class Users extends Front_Controller
 
 			// Bersihkan requested_page agar tidak redirect balik ke /login
 			$this->session->unset_userdata('requested_page');
+			// Satu akun DOKTER memilih konteks dokter setelah autentikasi.
+			$role = $this->db->select('nama_role')->where('id_role', $this->auth->role_id())->get('roles')->row();
+			if ($role && $role->nama_role === 'DOKTER') {
+				$this->session->unset_userdata('id_dokter_aktif');
+				Template::redirect('dokter-bertugas');
+			}
 
 			// Jika tidak ada tujuan lain, masuk ke router dashboard per-role.
 			Template::redirect('dashboard');
@@ -148,6 +154,7 @@ class Users extends Front_Controller
 		}
 
 		// Always clear browser data (don't silently ignore user requests).
+		$this->session->unset_userdata('id_dokter_aktif');
 		$this->auth->logout();
 		Template::redirect('/');
 	}

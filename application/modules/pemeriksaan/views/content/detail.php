@@ -5,6 +5,16 @@
                 <h3 class="card-title">Detail Rekam Medis</h3>
             </div>
             <div class="card-body">
+                <?php if (!empty($kunjungan)): ?>
+                <h5>Identitas Pasien &amp; Kunjungan</h5>
+                <dl class="row">
+                    <dt class="col-sm-3">Pasien</dt><dd class="col-sm-9"><?php echo html_escape($kunjungan->nama_pasien . ' (' . $kunjungan->no_rm . ')'); ?></dd>
+                    <dt class="col-sm-3">Tanggal Lahir / Jenis Kelamin</dt><dd class="col-sm-9"><?php echo html_escape(($kunjungan->tanggal_lahir ?: '-') . ' / ' . ($kunjungan->jenis_kelamin ?: '-')); ?></dd>
+                    <dt class="col-sm-3">Kunjungan</dt><dd class="col-sm-9"><?php echo html_escape(($kunjungan->nomor_kunjungan ?? '-') . ' — ' . ($kunjungan->tanggal_kunjungan ?? '-')); ?></dd>
+                    <dt class="col-sm-3">Dokter / Poli / Ruangan</dt><dd class="col-sm-9"><?php echo html_escape($kunjungan->nama_dokter . ' / ' . $kunjungan->nama_poli . ' / ' . ($kunjungan->nama_ruangan ?: '-')); ?></dd>
+                    <dt class="col-sm-3">Antrian</dt><dd class="col-sm-9"><?php echo html_escape(($kunjungan->nomor_antrian ?: '-') . ' — ' . ($kunjungan->status_antrian ?: '-')); ?></dd>
+                </dl><hr>
+                <?php endif; ?>
                 <dl class="row">
                     <dt class="col-sm-3">Keluhan</dt>
                     <dd class="col-sm-9"><?php echo nl2br(html_escape($pemeriksaan->keluhan ?: '-')); ?></dd>
@@ -33,6 +43,13 @@
                                 <?php endforeach; ?>
                             </ul>
                         <?php endif; ?>
+                        <?php if ($boleh_edit_rekam_medis): ?>
+                        <?php echo form_open($this->uri->uri_string(), array('class' => 'mt-2')); ?>
+                            <input type="hidden" name="aksi" value="diagnosis">
+                            <div class="input-group input-group-sm"><input name="nama_diagnosis" class="form-control" maxlength="200" required placeholder="Tambah diagnosis"><div class="input-group-append"><button class="btn btn-primary">Simpan</button></div></div>
+                            <input name="keterangan" class="form-control form-control-sm mt-1" placeholder="Keterangan (opsional)">
+                        <?php echo form_close(); ?>
+                        <?php endif; ?>
                     </div>
                     <div class="col-md-6">
                         <h4>Tindakan</h4>
@@ -41,14 +58,29 @@
                         <?php else: ?>
                             <ul>
                                 <?php foreach($pemeriksaan->tindakan as $t): ?>
-                                    <li><?php echo html_escape($t->nama_tindakan); ?></li>
+                                    <li><?php echo html_escape($t->nama_tindakan); ?> — Rp <?php echo number_format((float) $t->biaya, 0, ',', '.'); ?></li>
                                 <?php endforeach; ?>
                             </ul>
+                        <?php endif; ?>
+                        <?php if ($boleh_edit_rekam_medis): ?>
+                        <?php echo form_open($this->uri->uri_string(), array('class' => 'mt-2')); ?>
+                            <input type="hidden" name="aksi" value="tindakan">
+                            <input name="nama_tindakan" class="form-control form-control-sm mb-1" maxlength="200" required placeholder="Nama tindakan">
+                            <div class="input-group input-group-sm"><input type="number" min="0" step="any" name="biaya" class="form-control" required placeholder="Biaya"><div class="input-group-append"><button class="btn btn-primary">Simpan</button></div></div>
+                            <input name="keterangan" class="form-control form-control-sm mt-1" placeholder="Keterangan (opsional)">
+                        <?php echo form_close(); ?>
                         <?php endif; ?>
                     </div>
                 </div>
 
                 <hr>
+
+                <?php if (!empty($riwayat)): ?>
+                <h4>Ringkasan Riwayat Pasien</h4>
+                <div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Tanggal</th><th>Keluhan</th><th>Diagnosis</th><th>Tindakan</th><th>Status</th></tr></thead><tbody>
+                <?php foreach ($riwayat as $h): ?><tr><td><?php echo html_escape($h->tanggal_pemeriksaan); ?></td><td><?php echo html_escape($h->keluhan ?: '-'); ?></td><td><?php echo html_escape(implode(', ', array_map(function ($x) { return $x->nama_diagnosis; }, $h->diagnosis)) ?: '-'); ?></td><td><?php echo html_escape(implode(', ', array_map(function ($x) { return $x->nama_tindakan; }, $h->tindakan)) ?: '-'); ?></td><td><?php echo html_escape($h->status); ?></td></tr><?php endforeach; ?>
+                </tbody></table></div><hr>
+                <?php endif; ?>
 
                 <h4>Resep Obat</h4>
                 <?php if (!empty($pemeriksaan->resep)): ?>

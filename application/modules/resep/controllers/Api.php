@@ -4,7 +4,7 @@
  * API Resep (§13, §14). Guard: kelola_resep (DOKTER membuat, APOTEKER memproses).
  * Body detail: items[0][id_obat], items[0][jumlah], items[0][dosis], items[0][aturan_pakai].
  */
-class Api extends Authenticated_Controller
+class Api extends App_Controller
 {
     public function __construct()
     {
@@ -126,7 +126,7 @@ class Api extends Authenticated_Controller
         if (! $this->hanya_dokter()) {
             return null;
         }
-        $dokter = $this->dokter_model->dari_user($this->auth->user_id());
+        $dokter = $this->dokter_aktif();
         return $dokter ? (int) $dokter->id_dokter : false;
     }
 

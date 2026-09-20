@@ -67,6 +67,10 @@ class Penjualan_model extends BF_Model
             $this->error = 'Item penjualan kosong.';
             return false;
         }
+        if ($id_pasien && ! $this->db->where('id_pasien', $id_pasien)->where('status', 'AKTIF')->get('pasien')->row()) {
+            $this->error = 'Pasien tidak ditemukan atau tidak aktif.';
+            return false;
+        }
 
         $this->load->model('stok/stok_model');
         $this->db->trans_start();
@@ -76,6 +80,7 @@ class Penjualan_model extends BF_Model
         // trans_status masih TRUE).
         $total = 0;
         $rows = array();
+        $obat_ids = array();
         foreach ($items as $item) {
             if (empty($item['id_obat']) || ! preg_match('/^\d+$/', (string) ($item['jumlah'] ?? '')) || (int) $item['jumlah'] <= 0) {
                 $this->db->trans_complete();
@@ -182,5 +187,64 @@ class Penjualan_model extends BF_Model
             ->get('penjualan_obat_detail')
             ->result();
         return $row;
+    }
+
+    /** Retur sekali per penjualan; stok dan mutasi dipulihkan secara atomik. */
+    public function retur($id_penjualan, $items, $keterangan = '')
+    {
+        if (empty($items)) {
+            $this->error = 'Item retur kosong.';
+            return false;
+        }
+        $this->db->trans_begin();
+        $jual = $this->db->query('SELECT * FROM penjualan_obat WHERE id_penjualan = ? FOR UPDATE', array($id_penjualan))->row();
+        if (! $jual || $jual->status !== 'SELESAI') {
+            $this->db->trans_rollback();
+            $this->error = 'Penjualan tidak dapat diretur.';
+            return false;
+        }
+        if ($this->db->where('id_penjualan', $id_penjualan)->get('retur_penjualan')->row()) {
+            $this->db->trans_rollback();
+            $this->error = 'Penjualan sudah pernah diretur.';
+            return false;
+        }
+        $terjual = array();
+        foreach ($this->db->where('id_penjualan', $id_penjualan)->get('penjualan_obat_detail')->result() as $d) {
+            $terjual[(int) $d->id_obat] = (int) $d->jumlah;
+        }
+        $retur = array();
+        foreach ($items as $item) {
+            $id_obat = (int) ($item['id_obat'] ?? 0);
+            $jumlah = $item['jumlah'] ?? null;
+            if (! isset($terjual[$id_obat]) || ! preg_match('/^\d+$/', (string) $jumlah) || (int) $jumlah <= 0 || (int) $jumlah > $terjual[$id_obat] || isset($retur[$id_obat])) {
+                $this->db->trans_rollback();
+                $this->error = 'Item atau jumlah retur tidak valid.';
+                return false;
+            }
+            if (isset($obat_ids[(int) $item['id_obat']])) {
+                $this->db->trans_complete();
+                $this->error = 'Obat tidak boleh muncul lebih dari sekali dalam satu penjualan.';
+                return false;
+            }
+            $obat_ids[(int) $item['id_obat']] = true;
+            $retur[$id_obat] = (int) $jumlah;
+        }
+        $this->db->insert('retur_penjualan', array('id_penjualan' => $id_penjualan, 'nomor_retur' => nomor_baru('RJ', 'retur_penjualan', 'nomor_retur'), 'tanggal_retur' => date('Y-m-d H:i:s'), 'keterangan' => $keterangan));
+        $id_retur = $this->db->insert_id();
+        $this->load->model('stok/stok_model');
+        foreach ($retur as $id_obat => $jumlah) {
+            $this->db->insert('retur_penjualan_detail', array('id_retur' => $id_retur, 'id_obat' => $id_obat, 'jumlah' => $jumlah));
+            if (! $this->stok_model->masuk($id_obat, $jumlah, 'RETUR_PENJUALAN', $id_retur, 'Retur penjualan ' . $jual->nomor_penjualan)) {
+                $this->db->trans_rollback();
+                $this->error = $this->stok_model->error ?: 'Gagal mengembalikan stok.';
+                return false;
+            }
+        }
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === false) {
+            $this->error = 'Gagal memproses retur penjualan.';
+            return false;
+        }
+        return array('id_retur' => $id_retur);
     }
 }

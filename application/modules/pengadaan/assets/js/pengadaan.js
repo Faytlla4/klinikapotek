@@ -1,4 +1,4 @@
-﻿var _p = location.pathname.split('/');
+var _p = location.pathname.split('/');
 var ctxBase = _p.slice(0, _p.indexOf('admin') + 3).join('/');
 $('#pengadaan_table').bfDataTable({
     url: ctxBase + '/get_data',
@@ -16,8 +16,12 @@ $('#pengadaan_table').bfDataTable({
             orderable: false,
             searchable: false,
             render: function (data) {
-                var html = '<a href="' + ctxBase + '/detail/' + data.id + '" class="btn btn-sm btn-primary mr-1"><i class="fas fa-eye"></i></a>';
-                if (data.status === 'Dipesan') {
+                var html = '<a href="' + ctxBase + '/detail/' + data.id + '" class="btn btn-sm btn-info mr-1" title="Detail"><i class="fas fa-eye"></i> Detail</a>';
+                var st = (data.status || '').toUpperCase();
+                if (st !== 'SELESAI' && st !== 'DIBATALKAN') {
+                    html += ' <a href="' + ctxBase + '/detail/' + data.id + '" class="btn btn-sm btn-success mr-1"><i class="fas fa-boxes"></i> Terima Obat</a>';
+                }
+                if (st === 'DIPESAN') {
                     html += ' <button class="btn btn-sm btn-danger btn-hapus" data-id="' + data.id + '" data-nama="' + data.nomor_pengadaan + '"><i class="fas fa-trash"></i></button>';
                 }
                 return html;

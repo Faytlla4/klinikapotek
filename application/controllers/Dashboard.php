@@ -30,6 +30,10 @@ class Dashboard extends App_Controller
     public function index()
     {
         $role = $this->current_role();
+        if ($role === 'DOKTER' && ! $this->dokter_aktif()) {
+            redirect('dokter-bertugas');
+            return;
+        }
         if ($role && isset($this->role_map[$role])) {
             redirect('dashboard/' . $this->role_map[$role]);
             return;
@@ -70,8 +74,12 @@ class Dashboard extends App_Controller
         $this->require_role('DOKTER');
         $this->load->model('master/dokter_model');
         $this->load->model('antrian/antrian_model');
-        $dokter = $this->dokter_model->dari_user($this->auth->user_id());
-        $id_dokter = $dokter ? (int) $dokter->id_dokter : null;
+        $dokter = $this->dokter_aktif();
+        if (! $dokter) {
+            redirect('dokter-bertugas');
+            return;
+        }
+        $id_dokter = (int) $dokter->id_dokter;
         if (! $dokter) {
             Template::set_message('Akun belum dipetakan ke data dokter.', 'attention');
         }
