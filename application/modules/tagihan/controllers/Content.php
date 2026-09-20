@@ -5,5 +5,30 @@ class Content extends App_Controller
     public function index() { Template::set('toolbar_title', 'Tagihan'); Template::render(); }
     public function get_data() { $rows = $this->db->select('tagihan.id_tagihan AS id, tagihan.*, pasien.no_rm, pasien.nama AS nama_pasien')->join('kunjungan', 'kunjungan.id_kunjungan = tagihan.id_kunjungan', 'left')->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien', 'left')->order_by('tagihan.id_tagihan', 'DESC')->get('tagihan')->result(); echo json_encode(array('draw' => (int)($this->input->post('draw') ?: 1), 'recordsTotal' => count($rows), 'recordsFiltered' => count($rows), 'data' => $rows)); }
     public function detail($id) { $row = $this->tagihan_model->detail((int) $id); if (!$row) { show_404(); } Template::set('tagihan', $row); Template::set('toolbar_title', 'Detail Tagihan'); Template::render(); }
+
+    public function delete($id = null)
+    {
+        $id = (int) $id;
+        if ($id <= 0) {
+            echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+            return;
+        }
+
+        $guna = array();
+        $n = $this->db->where('id_tagihan', $id)->count_all_results('transaksi');
+        if ($n > 0) $guna[] = $n . ' transaksi';
+
+        if (!empty($guna)) {
+            echo json_encode(array('success' => false, 'message' => 'Tidak bisa menghapus tagihan karena masih memiliki ' . implode(', ', $guna) . '.'));
+            return;
+        }
+
+        $this->db->where('id_tagihan', $id)->delete('tagihan_detail');
+        if ($this->db->where('id_tagihan', $id)->delete('tagihan')) {
+            echo json_encode(array('success' => true, 'message' => 'Tagihan berhasil dihapus.'));
+        } else {
+            echo json_encode(array('success' => false, 'message' => 'Gagal menghapus tagihan.'));
+        }
+    }
 }
 

@@ -24,7 +24,44 @@ class Content extends App_Controller
     }
     public function get_data()
     {
-        $rows = $this->db->select('pengadaan_obat.*, supplier.nama_supplier')->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')->order_by('id_pengadaan', 'DESC')->get('pengadaan_obat')->result();
-        echo json_encode(array('draw' => (int)($this->input->post('draw') ?: 1), 'recordsTotal' => count($rows), 'recordsFiltered' => count($rows), 'data' => $rows));
+        $rows = $this->db->select('pengadaan_obat.*, supplier.nama_supplier')
+            ->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')
+            ->order_by('id_pengadaan', 'DESC')
+            ->get('pengadaan_obat')
+            ->result();
+        foreach ($rows as $row) {
+            $row->id = (int) $row->id_pengadaan;
+        }
+        echo json_encode(array(
+            'draw'            => (int) ($this->input->post('draw') ?: 1),
+            'recordsTotal'    => count($rows),
+            'recordsFiltered' => count($rows),
+            'data'            => $rows
+        ));
+    }
+
+    public function delete($id = null)
+    {
+        $id = (int) $id;
+        if ($id <= 0) {
+            echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+            return;
+        }
+
+        $guna = array();
+        $n = $this->db->where('id_pengadaan', $id)->count_all_results('penerimaan_obat');
+        if ($n > 0) $guna[] = $n . ' penerimaan';
+
+        if (!empty($guna)) {
+            echo json_encode(array('success' => false, 'message' => 'Tidak bisa menghapus pengadaan karena masih memiliki ' . implode(', ', $guna) . '.'));
+            return;
+        }
+
+        $this->db->where('id_pengadaan', $id)->delete('pengadaan_obat_detail');
+        if ($this->db->where('id_pengadaan', $id)->delete('pengadaan_obat')) {
+            echo json_encode(array('success' => true, 'message' => 'Pengadaan berhasil dihapus.'));
+        } else {
+            echo json_encode(array('success' => false, 'message' => 'Gagal menghapus pengadaan.'));
+        }
     }
 }

@@ -25,7 +25,44 @@ $(document).ready(function () {
                     var cls = data === 'LUNAS' ? 'badge-success' : (data === 'BATAL' ? 'badge-danger' : 'badge-warning');
                     return '<span class="badge ' + cls + '">' + data + '</span>';
                 }
+            },
+            {
+                data: null,
+                orderable: false,
+                searchable: false,
+                render: function (data) {
+                    var html = '<a href="' + ctxBase + '/detail/' + data.id + '" class="btn btn-sm btn-primary mr-1"><i class="fas fa-eye"></i></a>';
+                    if (data.status === 'BELUM_DIBAYAR') {
+                        html += ' <button class="btn btn-sm btn-danger btn-hapus" data-id="' + data.id + '" data-nama="' + data.nomor_tagihan + '"><i class="fas fa-trash"></i></button>';
+                    }
+                    return html;
+                }
             }
         ]
+    });
+
+    $(document).on('click', '.btn-hapus', function () {
+        var id = $(this).data('id');
+        var nama = $(this).data('nama');
+        Swal.fire({
+            title: 'Hapus Tagihan?',
+            text: 'Tagihan ' + nama + ' akan dihapus.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!'
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                $.post(ctxBase + '/delete/' + id, {csrf_token: $('input[name=csrf_token]').val()}, function (res) {
+                    if (res.success) {
+                        Swal.fire('Terhapus!', res.message, 'success');
+                        $('#tagihan_table').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                    }
+                }, 'json');
+            }
+        });
     });
 });

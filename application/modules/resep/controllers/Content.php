@@ -10,6 +10,41 @@ class Content extends App_Controller
     public function get_data() { $sendiri = $this->dokter_sendiri(); $rows = $sendiri === false ? array() : $this->resep_model->menunggu($sendiri); foreach ($rows as $row) { $row->id = (int) $row->id_resep; } echo json_encode(array('draw' => (int)($this->input->post('draw') ?: 1), 'recordsTotal' => count($rows), 'recordsFiltered' => count($rows), 'data' => $rows)); }
     public function detail($id) { $row = $this->resep_model->detail((int) $id); if (!$row || !$this->boleh_akses($row->id_dokter)) { show_404(); } Template::set('resep', $row); Template::set('toolbar_title', 'Detail Resep'); Template::render(); }
 
+    public function delete($id = null)
+    {
+        $id = (int) $id;
+        if ($id <= 0) {
+            echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+            return;
+        }
+
+        $resep = $this->db->where('id_resep', $id)->get('resep')->row();
+        if (!$resep) {
+            echo json_encode(array('success' => false, 'message' => 'Resep tidak ditemukan.'));
+            return;
+        }
+        if (!$this->boleh_akses($resep->id_dokter)) {
+            echo json_encode(array('success' => false, 'message' => 'Anda tidak memiliki akses ke resep ini.'));
+            return;
+        }
+
+        $guna = array();
+        $n = $this->db->where('id_resep', $id)->count_all_results('penjualan_obat');
+        if ($n > 0) $guna[] = $n . ' penjualan obat';
+
+        if (!empty($guna)) {
+            echo json_encode(array('success' => false, 'message' => 'Tidak bisa menghapus resep karena masih memiliki ' . implode(', ', $guna) . '.'));
+            return;
+        }
+
+        $this->db->where('id_resep', $id)->delete('resep_detail');
+        if ($this->db->where('id_resep', $id)->delete('resep')) {
+            echo json_encode(array('success' => true, 'message' => 'Resep berhasil dihapus.'));
+        } else {
+            echo json_encode(array('success' => false, 'message' => 'Gagal menghapus resep.'));
+        }
+    }
+
     /** True bila user dokter murni (apoteker memproses semua resep, admin melihat semua). */
     private function hanya_dokter()
     {
