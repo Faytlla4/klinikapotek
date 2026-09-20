@@ -62,9 +62,9 @@
         .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link {
             color: rgba(255,255,255,.85) !important;
             background-color: rgba(255,255,255,.08);
-            margin: 2px 8px;
+            margin: 1px 6px;
             border-radius: 6px;
-            padding: 8px 12px;
+            padding: 6px 10px;
         }
         .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link:hover {
             color: #fff !important;
@@ -79,8 +79,8 @@
             background-color: transparent;
         }
         .sidebar-dark-primary .nav-treeview > .nav-item > .nav-link {
-            margin: 1px 8px 1px 20px;
-            padding: 8px 12px;
+            margin: 1px 6px 1px 18px;
+            padding: 5px 10px;
             border-radius: 5px;
             color: rgba(255,255,255,.75) !important;
             background-color: rgba(255,255,255,.06);
