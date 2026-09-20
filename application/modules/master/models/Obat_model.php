@@ -14,13 +14,11 @@ class Obat_model extends BF_Model
     protected $return_insert_id = true;
 
     protected $validation_rules = array(
-        array('field' => 'kode_obat', 'label' => 'Kode Obat', 'rules' => 'max_length[50]'),
         array('field' => 'nama_obat', 'label' => 'Nama Obat', 'rules' => 'max_length[150]'),
         array('field' => 'satuan', 'label' => 'Satuan', 'rules' => 'max_length[30]'),
         array('field' => 'harga', 'label' => 'Harga', 'rules' => 'numeric'),
     );
     protected $insert_validation_rules = array(
-        array('field' => 'kode_obat', 'label' => 'Kode Obat', 'rules' => 'required|is_unique[obat.kode_obat]'),
         array('field' => 'nama_obat', 'label' => 'Nama Obat', 'rules' => 'required'),
         array('field' => 'satuan', 'label' => 'Satuan', 'rules' => 'required'),
         array('field' => 'harga', 'label' => 'Harga', 'rules' => 'required'),
@@ -51,17 +49,21 @@ class Obat_model extends BF_Model
     /** Auto-generate kode obat berikutnya: OBT-001, OBT-002, ... */
     public function generate_kode()
     {
-        $last = $this->db->select('kode_obat')
-            ->order_by('id_obat', 'DESC')
-            ->limit(1)
+        $rows = $this->db->select('kode_obat')
+            ->like('kode_obat', 'OBT-', 'after')
             ->get('obat')
-            ->row();
+            ->result();
 
-        $next = 1;
-        if ($last && preg_match('/OBT-(\d+)/', $last->kode_obat, $m)) {
-            $next = (int) $m[1] + 1;
+        $max = 0;
+        foreach ($rows as $row) {
+            if (preg_match('/OBT-(\d+)$/', $row->kode_obat, $m)) {
+                $n = (int) $m[1];
+                if ($n > $max) {
+                    $max = $n;
+                }
+            }
         }
 
-        return 'OBT-' . str_pad($next, 3, '0', STR_PAD_LEFT);
+        return 'OBT-' . str_pad($max + 1, 3, '0', STR_PAD_LEFT);
     }
 }
