@@ -259,6 +259,7 @@
     $(document).ready(function () {
         $('body').removeClass('sidebar-collapse');
         try { localStorage.removeItem('sidebar-collapse'); } catch (e) {}
+        $('.nav-link.active').parents('.nav-item').addClass('menu-open');
     });
     </script>
 </body>
