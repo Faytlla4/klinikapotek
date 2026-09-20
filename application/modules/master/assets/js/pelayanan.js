@@ -20,10 +20,44 @@ $('#pelayanan_table').bfDataTable({
                 var cls = data === 'AKTIF' ? 'badge-success' : 'badge-danger';
                 return '<span class="badge ' + cls + '">' + data + '</span>';
             }
-        }
+        },
+        { data: null, orderable: false, searchable: false, render: function(data) {
+            var editUrl = site_url + 'admin/master/pelayanan/edit/' + data.id;
+            var deleteUrl = site_url + 'admin/master/pelayanan/delete/' + data.id;
+            return '<a href="' + editUrl + '" class="btn btn-xs btn-primary mr-1"><i class="fas fa-edit"></i></a>' +
+                '<button class="btn btn-xs btn-danger btn-hapus" data-url="' + deleteUrl + '" data-nama="' + data.nama_pelayanan + '"><i class="fas fa-trash"></i></button>';
+        } }
     ]
 });
 
-$('.select2').select2({
-    theme: 'bootstrap4'
+$('.select2').select2({ theme: 'bootstrap4' });
+
+$(document).on('click', '.btn-hapus', function(e) {
+    e.preventDefault();
+    var btn = $(this);
+    var url = btn.data('url');
+    var nama = btn.data('nama');
+    Swal.fire({
+        title: 'Hapus Pelayanan?',
+        html: 'Data <strong>' + nama + '</strong> akan dihapus permanen.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            $.post(url, function(res) {
+                if (res.success) {
+                    Swal.fire('Terhapus!', res.message, 'success');
+                    $('#pelayanan_table').DataTable().ajax.reload(null, false);
+                } else {
+                    Swal.fire('Gagal', res.message, 'error');
+                }
+            }, 'json').fail(function() {
+                Swal.fire('Error', 'Terjadi kesalahan server.', 'error');
+            });
+        }
+    });
 });

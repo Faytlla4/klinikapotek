@@ -104,6 +104,25 @@ class Spesialis extends App_Controller
 			'data'            => $data ?: array()
 		));
 	}
+
+	public function delete($id = null)
+	{
+		$id = (int) $id;
+		if ($id <= 0) {
+			echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+			return;
+		}
+
+		$n = $this->db->where('id_spesialis', $id)->count_all_results('dokter');
+
+		if ($this->spesialis_model->delete($id)) {
+			$msg = 'Spesialis berhasil dihapus.';
+			if ($n > 0) $msg .= ' ' . $n . ' dokter terkait kehilangan data spesialis.';
+			echo json_encode(array('success' => true, 'message' => $msg));
+		} else {
+			echo json_encode(array('success' => false, 'message' => 'Gagal menghapus spesialis.'));
+		}
+	}
 }
 
 

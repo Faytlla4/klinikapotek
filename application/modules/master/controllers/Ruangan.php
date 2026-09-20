@@ -120,6 +120,30 @@ class Ruangan extends App_Controller
 			'data'            => $data ?: array()
 		));
 	}
+
+	public function delete($id = null)
+	{
+		$id = (int) $id;
+		if ($id <= 0) {
+			echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+			return;
+		}
+
+		$guna = array();
+		$n = $this->db->where('id_ruangan', $id)->count_all_results('kunjungan');
+		if ($n > 0) $guna[] = $n . ' kunjungan';
+
+		if (!empty($guna)) {
+			echo json_encode(array('success' => false, 'message' => 'Tidak bisa menghapus ruangan karena masih memiliki ' . implode(', ', $guna) . '.'));
+			return;
+		}
+
+		if ($this->ruangan_model->delete($id)) {
+			echo json_encode(array('success' => true, 'message' => 'Ruangan berhasil dihapus.'));
+		} else {
+			echo json_encode(array('success' => false, 'message' => 'Gagal menghapus ruangan.'));
+		}
+	}
 }
 
 

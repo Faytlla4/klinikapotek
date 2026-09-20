@@ -12,6 +12,7 @@
                             <th>Nama Ruangan</th>
                             <th>Poli Terkait</th>
                             <th>Status</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                 </table>

@@ -125,6 +125,34 @@ class Dokter extends App_Controller
 			'data'            => $data ?: array()
 		));
 	}
+
+	public function delete($id = null)
+	{
+		$id = (int) $id;
+		if ($id <= 0) {
+			echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+			return;
+		}
+
+		$guna = array();
+		$n = $this->db->where('id_dokter', $id)->count_all_results('kunjungan');
+		if ($n > 0) $guna[] = $n . ' kunjungan';
+		$n = $this->db->where('id_dokter', $id)->count_all_results('pemeriksaan');
+		if ($n > 0) $guna[] = $n . ' pemeriksaan';
+		$n = $this->db->where('id_dokter', $id)->count_all_results('resep');
+		if ($n > 0) $guna[] = $n . ' resep';
+
+		if (!empty($guna)) {
+			echo json_encode(array('success' => false, 'message' => 'Tidak bisa menghapus dokter karena masih memiliki ' . implode(', ', $guna) . '.'));
+			return;
+		}
+
+		if ($this->dokter_model->delete($id)) {
+			echo json_encode(array('success' => true, 'message' => 'Dokter berhasil dihapus.'));
+		} else {
+			echo json_encode(array('success' => false, 'message' => 'Gagal menghapus dokter.'));
+		}
+	}
 }
 
 

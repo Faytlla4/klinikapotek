@@ -2,7 +2,7 @@
 <div class="row"><div class="col-md-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title">Form Tambah Obat</h3></div>
     <?php echo form_open($this->uri->uri_string()); ?><div class="card-body">
-        <div class="row"><div class="col-md-6"><div class="form-group"><label for="kode_obat">Kode Obat <span class="text-danger">*</span></label><input id="kode_obat" name="kode_obat" class="form-control" required value="<?php echo set_value('kode_obat'); ?>"><?php echo form_error('kode_obat'); ?></div></div><div class="col-md-6">
+        <div class="row"><div class="col-md-6"><div class="form-group"><label for="kode_obat">Kode Obat</label><input id="kode_obat" class="form-control" value="<?php echo $kode_obat_baru; ?>" readonly style="background:#f0f0f0;"></div></div><div class="col-md-6">
         <div class="form-group"><label for="nama_obat">Nama Obat <span class="text-danger">*</span></label><input id="nama_obat" name="nama_obat" class="form-control" required value="<?php echo set_value('nama_obat'); ?>"><?php echo form_error('nama_obat'); ?></div></div></div>
         <div class="row"><div class="col-md-6"><div class="form-group"><label for="jenis_obat">Jenis Obat</label><input id="jenis_obat" name="jenis_obat" class="form-control" value="<?php echo set_value('jenis_obat'); ?>"></div></div><div class="col-md-6">
         <div class="form-group"><label for="satuan">Satuan <span class="text-danger">*</span></label><input id="satuan" name="satuan" class="form-control" required value="<?php echo set_value('satuan'); ?>"><?php echo form_error('satuan'); ?></div></div></div>

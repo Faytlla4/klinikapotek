@@ -13,6 +13,7 @@
                             <th>Jenis Pelayanan</th>
                             <th>Tarif (Rp)</th>
                             <th>Status</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                 </table>

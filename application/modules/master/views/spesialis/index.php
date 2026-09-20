@@ -11,6 +11,7 @@
                             <th>ID</th>
                             <th>Nama Spesialis</th>
                             <th>Status</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                 </table>

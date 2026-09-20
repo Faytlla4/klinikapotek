@@ -47,4 +47,21 @@ class Obat_model extends BF_Model
         }
         return $this->db->get('obat')->result();
     }
+
+    /** Auto-generate kode obat berikutnya: OBT-001, OBT-002, ... */
+    public function generate_kode()
+    {
+        $last = $this->db->select('kode_obat')
+            ->order_by('id_obat', 'DESC')
+            ->limit(1)
+            ->get('obat')
+            ->row();
+
+        $next = 1;
+        if ($last && preg_match('/OBT-(\d+)/', $last->kode_obat, $m)) {
+            $next = (int) $m[1] + 1;
+        }
+
+        return 'OBT-' . str_pad($next, 3, '0', STR_PAD_LEFT);
+    }
 }

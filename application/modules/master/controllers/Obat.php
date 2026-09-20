@@ -30,6 +30,7 @@ class Obat extends App_Controller
 			Template::set_message('Obat berhasil ditambahkan.', 'success');
 			redirect(SITE_AREA . '/master/obat');
 		}
+		Template::set('kode_obat_baru', $this->obat_model->generate_kode());
 		Template::set('toolbar_title', 'Tambah Obat');
 		Template::render();
 	}
@@ -57,7 +58,6 @@ class Obat extends App_Controller
 			return false;
 		}
 		$data = array(
-			'kode_obat'    => $this->input->post('kode_obat'),
 			'nama_obat'    => $this->input->post('nama_obat'),
 			'jenis_obat'   => $this->input->post('jenis_obat'),
 			'satuan'       => $this->input->post('satuan'),
@@ -67,9 +67,9 @@ class Obat extends App_Controller
 			'status'       => $this->input->post('status') ?: 'AKTIF',
 		);
 		if ($type === 'insert') {
+			$data['kode_obat'] = $this->obat_model->generate_kode();
 			return $this->obat_model->insert($data);
 		}
-		unset($data['kode_obat']);
 		return $this->obat_model->update($id, $data);
 	}
 
@@ -96,7 +96,48 @@ class Obat extends App_Controller
 		$this->db->order_by('obat.id_obat', 'DESC')
 			->limit((int) ($request['length'] ?? 10), (int) ($request['start'] ?? 0));
 		$data = $this->db->get()->result();
+		foreach ($data as $row) {
+			$row->id = (int) $row->id_obat;
+		}
 		echo json_encode(array('draw' => $draw, 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data ?: array()));
+	}
+
+	public function delete($id = null)
+	{
+		$id = (int) $id;
+		if ($id <= 0) {
+			echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+			return;
+		}
+
+		$guna = array();
+		$n = $this->db->where('id_obat', $id)->count_all_results('stok_obat');
+		if ($n > 0) $guna[] = $n . ' data stok';
+		$n = $this->db->where('id_obat', $id)->count_all_results('mutasi_stok');
+		if ($n > 0) $guna[] = $n . ' mutasi stok';
+		$n = $this->db->where('id_obat', $id)->count_all_results('resep_detail');
+		if ($n > 0) $guna[] = $n . ' resep';
+		$n = $this->db->where('id_obat', $id)->count_all_results('penjualan_obat_detail');
+		if ($n > 0) $guna[] = $n . ' penjualan';
+		$n = $this->db->where('id_obat', $id)->count_all_results('penerimaan_obat_detail');
+		if ($n > 0) $guna[] = $n . ' penerimaan';
+		$n = $this->db->where('id_obat', $id)->count_all_results('pengadaan_obat_detail');
+		if ($n > 0) $guna[] = $n . ' pengadaan';
+		$n = $this->db->where('id_obat', $id)->count_all_results('retur_pengadaan_detail');
+		if ($n > 0) $guna[] = $n . ' retur';
+		$n = $this->db->where('id_obat', $id)->count_all_results('pesanan_online_detail');
+		if ($n > 0) $guna[] = $n . ' pesanan online';
+
+		if (!empty($guna)) {
+			echo json_encode(array('success' => false, 'message' => 'Tidak bisa menghapus obat karena masih memiliki ' . implode(', ', $guna) . '.'));
+			return;
+		}
+
+		if ($this->obat_model->delete($id)) {
+			echo json_encode(array('success' => true, 'message' => 'Obat berhasil dihapus.'));
+		} else {
+			echo json_encode(array('success' => false, 'message' => 'Gagal menghapus obat.'));
+		}
 	}
 }
 

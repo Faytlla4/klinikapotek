@@ -104,6 +104,32 @@ class Poli extends App_Controller
 			'data'            => $data ?: array()
 		));
 	}
+
+	public function delete($id = null)
+	{
+		$id = (int) $id;
+		if ($id <= 0) {
+			echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+			return;
+		}
+
+		$guna = array();
+		$n = $this->db->where('id_poli', $id)->count_all_results('kunjungan');
+		if ($n > 0) $guna[] = $n . ' kunjungan';
+		$n = $this->db->where('id_poli', $id)->count_all_results('ruangan');
+		if ($n > 0) $guna[] = $n . ' ruangan';
+
+		if (!empty($guna)) {
+			echo json_encode(array('success' => false, 'message' => 'Tidak bisa menghapus poli karena masih memiliki ' . implode(', ', $guna) . '.'));
+			return;
+		}
+
+		if ($this->poli_model->delete($id)) {
+			echo json_encode(array('success' => true, 'message' => 'Poli berhasil dihapus.'));
+		} else {
+			echo json_encode(array('success' => false, 'message' => 'Gagal menghapus poli.'));
+		}
+	}
 }
 
 

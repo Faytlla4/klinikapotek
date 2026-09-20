@@ -108,6 +108,30 @@ class Pelayanan extends App_Controller
 			'data'            => $data ?: array()
 		));
 	}
+
+	public function delete($id = null)
+	{
+		$id = (int) $id;
+		if ($id <= 0) {
+			echo json_encode(array('success' => false, 'message' => 'ID tidak valid.'));
+			return;
+		}
+
+		$guna = array();
+		$n = $this->db->where('id_pelayanan', $id)->count_all_results('kunjungan');
+		if ($n > 0) $guna[] = $n . ' kunjungan';
+
+		if (!empty($guna)) {
+			echo json_encode(array('success' => false, 'message' => 'Tidak bisa menghapus pelayanan karena masih memiliki ' . implode(', ', $guna) . '.'));
+			return;
+		}
+
+		if ($this->pelayanan_model->delete($id)) {
+			echo json_encode(array('success' => true, 'message' => 'Pelayanan berhasil dihapus.'));
+		} else {
+			echo json_encode(array('success' => false, 'message' => 'Gagal menghapus pelayanan.'));
+		}
+	}
 }
 
 
