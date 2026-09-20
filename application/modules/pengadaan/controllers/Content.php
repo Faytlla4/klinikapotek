@@ -10,8 +10,7 @@ class Content extends App_Controller
         $this->load->model('pengadaan/pengadaan_model'); $this->load->model('pengadaan/supplier_model');
         $this->load->model('master/obat_model'); Assets::add_module_js('pengadaan', 'pengadaan.js');
     }
-    public function index() { Template::set('toolbar_title', 'Pengadaan Obat'); Template::render(); }
-    public function create()
+    public function index()
     {
         if (isset($_POST['save'])) {
             $items = array(array('id_obat' => $this->input->post('id_obat'), 'jumlah_pesan' => $this->input->post('jumlah_pesan'), 'harga' => $this->input->post('harga')));
@@ -19,8 +18,10 @@ class Content extends App_Controller
             if ($result) { Template::set_message('Pengadaan berhasil dibuat.', 'success'); redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan'); }
             Template::set_message($this->pengadaan_model->error ?: 'Pengadaan gagal.', 'error');
         }
-        Template::set('supplier_list', $this->supplier_model->aktif()); Template::set('obat_list', $this->obat_model->aktif());
-        Template::set('toolbar_title', 'Tambah Pengadaan'); Template::render();
+        Template::set('supplier_list', $this->supplier_model->aktif());
+        Template::set('obat_list', $this->obat_model->aktif());
+        Template::set('toolbar_title', 'Pengadaan Obat');
+        Template::render();
     }
     public function get_data()
     {
