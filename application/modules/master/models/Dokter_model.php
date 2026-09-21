@@ -15,10 +15,12 @@ class Dokter_model extends BF_Model
 
     protected $validation_rules = array(
         array('field' => 'nama_dokter', 'label' => 'Nama Dokter', 'rules' => 'max_length[150]'),
+        array('field' => 'no_sip', 'label' => 'No. SIP', 'rules' => 'required'),
         array('field' => 'tarif', 'label' => 'Tarif', 'rules' => 'numeric'),
     );
     protected $insert_validation_rules = array(
         array('field' => 'nama_dokter', 'label' => 'Nama Dokter', 'rules' => 'required'),
+        array('field' => 'no_sip', 'label' => 'No. SIP', 'rules' => 'required'),
         array('field' => 'tarif', 'label' => 'Tarif', 'rules' => 'required'),
     );
     protected $skip_validation = false;
