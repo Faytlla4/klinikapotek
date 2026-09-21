@@ -22,6 +22,7 @@ class Master extends Content
             }
             Template::set_message($this->supplier_model->error ?: 'Gagal menyimpan supplier.', 'error');
         }
+        Template::set('kode_supplier_baru', $this->supplier_model->generate_kode());
         Template::set('supplier_list', $this->db->order_by('nama_supplier', 'ASC')->get('supplier')->result());
         Template::set('toolbar_title', 'Master Supplier');
         Template::set_view('master/supplier');

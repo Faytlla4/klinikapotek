@@ -2,7 +2,7 @@
 <div class="col-md-4"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title">Tambah Supplier</h3></div>
     <?php echo form_open($this->uri->uri_string()); ?><div class="card-body">
-        <div class="form-group"><label for="kode_supplier">Kode <span class="text-danger">*</span></label><input id="kode_supplier" name="kode_supplier" class="form-control" required value="<?php echo set_value('kode_supplier'); ?>"></div>
+        <div class="form-group"><label for="kode_supplier">Kode</label><input id="kode_supplier" name="kode_supplier" class="form-control" readonly value="<?php echo html_escape($kode_supplier_baru); ?>"></div>
         <div class="form-group"><label for="nama_supplier">Nama Supplier <span class="text-danger">*</span></label><input id="nama_supplier" name="nama_supplier" class="form-control" required value="<?php echo set_value('nama_supplier'); ?>"></div>
         <div class="form-group"><label for="alamat">Alamat</label><textarea id="alamat" name="alamat" class="form-control" rows="2"><?php echo set_value('alamat'); ?></textarea></div>
         <div class="form-group"><label for="no_hp">No. HP</label><input id="no_hp" name="no_hp" class="form-control" value="<?php echo set_value('no_hp'); ?>"></div>

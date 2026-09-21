@@ -50,13 +50,16 @@ class Api extends Authenticated_Controller
         $this->json(array('success' => true, 'data' => $this->supplier_model->aktif()));
     }
 
-    /** POST: kode_supplier, nama_supplier, alamat?, no_hp? */
+    /** POST: nama_supplier, alamat?, no_hp? */
     public function supplier_simpan()
     {
         $this->auth->restrict('kelola_pengadaan');
         $data = array_intersect_key($this->input->post(), array_flip(array(
             'kode_supplier', 'nama_supplier', 'alamat', 'no_hp', 'status',
         )));
+        if (empty($data['kode_supplier'])) {
+            $data['kode_supplier'] = $this->supplier_model->generate_kode();
+        }
         $id = $this->supplier_model->insert($data);
         if (! $id) {
             $this->json(array('success' => false, 'error' => $this->supplier_model->error ?: 'Gagal.'), 422);
