@@ -1,7 +1,7 @@
 <div class="login-box">
     <div class="login-card">
         <div class="lc-logo">
-            <img src="<?php echo base_url(); ?>assets/images/logo.png" alt="Logo">
+            <img src="<?php echo base_url(); ?>assets/images/logo_apotek.png" alt="Logo">
         </div>
         <h2 class="lc-title">Klinik &amp; Apotek</h2>
         <p class="lc-sub">Silakan masuk ke sistem</p>

@@ -114,14 +114,8 @@ switch (ENVIRONMENT) {
  * @link https://www.pyrocms.com/ PyroCMS
  * @link http://getcomposer.org/ Composer
  */
-if (ini_get('date.timezone') == ''
-	&& function_exists('date_default_timezone_set')
-) {
-	if (function_exists('date_default_timezone_get')) {
-		date_default_timezone_set(@date_default_timezone_get());
-	} else {
-		date_default_timezone_set('UTC');
-	}
+if (function_exists('date_default_timezone_set')) {
+	date_default_timezone_set('Asia/Jakarta');
 }
 
 /*
