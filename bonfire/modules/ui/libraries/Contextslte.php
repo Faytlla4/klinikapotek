@@ -613,7 +613,7 @@ class Contextslte
 			return str_replace(
 				array('{extra}', '{url}', '{title}', '{display}'),
 				array(
-					$module == self::$ci->uri->segment(3) ? ' active' : '',
+					$module == self::$ci->uri->segment(3) && self::$ci->uri->segment(2) == $context ? ' active' : '',
 					site_url(self::$site_area . "/{$context}/{$module}"),
 					$title,
 					$displayName,

@@ -7,25 +7,25 @@
         </a>
     </li>
     <li class="nav-item">
-        <a href="<?php echo site_url(SITE_AREA . '/online/obat'); ?>" class="nav-link <?php echo $seg3 == 'obat' ? 'active' : ''; ?>">
+        <a href="<?php echo site_url(SITE_AREA . '/online/obat'); ?>" class="nav-link <?php echo $seg2 == 'online' && $seg3 == 'obat' ? 'active' : ''; ?>">
             <i class="far fa-circle nav-icon"></i>
             <p>Daftar Obat</p>
         </a>
     </li>
     <li class="nav-item">
-        <a href="<?php echo site_url(SITE_AREA . '/online/keranjang'); ?>" class="nav-link <?php echo $seg3 == 'keranjang' || $seg3 == 'checkout' ? 'active' : ''; ?>">
+        <a href="<?php echo site_url(SITE_AREA . '/online/keranjang'); ?>" class="nav-link <?php echo $seg2 == 'online' && ($seg3 == 'keranjang' || $seg3 == 'checkout') ? 'active' : ''; ?>">
             <i class="far fa-circle nav-icon"></i>
             <p>Keranjang</p>
         </a>
     </li>
     <li class="nav-item">
-        <a href="<?php echo site_url(SITE_AREA . '/online/checkout'); ?>" class="nav-link <?php echo $seg3 == 'checkout' ? 'active' : ''; ?>">
+        <a href="<?php echo site_url(SITE_AREA . '/online/checkout'); ?>" class="nav-link <?php echo $seg2 == 'online' && $seg3 == 'checkout' ? 'active' : ''; ?>">
             <i class="far fa-circle nav-icon"></i>
             <p>Checkout</p>
         </a>
     </li>
     <li class="nav-item">
-        <a href="<?php echo site_url(SITE_AREA . '/online/pesanan'); ?>" class="nav-link <?php echo $seg3 == 'pesanan' ? 'active' : ''; ?>">
+        <a href="<?php echo site_url(SITE_AREA . '/online/pesanan'); ?>" class="nav-link <?php echo $seg2 == 'online' && $seg3 == 'pesanan' ? 'active' : ''; ?>">
             <i class="far fa-circle nav-icon"></i>
             <p>Pesanan Saya</p>
         </a>
