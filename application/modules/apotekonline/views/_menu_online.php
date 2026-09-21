@@ -31,7 +31,7 @@
         </a>
     </li>
     <li class="nav-item">
-        <a href="<?php echo site_url('dashboard/pasien'); ?>" class="nav-link">
+        <a href="<?php echo site_url('dashboard/edit_pribadi'); ?>" class="nav-link <?php echo $seg2 == 'edit_pribadi' ? 'active' : ''; ?>">
             <i class="far fa-circle nav-icon"></i>
             <p>Data Pribadi</p>
         </a>

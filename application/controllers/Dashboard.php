@@ -182,6 +182,39 @@ class Dashboard extends App_Controller
         Template::render();
     }
 
+    /** Edit data pribadi pasien yang login. */
+    public function edit_pribadi()
+    {
+        $this->require_role('PASIEN');
+        $this->load->model('pasien/pasien_model');
+        $pasien = $this->db->where('id_user', $this->auth->user_id())->get('pasien')->row();
+        if (! $pasien) {
+            Template::set_message('Data pasien tidak ditemukan.', 'error');
+            redirect('dashboard/pasien');
+        }
+
+        if (isset($_POST['save'])) {
+            $nik = trim($this->input->post('nik'));
+            if ($nik !== '' && ! $this->pasien_model->nik_tersedia($nik, $pasien->id_pasien)) {
+                Template::set_message('NIK sudah digunakan pasien lain.', 'error');
+            } else {
+                $data = array(
+                    'nama'   => trim($this->input->post('nama')),
+                    'nik'    => $nik !== '' ? $nik : null,
+                    'no_hp'  => trim($this->input->post('no_hp')),
+                    'alamat' => trim($this->input->post('alamat')),
+                );
+                $this->pasien_model->update($pasien->id_pasien, $data);
+                Template::set_message('Data pribadi berhasil diperbarui.', 'success');
+                redirect('dashboard/pasien');
+            }
+        }
+
+        Template::set('pasien', $pasien);
+        Template::set('toolbar_title', 'Edit Data Pribadi');
+        Template::render('dashboard/pasien_edit');
+    }
+
     /**
      * Nama role user saat ini dari database (users -> user_roles -> roles).
      *
