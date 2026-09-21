@@ -5,6 +5,16 @@ var ctxBase = _p.slice(0, _p.indexOf('admin') + 3).join('/');
 if ($('#kunjungan_table').length) {
 $('#kunjungan_table').bfDataTable({
     url: ctxBase + '/get_data',
+    ajax: {
+        url: ctxBase + '/get_data',
+        data: function (data) {
+            data.length = $('select', '#kunjungan_table_length').val();
+            data.search = data.search || {};
+            data.search.value = $('#kunjungan_table_filter input').val();
+            var dari = $('#filter-dari'), sampai = $('#filter-sampai');
+            if (dari.length) { data.dari = dari.val(); data.sampai = sampai.val(); }
+        }
+    },
     targetUrl: ctxBase + '/detail',
     filterCols: [0, 1, 2, 3, 4, 5, 6],
     sortCols: { id_kunjungan: 'desc' },
@@ -18,6 +28,15 @@ $('#kunjungan_table').bfDataTable({
 }
 
 $('.select2').select2();
+
+$('#filter-dari, #filter-sampai').on('change', function () {
+    if ($('#kunjungan_table').length) { $('#kunjungan_table').DataTable().ajax.reload(); }
+});
+$('#filter-reset').on('click', function () {
+    $('#filter-dari').val('');
+    $('#filter-sampai').val('');
+    if ($('#kunjungan_table').length) { $('#kunjungan_table').DataTable().ajax.reload(); }
+});
 
 // --- Pasien Quick Lookup ---
 var searchTimer = null;

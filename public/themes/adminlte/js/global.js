@@ -1,37 +1,30 @@
 $.fn.dataTableExt.oApi._fnFilterInputGroup = function (oSettings) {
 	if (oSettings.oInit.searching) {
-		let nFilterInputGroup = '<div class="input-group">';
-		nFilterInputGroup += '<div class="input-group-prepend">' +
-			'<select class="form-control">';
-		oSettings.oInit.filterCols.forEach(function (i) {
-			nFilterInputGroup += '<option value="' + oSettings.aoColumns[i].mData + '">' + oSettings.aoColumns[i].sTitle + '</option>';
-		});
-		nFilterInputGroup += '</select>' +
-			'</div>';
-
 		const sFilterId = '#' + oSettings.sTableId + '_filter';
 		$(sFilterId).html(`
-            ${nFilterInputGroup}
-                <input type="search" class="form-control" placeholder="Search..." autocomplete="off">
+            <div class="input-group">
+                <input type="search" class="form-control" placeholder="Cari..." autocomplete="off">
                 <span class="input-group-append">
                     <button class="btn btn-flat btn-primary"><i class="fas fa-search"></i></button>
                 </span>
             </div>
         `);
 
-		$('select', sFilterId).on('change', $.proxy(function () {
-			if ($('input', sFilterId).val()?.length > 0) {
-				this.fnDraw();
-			}
-		}, this));
-		$('input', sFilterId).on('keyup', $.proxy(function (e) {
+		let searchTimer = null;
+		const draw = $.proxy(function () { this.fnDraw(); }, this);
+		$('input', sFilterId).on('keyup', function (e) {
 			if (e.key == 'Enter') {
-				this.fnDraw();
+				clearTimeout(searchTimer);
+				draw();
+				return;
 			}
-		}, this));
-		$('button', sFilterId).on('mouseup', $.proxy(function () {
-			this.fnDraw();
-		}, this));
+			clearTimeout(searchTimer);
+			searchTimer = setTimeout(draw, 400);
+		});
+		$('button', sFilterId).on('mouseup', function () {
+			clearTimeout(searchTimer);
+			draw();
+		});
 	}
 
 	return this;
@@ -64,7 +57,7 @@ $.fn.bfDataTable = function (options) {
 			data: options.ajax?.data ?? $.proxy(function (data) {
 				data.length = $('select', '#' + this.fnSettings().sTableId + '_length').val();
 				const sFilterId = '#' + this.fnSettings().sTableId + '_filter';
-				data.search.column = $('select', sFilterId).val();
+				data.search.column = $('select', sFilterId).val() || '';
 				data.search.value = $('input', sFilterId).val();
 				data.sort = options.sortCols ?? false;
 				$.extend(data, { params: options.params ?? false });

@@ -4,6 +4,16 @@ $(document).ready(function () {
 
     $('#transaksi_table').bfDataTable({
         url: ctxBase + '/get_data',
+        ajax: {
+            url: ctxBase + '/get_data',
+            data: function (data) {
+                data.length = $('select', '#transaksi_table_length').val();
+                data.search = data.search || {};
+                data.search.value = $('#transaksi_table_filter input').val();
+                data.dari = $('#filter-dari').val();
+                data.sampai = $('#filter-sampai').val();
+            }
+        },
         targetUrl: ctxBase + '/detail',
         filterCols: [0, 1, 2, 3],
         sortCols: { id_transaksi: 'desc' },
@@ -37,6 +47,15 @@ $(document).ready(function () {
                 }
             }
         ]
+    });
+
+    $('#filter-dari, #filter-sampai').on('change', function () {
+        $('#transaksi_table').DataTable().ajax.reload();
+    });
+    $('#filter-reset').on('click', function () {
+        $('#filter-dari').val('');
+        $('#filter-sampai').val('');
+        $('#transaksi_table').DataTable().ajax.reload();
     });
 
     $(document).on('click', '.btn-hapus', function () {

@@ -4,6 +4,16 @@ $(document).ready(function () {
 
     $('#tagihan_table').bfDataTable({
         url: ctxBase + '/get_data',
+        ajax: {
+            url: ctxBase + '/get_data',
+            data: function (data) {
+                data.length = $('select', '#tagihan_table_length').val();
+                data.search = data.search || {};
+                data.search.value = $('#tagihan_table_filter input').val();
+                data.dari = $('#filter-dari').val();
+                data.sampai = $('#filter-sampai').val();
+            }
+        },
         targetUrl: ctxBase + '/detail',
         filterCols: [0, 1, 2, 3, 4, 5],
         sortCols: { id_tagihan: 'desc' },
@@ -39,6 +49,15 @@ $(document).ready(function () {
                 }
             }
         ]
+    });
+
+    $('#filter-dari, #filter-sampai').on('change', function () {
+        $('#tagihan_table').DataTable().ajax.reload();
+    });
+    $('#filter-reset').on('click', function () {
+        $('#filter-dari').val('');
+        $('#filter-sampai').val('');
+        $('#tagihan_table').DataTable().ajax.reload();
     });
 
     $(document).on('click', '.btn-hapus', function () {

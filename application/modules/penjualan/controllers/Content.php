@@ -12,10 +12,22 @@ class Content extends App_Controller
     }
     public function index()
     {
-        $rows = $this->db->select('penjualan_obat.*, pasien.nama AS nama_pasien')
-            ->join('pasien', 'pasien.id_pasien = penjualan_obat.id_pasien', 'left')
-            ->order_by('penjualan_obat.id_penjualan', 'DESC')->limit(50)->get('penjualan_obat')->result();
+        $dari = $this->input->get('dari');
+        $sampai = $this->input->get('sampai');
+        $ok_dari = is_string($dari) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dari);
+        $ok_sampai = is_string($sampai) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $sampai);
+        $this->db->select('penjualan_obat.*, pasien.nama AS nama_pasien')
+            ->join('pasien', 'pasien.id_pasien = penjualan_obat.id_pasien', 'left');
+        if ($ok_dari) {
+            $this->db->where('penjualan_obat.tanggal_penjualan >=', $dari . ' 00:00:00');
+        }
+        if ($ok_sampai) {
+            $this->db->where('penjualan_obat.tanggal_penjualan <=', $sampai . ' 23:59:59');
+        }
+        $rows = $this->db->order_by('penjualan_obat.id_penjualan', 'DESC')->limit($ok_dari || $ok_sampai ? 500 : 50)->get('penjualan_obat')->result();
         Template::set('jual_list', $rows);
+        Template::set('f_dari', $ok_dari ? $dari : '');
+        Template::set('f_sampai', $ok_sampai ? $sampai : '');
         Template::set('toolbar_title', 'Penjualan Obat'); Template::render();
     }
     public function create()

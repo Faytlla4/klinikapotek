@@ -128,7 +128,9 @@ class Content extends App_Controller
 		$request = $this->input->post();
 		$draw    = (int) ($request['draw'] ?? 1);
 		$search  = trim($request['search']['value'] ?? '');
-		$build   = function () use ($search) {
+		$dari    = $request['dari'] ?? '';
+		$sampai  = $request['sampai'] ?? '';
+		$build   = function () use ($search, $dari, $sampai) {
 			$this->db->select('kunjungan.*, pasien.no_rm, pasien.nama AS nama_pasien,
 				pelayanan.nama_pelayanan, poli.nama_poli, dokter.nama_dokter, ruangan.nama_ruangan')
 				->from('kunjungan')
@@ -144,6 +146,12 @@ class Content extends App_Controller
 					->or_where("pelayanan.nama_pelayanan LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
 					->or_where("poli.nama_poli LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
 					->group_end();
+			}
+			if (is_string($dari) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dari)) {
+				$this->db->where('kunjungan.tanggal_kunjungan >=', $dari . ' 00:00:00');
+			}
+			if (is_string($sampai) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $sampai)) {
+				$this->db->where('kunjungan.tanggal_kunjungan <=', $sampai . ' 23:59:59');
 			}
 		};
 		$build();
