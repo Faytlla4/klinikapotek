@@ -2,10 +2,10 @@
 <div class="row"><div class="col-md-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title">Form Tambah Kunjungan</h3></div>
     <?php echo form_open($this->uri->uri_string()); ?><div class="card-body">
-        <input type="hidden" id="id_pasien" name="id_pasien" value="<?php echo set_value('id_pasien'); ?>">
         <div class="row"><div class="col-md-6">
             <div class="form-group">
-                <label>Pasien <span class="text-danger">*</span></label>
+                <label>No. RM Pasien <span class="text-danger">*</span></label>
+                <input type="hidden" id="id_pasien" name="id_pasien" value="<?php echo set_value('id_pasien'); ?>">
                 <div id="pasien-selected" class="d-none">
                     <div class="input-group">
                         <input type="text" class="form-control" id="pasien-selected-text" readonly>
@@ -13,7 +13,7 @@
                     </div>
                 </div>
                 <div id="pasien-search-box" style="position:relative;">
-                    <input type="text" id="pasien-search" class="form-control" placeholder="Ketik NIK, No RM, atau Nama..." autocomplete="off">
+                    <input type="text" id="pasien-search" class="form-control" placeholder="Cari nama pasien atau No. RM..." autocomplete="off">
                     <div id="pasien-results" class="list-group" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:9999;max-height:250px;overflow-y:auto;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15);border-radius:4px;"></div>
                 </div>
                 <?php echo form_error('id_pasien'); ?>

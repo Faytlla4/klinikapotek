@@ -40,6 +40,11 @@ $('#filter-reset').on('click', function () {
 
 // --- Pasien Quick Lookup ---
 var searchTimer = null;
+var pasienSearchOffset = 0;
+var pasienSearchQuery = '';
+var pasienSearchLoading = false;
+var pasienSearchRequest = null;
+var pasienSearchVersion = 0;
 
 function esc(s) {
     return String(s === null || s === undefined ? '' : s)
@@ -47,34 +52,69 @@ function esc(s) {
         .replace(/"/g, '&quot;');
 }
 
+function renderPasienResults(data, append) {
+    var $results = $('#pasien-results');
+    if (!append) { $results.empty(); }
+    if (!data || data.length === 0) {
+        if (!append) { $results.append('<div class="list-group-item text-muted">Pasien tidak ditemukan.</div>'); }
+        $results.show();
+        return;
+    }
+    $.each(data, function (i, p) {
+        var label = '<strong>' + esc(p.nama) + '</strong> <small class="text-muted">(' + esc(p.no_rm) + ')</small>';
+        if (p.nik) { label += ' <small>NIK: ' + esc(p.nik) + '</small>'; }
+        $results.append(
+            '<button type="button" class="list-group-item list-group-item-action pasien-pick" ' +
+            'data-id="' + p.id_pasien + '" data-nama="' + esc(p.nama) + '" data-rm="' + esc(p.no_rm) + '" ' +
+            'data-nik="' + esc(p.nik) + '" data-hp="' + esc(p.no_hp) + '" data-alamat="' + esc(p.alamat) + '" data-jk="' + esc(p.jenis_kelamin || '') + '">' +
+            label + '</button>'
+        );
+    });
+    $results.show();
+}
+
+function cariPasien(q, append) {
+    var $results = $('#pasien-results');
+    if (append && pasienSearchLoading) { return; }
+    var requestVersion = append ? pasienSearchVersion : ++pasienSearchVersion;
+    if (!append && pasienSearchRequest) { pasienSearchRequest.abort(); }
+    pasienSearchLoading = true;
+    pasienSearchRequest = $.getJSON(ctxBase + '/cari_pasien', { q: q, offset: append ? pasienSearchOffset : 0 }, function (response) {
+        if (requestVersion !== pasienSearchVersion) { return; }
+        var data = response && response.data ? response.data : [];
+        if (!append) { pasienSearchOffset = 0; }
+        pasienSearchOffset += data.length;
+        renderPasienResults(data, append);
+        $results.find('#pasien-load-more').remove();
+        if (response && response.has_more) {
+            $results.append('<button type="button" id="pasien-load-more" class="list-group-item list-group-item-action text-center">Muat lebih banyak pasien</button>');
+        }
+    }).fail(function (xhr) {
+        if (xhr.statusText === 'abort') { return; }
+        $results.empty().append('<div class="list-group-item text-danger">Gagal mencari (HTTP ' + xhr.status + '). Coba lagi.</div>').show();
+    }).always(function () {
+        if (requestVersion === pasienSearchVersion) { pasienSearchLoading = false; }
+    });
+}
+
 $('#pasien-search').on('input', function () {
     var q = $(this).val().trim();
-    var $results = $('#pasien-results');
-    if (q.length < 1) { $results.hide().empty(); return; }
+    pasienSearchQuery = q;
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(function () {
-        $.getJSON(ctxBase + '/cari_pasien', { q: q }, function (data) {
-            $results.empty();
-            if (!data || data.length === 0) {
-                $results.append('<div class="list-group-item text-muted">Tidak ditemukan. <a href="#" id="btn-daftar-baru">Daftar baru</a></div>');
-                $results.show();
-                return;
-            }
-            $.each(data, function (i, p) {
-                var label = '<strong>' + esc(p.nama) + '</strong> <small class="text-muted">(' + esc(p.no_rm) + ')</small>';
-                if (p.nik) label += ' <small>NIK: ' + esc(p.nik) + '</small>';
-                $results.append(
-                    '<button type="button" class="list-group-item list-group-item-action pasien-pick" ' +
-                    'data-id="' + p.id_pasien + '" data-nama="' + esc(p.nama) + '" data-rm="' + esc(p.no_rm) + '" ' +
-                    'data-nik="' + esc(p.nik) + '" data-hp="' + esc(p.no_hp) + '" data-alamat="' + esc(p.alamat) + '" data-jk="' + esc(p.jenis_kelamin || '') + '">' +
-                    label + '</button>'
-                );
-            });
-            $results.show();
-        }).fail(function (xhr) {
-            $results.empty().append('<div class="list-group-item text-danger">Gagal mencari (HTTP ' + xhr.status + '). Coba lagi.</div>').show();
-        });
-    }, 150);
+    searchTimer = setTimeout(function () { cariPasien(q, false); }, 150);
+});
+
+$('#pasien-search').on('focus click', function () {
+    var q = $(this).val().trim();
+    if (pasienSearchQuery !== q || !$('#pasien-results').children().length) {
+        pasienSearchQuery = q;
+        cariPasien(q, false);
+    }
+});
+
+$(document).on('click', '#pasien-load-more', function (e) {
+    e.preventDefault();
+    cariPasien(pasienSearchQuery, true);
 });
 
 // Sembunyikan hasil saat klik di luar / tekan Escape

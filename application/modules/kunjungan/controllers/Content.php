@@ -84,7 +84,7 @@ class Content extends App_Controller
 
 	private function set_master_data()
 	{
-		Template::set('pasien_list', $this->pasien_model->find_all() ?: array());
+		Template::set('pasien_list', $this->pasien_model->order_by('nama', 'ASC')->find_all() ?: array());
 		Template::set('pelayanan_list', $this->pelayanan_model->aktif());
 		Template::set('poli_list', $this->poli_model->aktif());
 		Template::set('dokter_list', $this->dokter_model->aktif());
@@ -168,25 +168,31 @@ class Content extends App_Controller
 
 	/**
 	 * AJAX: cari pasien by NIK / no_rm / nama (case-insensitive).
-	 * Return JSON array of { id_pasien, no_rm, nama, nik, no_hp, alamat, jenis_kelamin }.
+	 * Return JSON { data, has_more } with server-side search pagination.
 	 */
 	public function cari_pasien()
 	{
 		$q = trim($this->input->get('q'));
-		if ($q === '') {
-			echo json_encode(array());
-			return;
+		$limit = 20;
+		$offset = max(0, (int) $this->input->get('offset'));
+		$query = $this->db->select('id_pasien, no_rm, nama, nik, no_hp, alamat, jenis_kelamin')
+			->where('status', 'AKTIF');
+		if ($q !== '') {
+			$query->group_start()
+				->where("nik ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+				->or_where("no_rm ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+				->or_where("nama ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+				->group_end();
 		}
-		$rows = $this->db
-			->group_start()
-			->where("nik ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
-			->or_where("no_rm ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
-			->or_where("nama ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
-			->group_end()
+		$rows = $query
 			->order_by('nama', 'ASC')
-			->limit(10)
+			->limit($limit + 1, $offset)
 			->get('pasien')
 			->result();
+		$has_more = count($rows) > $limit;
+		if ($has_more) {
+			array_pop($rows);
+		}
 		$result = array();
 		foreach ($rows as $r) {
 			$result[] = array(
@@ -199,7 +205,10 @@ class Content extends App_Controller
 				'jenis_kelamin' => $r->jenis_kelamin ?: '',
 			);
 		}
-		$this->output->set_content_type('application/json')->set_output(json_encode($result));
+		$this->output->set_content_type('application/json')->set_output(json_encode(array(
+			'data' => $result,
+			'has_more' => $has_more,
+		)));
 	}
 
 	/**

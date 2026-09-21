@@ -76,6 +76,10 @@ class Content extends App_Controller
 		if ($this->form_validation->run() === false) {
 			return false;
 		}
+		if (! $this->pasien_model->nik_valid($this->input->post('nik'))) {
+			Template::set_message($this->pasien_model->error, 'error');
+			return false;
+		}
 		if (! $this->pasien_model->nik_tersedia($this->input->post('nik'), $type === 'update' ? $id : null)) {
 			Template::set_message('NIK sudah terdaftar.', 'error');
 			return false;
@@ -93,9 +97,15 @@ class Content extends App_Controller
 		if ($type === 'insert') {
 			$id = $this->pasien_model->daftar($data);
 			$aksi = 'create';
+			if (! $id) {
+				Template::set_message('Gagal membuat pasien: ' . $this->pasien_model->error, 'error');
+			}
 		} else {
 			$id = $this->pasien_model->update($id, $data) ? $id : false;
 			$aksi = 'update';
+			if (! $id) {
+				Template::set_message('Gagal mengubah pasien: ' . $this->pasien_model->error, 'error');
+			}
 		}
 		if (! $id) {
 			return false;
@@ -140,5 +150,4 @@ class Content extends App_Controller
 		$this->output->set_content_type('application/json')->set_output($json);
 	}
 }
-
 

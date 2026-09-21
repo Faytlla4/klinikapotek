@@ -3,7 +3,7 @@
     <div class="card-header"><h3 class="card-title">Form Tambah Pasien</h3></div>
     <?php echo form_open($this->uri->uri_string()); ?><div class="card-body">
         <div class="row"><div class="col-md-6"><div class="form-group"><label for="nama">Nama <span class="text-danger">*</span></label><input id="nama" name="nama" class="form-control" required value="<?php echo set_value('nama'); ?>"><?php echo form_error('nama'); ?></div></div><div class="col-md-6">
-        <div class="form-group"><label for="nik">NIK</label><input id="nik" name="nik" class="form-control" maxlength="20" value="<?php echo set_value('nik'); ?>"><?php echo form_error('nik'); ?></div></div></div>
+        <div class="form-group"><label for="nik">NIK</label><input id="nik" name="nik" class="form-control" maxlength="30" value="<?php echo set_value('nik'); ?>"><?php echo form_error('nik'); ?></div></div></div>
         <div class="row"><div class="col-md-6"><div class="form-group"><label for="tanggal_lahir">Tanggal Lahir</label><input id="tanggal_lahir" type="date" name="tanggal_lahir" class="form-control" value="<?php echo set_value('tanggal_lahir'); ?>"></div></div><div class="col-md-6">
         <div class="form-group"><label for="jenis_kelamin">Jenis Kelamin</label><select id="jenis_kelamin" name="jenis_kelamin" class="form-control select2"><option value="">-- Pilih --</option><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div></div></div>
         <div class="form-group"><label for="alamat">Alamat</label><textarea id="alamat" name="alamat" class="form-control" rows="3"><?php echo set_value('alamat'); ?></textarea></div>

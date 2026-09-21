@@ -19,7 +19,7 @@
             <label for="nik">NIK</label>
             <div class="input-group">
                 <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-address-card"></i></span></div>
-                <input id="nik" name="nik" class="form-control" maxlength="20" value="<?php echo html_escape(set_value('nik', $pasien->nik)); ?>">
+                <input id="nik" name="nik" type="text" inputmode="numeric" class="form-control" maxlength="30" value="<?php echo html_escape(set_value('nik', $pasien->nik)); ?>">
             </div>
         </div>
         <hr>

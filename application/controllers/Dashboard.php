@@ -195,7 +195,9 @@ class Dashboard extends App_Controller
 
         if (isset($_POST['save'])) {
             $nik = trim($this->input->post('nik'));
-            if ($nik !== '' && ! $this->pasien_model->nik_tersedia($nik, $pasien->id_pasien)) {
+            if (! $this->pasien_model->nik_valid($nik)) {
+                Template::set_message($this->pasien_model->error, 'error');
+            } elseif ($nik !== '' && ! $this->pasien_model->nik_tersedia($nik, $pasien->id_pasien)) {
                 Template::set_message('NIK sudah digunakan pasien lain.', 'error');
             } else {
                 $data = array(
@@ -204,9 +206,11 @@ class Dashboard extends App_Controller
                     'no_hp'  => trim($this->input->post('no_hp')),
                     'alamat' => trim($this->input->post('alamat')),
                 );
-                $this->pasien_model->update($pasien->id_pasien, $data);
-                Template::set_message('Data pribadi berhasil diperbarui.', 'success');
-                redirect('dashboard/pasien');
+                if ($this->pasien_model->update($pasien->id_pasien, $data)) {
+                    Template::set_message('Data pribadi berhasil diperbarui.', 'success');
+                    redirect('dashboard/pasien');
+                }
+                Template::set_message($this->pasien_model->error ?: 'Gagal memperbarui data pribadi.', 'error');
             }
         }
 

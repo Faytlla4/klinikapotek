@@ -22,11 +22,11 @@ class Pasien_model extends BF_Model
     protected $validation_rules = array(
         array('field' => 'nama', 'label' => 'Nama', 'rules' => 'max_length[150]'),
         array('field' => 'no_rm', 'label' => 'No. RM', 'rules' => 'max_length[30]'),
-        array('field' => 'nik', 'label' => 'NIK', 'rules' => 'max_length[20]'),
+        array('field' => 'nik', 'label' => 'NIK', 'rules' => 'max_length[30]'),
     );
     protected $insert_validation_rules = array(
         array('field' => 'nama', 'label' => 'Nama', 'rules' => 'required'),
-        array('field' => 'no_rm', 'label' => 'No. RM', 'rules' => 'required|is_unique[pasien.no_rm]'),
+        array('field' => 'no_rm', 'label' => 'No. RM', 'rules' => 'required'),
     );
     protected $skip_validation = false;
 
@@ -65,6 +65,9 @@ class Pasien_model extends BF_Model
         // NIK bersifat opsional, jadi representasikan input kosong sebagai NULL
         // agar lebih dari satu pasien tanpa NIK tetap dapat disimpan.
         $data['nik'] = $this->normalisasi_nik(isset($data['nik']) ? $data['nik'] : null);
+        if (! $this->nik_valid($data['nik'])) {
+            return false;
+        }
         if (! empty($data['nik']) && $this->find_by('nik', $data['nik'])) {
             $this->error = 'NIK sudah terdaftar.';
             return false;
@@ -79,7 +82,11 @@ class Pasien_model extends BF_Model
         if (empty($data['status'])) {
             $data['status'] = 'AKTIF';
         }
-        return $this->insert($data);
+        $id = $this->insert($data);
+        if (! $id && $this->nik_duplicate_error()) {
+            $this->error = 'NIK sudah terdaftar.';
+        }
+        return $id;
     }
 
     /** Normalisasi NIK opsional sebelum disimpan ke kolom UNIQUE. */
@@ -90,6 +97,30 @@ class Pasien_model extends BF_Model
     }
 
     /**
+     * NIK adalah identifier string. Input boleh kosong, tetapi jika diisi
+     * harus tepat 16 digit agar nol di depan tetap dipertahankan.
+     */
+    public function nik_valid($nik)
+    {
+        $nik = $this->normalisasi_nik($nik);
+        if ($nik === null) {
+            return true;
+        }
+        if (! preg_match('/^[0-9]{16}$/D', $nik)) {
+            $this->error = 'NIK harus terdiri dari 16 digit angka.';
+            return false;
+        }
+        return true;
+    }
+
+    private function nik_duplicate_error()
+    {
+        return stripos((string) $this->error, 'pasien_nik_key') !== false
+            || stripos((string) $this->error, 'duplicate key') !== false
+            || stripos((string) $this->error, 'unique constraint') !== false;
+    }
+
+    /**
      * Pastikan jalur API maupun form edit juga tidak menyimpan NIK kosong
      * sebagai string kosong.
      */
@@ -97,8 +128,15 @@ class Pasien_model extends BF_Model
     {
         if (is_array($data) && array_key_exists('nik', $data)) {
             $data['nik'] = $this->normalisasi_nik($data['nik']);
+            if (! $this->nik_valid($data['nik'])) {
+                return false;
+            }
         }
-        return parent::update($where, $data);
+        $updated = parent::update($where, $data);
+        if (! $updated && $this->nik_duplicate_error()) {
+            $this->error = 'NIK sudah terdaftar.';
+        }
+        return $updated;
     }
 
     /** Cek NIK unik, mengabaikan pasien saat edit. */
@@ -184,4 +222,3 @@ class Pasien_model extends BF_Model
         return $pasien;
     }
 }
-
