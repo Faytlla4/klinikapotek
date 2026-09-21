@@ -212,7 +212,8 @@ class Dashboard extends App_Controller
 
         Template::set('pasien', $pasien);
         Template::set('toolbar_title', 'Edit Data Pribadi');
-        Template::render('dashboard/pasien_edit');
+        Template::set_view('dashboard/edit_pribadi');
+        Template::render();
     }
 
     /**

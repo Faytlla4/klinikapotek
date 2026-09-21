@@ -1,6 +1,8 @@
+$(function () {
 var _p = location.pathname.split('/');
 var ctxBase = _p.slice(0, _p.indexOf('admin') + 3).join('/');
 
+if ($('#kunjungan_table').length) {
 $('#kunjungan_table').bfDataTable({
     url: ctxBase + '/get_data',
     targetUrl: ctxBase + '/detail',
@@ -13,38 +15,55 @@ $('#kunjungan_table').bfDataTable({
         { data: 'nama_ruangan' }, { data: 'status', render: function(data) { return '<span class="badge badge-info">' + data + '</span>'; } }
     ]
 });
+}
 
 $('.select2').select2({ theme: 'bootstrap4' });
 
 // --- Pasien Quick Lookup ---
 var searchTimer = null;
 
+function esc(s) {
+    return String(s === null || s === undefined ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 $('#pasien-search').on('input', function () {
     var q = $(this).val().trim();
     var $results = $('#pasien-results');
-    if (q.length < 2) { $results.hide().empty(); return; }
+    if (q.length < 1) { $results.hide().empty(); return; }
     clearTimeout(searchTimer);
     searchTimer = setTimeout(function () {
         $.getJSON(ctxBase + '/cari_pasien', { q: q }, function (data) {
             $results.empty();
             if (!data || data.length === 0) {
-                $results.append('<div class="list-group-item list-group-item-action text-muted">Tidak ditemukan. <a href="#" id="btn-daftar-baru">Daftar baru</a></div>');
+                $results.append('<div class="list-group-item text-muted">Tidak ditemukan. <a href="#" id="btn-daftar-baru">Daftar baru</a></div>');
                 $results.show();
                 return;
             }
             $.each(data, function (i, p) {
-                var label = '<strong>' + p.nama + '</strong> <small class="text-muted">(' + p.no_rm + ')</small>';
-                if (p.nik) label += ' <small>NIK: ' + p.nik + '</small>';
+                var label = '<strong>' + esc(p.nama) + '</strong> <small class="text-muted">(' + esc(p.no_rm) + ')</small>';
+                if (p.nik) label += ' <small>NIK: ' + esc(p.nik) + '</small>';
                 $results.append(
                     '<button type="button" class="list-group-item list-group-item-action pasien-pick" ' +
-                    'data-id="' + p.id_pasien + '" data-nama="' + p.nama + '" data-rm="' + p.no_rm + '" ' +
-                    'data-nik="' + p.nik + '" data-hp="' + p.no_hp + '" data-alamat="' + p.alamat + '">' +
+                    'data-id="' + p.id_pasien + '" data-nama="' + esc(p.nama) + '" data-rm="' + esc(p.no_rm) + '" ' +
+                    'data-nik="' + esc(p.nik) + '" data-hp="' + esc(p.no_hp) + '" data-alamat="' + esc(p.alamat) + '" data-jk="' + esc(p.jenis_kelamin || '') + '">' +
                     label + '</button>'
                 );
             });
             $results.show();
+        }).fail(function (xhr) {
+            $results.empty().append('<div class="list-group-item text-danger">Gagal mencari (HTTP ' + xhr.status + '). Coba lagi.</div>').show();
         });
-    }, 300);
+    }, 150);
+});
+
+// Sembunyikan hasil saat klik di luar / tekan Escape
+$(document).on('click', function (e) {
+    if (!$(e.target).closest('#pasien-search-box').length) { $('#pasien-results').hide(); }
+});
+$(document).on('keydown', function (e) {
+    if (e.key === 'Escape') { $('#pasien-results').hide(); }
 });
 
 $(document).on('click', '.pasien-pick', function (e) {
@@ -56,9 +75,10 @@ $(document).on('click', '.pasien-pick', function (e) {
     $('#pasien-selected').removeClass('d-none');
     var info = $btn.data('nama') + ' (' + $btn.data('rm') + ')';
     if ($btn.data('nik')) info += ' | NIK: ' + $btn.data('nik');
-    if ($btn.data('hp')) info += ' | HP: ' + $btn.data('hp');
-    if ($btn.data('alamat')) info += ' | ' + $btn.data('alamat');
     $('#pasien-info-text').text(info);
+    $('#pasien-no-hp').val($btn.data('hp') || '-');
+    $('#pasien-jk').val($btn.data('jk') || '-');
+    $('#pasien-alamat').val($btn.data('alamat') || '-');
     $('#pasien-info').removeClass('d-none');
     $('#pasien-results').hide().empty();
     loadRiwayat($btn.data('id'));
@@ -70,6 +90,7 @@ $('#pasien-clear-btn').on('click', function () {
     $('#pasien-search-box').removeClass('d-none');
     $('#pasien-search').val('').focus();
     $('#pasien-info').addClass('d-none');
+    $('#pasien-no-hp, #pasien-jk, #pasien-alamat').val('');
     $('#riwayat_container').addClass('d-none');
     $('#riwayat_body').empty();
 });
@@ -109,3 +130,4 @@ function loadRiwayat(id_pasien) {
 if ($('#id_pasien').val()) {
     loadRiwayat($('#id_pasien').val());
 }
+});

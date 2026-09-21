@@ -12,9 +12,9 @@
                         <div class="input-group-append"><button type="button" class="btn btn-outline-danger" id="pasien-clear-btn"><i class="fas fa-times"></i></button></div>
                     </div>
                 </div>
-                <div id="pasien-search-box">
+                <div id="pasien-search-box" style="position:relative;">
                     <input type="text" id="pasien-search" class="form-control" placeholder="Ketik NIK, No RM, atau Nama..." autocomplete="off">
-                    <div id="pasien-results" class="list-group mt-1" style="display:none;position:absolute;z-index:100;width:calc(100% - 30px);max-height:250px;overflow-y:auto;"></div>
+                    <div id="pasien-results" class="list-group" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:9999;max-height:250px;overflow-y:auto;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15);border-radius:4px;"></div>
                 </div>
                 <?php echo form_error('id_pasien'); ?>
             </div>
@@ -24,7 +24,14 @@
         <div class="row"><div class="col-md-6"><div class="form-group"><label for="id_poli">Poli <span class="text-danger">*</span></label><select id="id_poli" name="id_poli" class="form-control select2" required><option value="">-- Pilih Poli --</option><?php foreach ($poli_list as $p): ?><option value="<?php echo $p->id_poli; ?>"><?php echo html_escape($p->nama_poli); ?></option><?php endforeach; ?></select><?php echo form_error('id_poli'); ?></div></div><div class="col-md-6">
             <div class="form-group"><label for="id_dokter">Dokter <span class="text-danger">*</span></label><select id="id_dokter" name="id_dokter" class="form-control select2" required><option value="">-- Pilih Dokter --</option><?php foreach ($dokter_list as $d): ?><option value="<?php echo $d->id_dokter; ?>"><?php echo html_escape($d->nama_dokter); ?></option><?php endforeach; ?></select><?php echo form_error('id_dokter'); ?></div></div></div>
         <div class="row"><div class="col-md-6"><div class="form-group"><label for="id_ruangan">Ruangan <span class="text-danger">*</span></label><select id="id_ruangan" name="id_ruangan" class="form-control select2" required><option value="">-- Pilih Ruangan --</option><?php foreach ($ruangan_list as $r): ?><option value="<?php echo $r->id_ruangan; ?>"><?php echo html_escape($r->nama_ruangan); ?></option><?php endforeach; ?></select><?php echo form_error('id_ruangan'); ?></div></div></div>
-        <div id="pasien-info" class="d-none"><div class="alert alert-light border mb-0"><strong id="pasien-info-text"></strong></div></div>
+        <div id="pasien-info" class="d-none"><div class="alert alert-light border mb-0">
+            <strong id="pasien-info-text"></strong>
+            <div class="row mt-2">
+                <div class="col-md-4"><div class="form-group mb-1"><label class="mb-0"><small>No. HP</small></label><input type="text" id="pasien-no-hp" class="form-control form-control-sm" readonly tabindex="-1"></div></div>
+                <div class="col-md-4"><div class="form-group mb-1"><label class="mb-0"><small>Jenis Kelamin</small></label><input type="text" id="pasien-jk" class="form-control form-control-sm" readonly tabindex="-1"></div></div>
+                <div class="col-md-4"><div class="form-group mb-1"><label class="mb-0"><small>Alamat</small></label><input type="text" id="pasien-alamat" class="form-control form-control-sm" readonly tabindex="-1"></div></div>
+            </div>
+        </div></div>
         <div class="alert alert-info">Status awal kunjungan: <strong>TERDAFTAR</strong>. Nomor antrian dibuat saat kunjungan disimpan.</div>
         <div id="riwayat_container" class="d-none mt-3">
             <h5 class="text-primary">Riwayat Kunjungan Terakhir</h5>

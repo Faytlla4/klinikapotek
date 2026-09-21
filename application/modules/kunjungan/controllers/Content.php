@@ -159,8 +159,8 @@ class Content extends App_Controller
 	}
 
 	/**
-	 * AJAX: cari pasien by NIK / no_rm / nama.
-	 * Return JSON array of { id_pasien, no_rm, nama, nik, no_hp, alamat }.
+	 * AJAX: cari pasien by NIK / no_rm / nama (case-insensitive).
+	 * Return JSON array of { id_pasien, no_rm, nama, nik, no_hp, alamat, jenis_kelamin }.
 	 */
 	public function cari_pasien()
 	{
@@ -169,26 +169,29 @@ class Content extends App_Controller
 			echo json_encode(array());
 			return;
 		}
-		$like = "%" . $this->db->escape_like_str($q) . "%";
 		$rows = $this->db
-			->where('nik LIKE', $like, FALSE)
-			->or_where('no_rm LIKE', $like, FALSE)
-			->or_where('nama LIKE', $like, FALSE)
+			->group_start()
+			->where("nik ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+			->or_where("no_rm ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+			->or_where("nama ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+			->group_end()
+			->order_by('nama', 'ASC')
 			->limit(10)
 			->get('pasien')
 			->result();
 		$result = array();
 		foreach ($rows as $r) {
 			$result[] = array(
-				'id_pasien' => (int) $r->id_pasien,
-				'no_rm'     => $r->no_rm,
-				'nama'      => $r->nama,
-				'nik'       => $r->nik ?: '',
-				'no_hp'     => $r->no_hp ?: '',
-				'alamat'    => $r->alamat ?: '',
+				'id_pasien'    => (int) $r->id_pasien,
+				'no_rm'        => $r->no_rm,
+				'nama'         => $r->nama,
+				'nik'          => $r->nik ?: '',
+				'no_hp'        => $r->no_hp ?: '',
+				'alamat'       => $r->alamat ?: '',
+				'jenis_kelamin' => $r->jenis_kelamin ?: '',
 			);
 		}
-		echo json_encode($result);
+		$this->output->set_content_type('application/json')->set_output(json_encode($result));
 	}
 
 	/**
