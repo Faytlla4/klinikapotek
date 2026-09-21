@@ -5,6 +5,7 @@ class Content extends App_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->pastikan_permission_cetak();
         $this->auth->restrict('lihat_laporan');
         $this->load->model('laporan/laporan_model');
     }
@@ -42,5 +43,35 @@ class Content extends App_Controller
             $sampai = date('Y-m-d');
         }
         return array($dari, $sampai);
+    }
+
+    /**
+     * Buat sendiri permission konteks LAPORAN CETAK bila belum ada (mesin baru
+     * cukup pull + buka halaman laporan; tanpa SQL manual). Idempoten.
+     */
+    protected function pastikan_permission_cetak()
+    {
+        if ($this->db->dbdriver !== 'postgre') {
+            return;
+        }
+        $ada = $this->db->select('COUNT(*) AS n', false)
+            ->where_in('nama_permission', array('Laporan.Cetak.View', 'Site.Cetak.View'))
+            ->get('permissions')->row();
+        if (! empty($ada) && (int) $ada->n === 2) {
+            return;
+        }
+        $this->db->query("INSERT INTO permissions (nama_permission, modul) VALUES
+            ('Laporan.Cetak.View', 'LAPORAN'),
+            ('Site.Cetak.View', 'MANAJEMEN_SISTEM')
+            ON CONFLICT (nama_permission) DO NOTHING");
+        $this->db->query("INSERT INTO role_permissions (id_role, id_permission)
+            SELECT rp.id_role, p.id_permission
+            FROM role_permissions rp
+            JOIN permissions pl ON pl.id_permission = rp.id_permission AND pl.nama_permission = 'Laporan.Laporan.View'
+            JOIN permissions p ON p.nama_permission IN ('Laporan.Cetak.View', 'Site.Cetak.View')
+            ON CONFLICT (id_role, id_permission) DO NOTHING");
+        // Muat ulang sekali agar cache permission Auth ikut segar.
+        $qs = ! empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+        redirect($this->uri->uri_string() . $qs);
     }
 }
