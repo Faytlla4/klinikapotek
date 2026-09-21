@@ -43,11 +43,13 @@ $(document).on('click', '.btn-hapus', function () {
             $.post(ctxBase + '/delete/' + id, {csrf_token: $('input[name=csrf_token]').val()}, function (res) {
                 if (res.success) {
                     Swal.fire('Terhapus!', res.message, 'success');
-                    $('#resep_table').DataTable().ajax.reload();
-                } else {
-                    Swal.fire('Gagal', res.message, 'error');
-                }
-            }, 'json');
+                        $('#resep_table').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                    }
+                }, 'json').fail(function () {
+                    Swal.fire('Error', 'Terjadi kesalahan server. Coba lagi atau muat ulang halaman.', 'error');
+                });
         }
     });
 });

@@ -59,7 +59,9 @@ $(document).ready(function () {
                     } else {
                         Swal.fire('Gagal', res.message, 'error');
                     }
-                }, 'json');
+                }, 'json').fail(function () {
+                    Swal.fire('Error', 'Terjadi kesalahan server. Coba lagi atau muat ulang halaman.', 'error');
+                });
             }
         });
     });
