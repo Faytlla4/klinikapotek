@@ -16,18 +16,73 @@ $('#kunjungan_table').bfDataTable({
 
 $('.select2').select2({ theme: 'bootstrap4' });
 
-// Riwayat kunjungan pasien saat pilih pasien di form tambah
-$('#id_pasien').on('change', function () {
-    var id_pasien = $(this).val();
+// --- Pasien Quick Lookup ---
+var searchTimer = null;
+
+$('#pasien-search').on('input', function () {
+    var q = $(this).val().trim();
+    var $results = $('#pasien-results');
+    if (q.length < 2) { $results.hide().empty(); return; }
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () {
+        $.getJSON(ctxBase + '/cari_pasien', { q: q }, function (data) {
+            $results.empty();
+            if (!data || data.length === 0) {
+                $results.append('<div class="list-group-item list-group-item-action text-muted">Tidak ditemukan. <a href="#" id="btn-daftar-baru">Daftar baru</a></div>');
+                $results.show();
+                return;
+            }
+            $.each(data, function (i, p) {
+                var label = '<strong>' + p.nama + '</strong> <small class="text-muted">(' + p.no_rm + ')</small>';
+                if (p.nik) label += ' <small>NIK: ' + p.nik + '</small>';
+                $results.append(
+                    '<button type="button" class="list-group-item list-group-item-action pasien-pick" ' +
+                    'data-id="' + p.id_pasien + '" data-nama="' + p.nama + '" data-rm="' + p.no_rm + '" ' +
+                    'data-nik="' + p.nik + '" data-hp="' + p.no_hp + '" data-alamat="' + p.alamat + '">' +
+                    label + '</button>'
+                );
+            });
+            $results.show();
+        });
+    }, 300);
+});
+
+$(document).on('click', '.pasien-pick', function (e) {
+    e.preventDefault();
+    var $btn = $(this);
+    $('#id_pasien').val($btn.data('id'));
+    $('#pasien-selected-text').val($btn.data('rm') + ' — ' + $btn.data('nama'));
+    $('#pasien-search-box').addClass('d-none');
+    $('#pasien-selected').removeClass('d-none');
+    var info = $btn.data('nama') + ' (' + $btn.data('rm') + ')';
+    if ($btn.data('nik')) info += ' | NIK: ' + $btn.data('nik');
+    if ($btn.data('hp')) info += ' | HP: ' + $btn.data('hp');
+    if ($btn.data('alamat')) info += ' | ' + $btn.data('alamat');
+    $('#pasien-info-text').text(info);
+    $('#pasien-info').removeClass('d-none');
+    $('#pasien-results').hide().empty();
+    loadRiwayat($btn.data('id'));
+});
+
+$('#pasien-clear-btn').on('click', function () {
+    $('#id_pasien').val('');
+    $('#pasien-selected').addClass('d-none');
+    $('#pasien-search-box').removeClass('d-none');
+    $('#pasien-search').val('').focus();
+    $('#pasien-info').addClass('d-none');
+    $('#riwayat_container').addClass('d-none');
+    $('#riwayat_body').empty();
+});
+
+$(document).on('click', '#btn-daftar-baru', function (e) {
+    e.preventDefault();
+    window.location.href = ctxBase.replace('/kunjungan', '/pasien/create');
+});
+
+// --- Riwayat kunjungan ---
+function loadRiwayat(id_pasien) {
     var $container = $('#riwayat_container');
     var $tbody = $('#riwayat_body');
-
-    if (!id_pasien) {
-        $container.addClass('d-none');
-        $tbody.empty();
-        return;
-    }
-
     $.getJSON(ctxBase + '/get_riwayat/' + id_pasien, function (res) {
         $tbody.empty();
         if (!res.status || !res.data || res.data.length === 0) {
@@ -42,18 +97,15 @@ $('#id_pasien').on('change', function () {
                     'BATAL'    : 'badge-danger'
                 }[row.status] || 'badge-secondary';
                 $tbody.append(
-                    '<tr>' +
-                    '<td>' + (row.tanggal_kunjungan || '-') + '</td>' +
-                    '<td>' + (row.nama_pelayanan || '-') + '</td>' +
-                    '<td>' + (row.nama_poli || '-') + '</td>' +
-                    '<td>' + (row.nama_dokter || '-') + '</td>' +
-                    '<td><span class="badge ' + badgeClass + '">' + (row.status || '-') + '</span></td>' +
-                    '</tr>'
+                    '<tr><td>' + (row.tanggal_kunjungan || '-') + '</td><td>' + (row.nama_pelayanan || '-') + '</td><td>' + (row.nama_poli || '-') + '</td><td>' + (row.nama_dokter || '-') + '</td><td><span class="badge ' + badgeClass + '">' + (row.status || '-') + '</span></td></tr>'
                 );
             });
         }
         $container.removeClass('d-none');
-    }).fail(function () {
-        $container.addClass('d-none');
-    });
-});
+    }).fail(function () { $container.addClass('d-none'); });
+}
+
+// Jika sudah ada id_pasien (validation error), load riwayat
+if ($('#id_pasien').val()) {
+    loadRiwayat($('#id_pasien').val());
+}

@@ -159,6 +159,39 @@ class Content extends App_Controller
 	}
 
 	/**
+	 * AJAX: cari pasien by NIK / no_rm / nama.
+	 * Return JSON array of { id_pasien, no_rm, nama, nik, no_hp, alamat }.
+	 */
+	public function cari_pasien()
+	{
+		$q = trim($this->input->get('q'));
+		if ($q === '') {
+			echo json_encode(array());
+			return;
+		}
+		$like = "%" . $this->db->escape_like_str($q) . "%";
+		$rows = $this->db
+			->where('nik ILIKE', $like, FALSE)
+			->or_where('no_rm ILIKE', $like, FALSE)
+			->or_where('nama ILIKE', $like, FALSE)
+			->limit(10)
+			->get('pasien')
+			->result();
+		$result = array();
+		foreach ($rows as $r) {
+			$result[] = array(
+				'id_pasien' => (int) $r->id_pasien,
+				'no_rm'     => $r->no_rm,
+				'nama'      => $r->nama,
+				'nik'       => $r->nik ?: '',
+				'no_hp'     => $r->no_hp ?: '',
+				'alamat'    => $r->alamat ?: '',
+			);
+		}
+		echo json_encode($result);
+	}
+
+	/**
 	 * Mengembalikan 5 kunjungan terakhir milik pasien (JSON).
 	 * Dipanggil via AJAX dari form tambah kunjungan.
 	 *
