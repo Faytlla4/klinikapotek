@@ -60,6 +60,24 @@ class Cetak extends Content
         list($dari, $sampai) = $this->rentang();
         $rows = $this->laporan_model->{'cetak_' . $jenis}($dari, $sampai);
 
+        // ponytail: tanpa composer (vendor tidak ikut ke-push) fallback ke .xls biasa
+        if (! class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+            header('Content-Disposition: attachment; filename="laporan-' . $jenis . '-' . $dari . '-' . $sampai . '.xls"');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+            echo '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
+            echo '<h4>Klinik &amp; Apotek</h4>';
+            echo '<div>' . html_escape($judul[$jenis]) . '</div>';
+            echo '<div><small>Periode ' . html_escape($dari) . ' s/d ' . html_escape($sampai) . '</small></div><br>';
+            $this->load->view('laporan/content/_tabel', array('jenis' => $jenis, 'rows' => $rows));
+            echo '</body></html>';
+            exit;
+        }
+
         $kolom = array(
             'kunjungan'   => array('Tanggal', 'No. RM', 'Pasien', 'Pelayanan', 'Poli', 'Dokter', 'Status'),
             'transaksi'   => array('Nomor', 'Tanggal', 'Total', 'Status'),

@@ -9,11 +9,11 @@ class Migration_laporan_cetak extends Migration
             ('Laporan.Cetak.View', 'LAPORAN'),
             ('Site.Cetak.View', 'MANAJEMEN_SISTEM')
             ON CONFLICT (nama_permission) DO NOTHING");
-        // Samakan dengan pemilik Laporan.Laporan.View (dinamis, bukan hardcode id role).
+        // Samakan dengan pemilik lihat_laporan (dinamis, bukan hardcode id role).
         $this->db->query("INSERT INTO role_permissions (id_role, id_permission)
             SELECT rp.id_role, p.id_permission
             FROM role_permissions rp
-            JOIN permissions pl ON pl.id_permission = rp.id_permission AND pl.nama_permission = 'Laporan.Laporan.View'
+            JOIN permissions pl ON pl.id_permission = rp.id_permission AND pl.nama_permission = 'lihat_laporan'
             JOIN permissions p ON p.nama_permission IN ('Laporan.Cetak.View', 'Site.Cetak.View')
             ON CONFLICT (id_role, id_permission) DO NOTHING");
     }
