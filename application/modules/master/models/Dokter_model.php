@@ -21,7 +21,6 @@ class Dokter_model extends BF_Model
     protected $insert_validation_rules = array(
         array('field' => 'nama_dokter', 'label' => 'Nama Dokter', 'rules' => 'required'),
         array('field' => 'no_sip', 'label' => 'No. SIP', 'rules' => 'required'),
-        array('field' => 'tarif', 'label' => 'Tarif', 'rules' => 'required'),
     );
     protected $skip_validation = false;
 

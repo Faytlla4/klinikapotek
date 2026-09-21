@@ -65,6 +65,18 @@ class Dokter extends App_Controller
 			return false;
 		}
 
+		$no_sip = trim($this->input->post('no_sip'));
+		if ($no_sip !== '') {
+			$exists = $this->db->where('no_sip', $no_sip);
+			if ($type == 'update') {
+				$exists->where('id_dokter !=', $id);
+			}
+			if ($exists->count_all_results('dokter') > 0) {
+				Template::set_message('No. SIP "' . $no_sip . '" sudah digunakan.', 'error');
+				return false;
+			}
+		}
+
 		$data = array(
 			'nama_dokter'  => $this->input->post('nama_dokter'),
 			'id_spesialis' => $this->input->post('id_spesialis') ? $this->input->post('id_spesialis') : null,

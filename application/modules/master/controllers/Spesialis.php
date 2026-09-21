@@ -62,8 +62,18 @@ class Spesialis extends App_Controller
 			return false;
 		}
 
+		$nama = trim($this->input->post('nama_spesialis'));
+		$exists = $this->db->where('LOWER(nama_spesialis)', strtolower($nama));
+		if ($type == 'update') {
+			$exists->where('id_spesialis !=', $id);
+		}
+		if ($exists->count_all_results('spesialis') > 0) {
+			Template::set_message('Nama spesialis "' . $nama . '" sudah ada.', 'error');
+			return false;
+		}
+
 		$data = array(
-			'nama_spesialis' => $this->input->post('nama_spesialis'),
+			'nama_spesialis' => $nama,
 			'status'         => $this->input->post('status') ? $this->input->post('status') : 'AKTIF',
 		);
 

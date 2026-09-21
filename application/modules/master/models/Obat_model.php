@@ -21,7 +21,7 @@ class Obat_model extends BF_Model
     protected $insert_validation_rules = array(
         array('field' => 'nama_obat', 'label' => 'Nama Obat', 'rules' => 'required'),
         array('field' => 'satuan', 'label' => 'Satuan', 'rules' => 'required'),
-        array('field' => 'harga', 'label' => 'Harga', 'rules' => 'required'),
+        array('field' => 'harga', 'label' => 'Harga', 'rules' => 'numeric'),
     );
     protected $skip_validation = false;
 

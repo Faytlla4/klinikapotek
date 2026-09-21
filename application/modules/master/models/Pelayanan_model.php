@@ -17,7 +17,6 @@ class Pelayanan_model extends BF_Model
     );
     protected $insert_validation_rules = array(
         array('field' => 'nama_pelayanan', 'label' => 'Nama Pelayanan', 'rules' => 'required'),
-        array('field' => 'tarif', 'label' => 'Tarif', 'rules' => 'required'),
     );
     protected $skip_validation = false;
 

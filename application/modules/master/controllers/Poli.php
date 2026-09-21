@@ -62,8 +62,18 @@ class Poli extends App_Controller
 			return false;
 		}
 
+		$nama = trim($this->input->post('nama_poli'));
+		$exists = $this->db->where('LOWER(nama_poli)', strtolower($nama));
+		if ($type == 'update') {
+			$exists->where('id_poli !=', $id);
+		}
+		if ($exists->count_all_results('poli') > 0) {
+			Template::set_message('Nama poli "' . $nama . '" sudah ada.', 'error');
+			return false;
+		}
+
 		$data = array(
-			'nama_poli' => $this->input->post('nama_poli'),
+			'nama_poli' => $nama,
 			'status'    => $this->input->post('status') ? $this->input->post('status') : 'AKTIF',
 		);
 

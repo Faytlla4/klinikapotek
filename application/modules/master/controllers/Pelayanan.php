@@ -62,8 +62,18 @@ class Pelayanan extends App_Controller
 			return false;
 		}
 
+		$nama = trim($this->input->post('nama_pelayanan'));
+		$exists = $this->db->where('LOWER(nama_pelayanan)', strtolower($nama));
+		if ($type == 'update') {
+			$exists->where('id_pelayanan !=', $id);
+		}
+		if ($exists->count_all_results('pelayanan') > 0) {
+			Template::set_message('Nama pelayanan "' . $nama . '" sudah ada.', 'error');
+			return false;
+		}
+
 		$data = array(
-			'nama_pelayanan'  => $this->input->post('nama_pelayanan'),
+			'nama_pelayanan'  => $nama,
 			'jenis_pelayanan' => $this->input->post('jenis_pelayanan'),
 			'tarif'           => $this->input->post('tarif'),
 			'status'          => $this->input->post('status') ? $this->input->post('status') : 'AKTIF',

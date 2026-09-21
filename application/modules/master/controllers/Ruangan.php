@@ -65,8 +65,18 @@ class Ruangan extends App_Controller
 			return false;
 		}
 
+		$nama = trim($this->input->post('nama_ruangan'));
+		$exists = $this->db->where('LOWER(nama_ruangan)', strtolower($nama));
+		if ($type == 'update') {
+			$exists->where('id_ruangan !=', $id);
+		}
+		if ($exists->count_all_results('ruangan') > 0) {
+			Template::set_message('Nama ruangan "' . $nama . '" sudah ada.', 'error');
+			return false;
+		}
+
 		$data = array(
-			'nama_ruangan' => $this->input->post('nama_ruangan'),
+			'nama_ruangan' => $nama,
 			'id_poli'      => $this->input->post('id_poli') ? $this->input->post('id_poli') : null,
 			'status'       => $this->input->post('status') ? $this->input->post('status') : 'AKTIF',
 		);
