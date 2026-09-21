@@ -24,6 +24,7 @@
         "source": "https://github.com/ci-bonfire/Bonfire"
     },
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=5.4.0",
+        "phpoffice/phpspreadsheet": "1.29"
     }
 }

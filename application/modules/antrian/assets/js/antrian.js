@@ -62,7 +62,8 @@ var antrianTable = $('#antrian_table').bfDataTable({
             orderable: false,
             render: function (data) {
                 var berikut = alurStatus[data.status] || [];
-                if (berikut.length === 0) return '<span class="text-muted">-</span>';
+                var html = '<a href="' + ctxBase + '/tiket/' + data.id_antrian + '" class="btn btn-sm btn-default mr-1" title="Cetak Tiket"><i class="fas fa-print"></i></a>';
+                if (berikut.length === 0) return html + '<span class="text-muted">-</span>';
                 return '<button class="btn btn-sm btn-outline-primary btn-aksi" '
                     + 'data-id="' + data.id_antrian + '" '
                     + 'data-nama="' + (data.nama_pasien || '') + '" '

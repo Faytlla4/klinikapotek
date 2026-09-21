@@ -180,6 +180,12 @@ $route['admin/apotek-online/pesanan/detail/(:num)'] = 'apotekonline/online/pesan
 // LAPORAN.
 $route['admin/laporan/laporan'] = 'laporan/laporan/index';
 
+// LAPORAN CETAK (konteks terpisah dari LAPORAN).
+// Urutan penting: rute xls harus sebelum wildcard agar tak tertelan (:any = .+).
+$route['admin/cetak'] = 'laporan/cetak/index';
+$route['admin/cetak/xlsx/(:any)'] = 'laporan/cetak/xlsx/$1';
+$route['admin/cetak/(:any)'] = 'laporan/cetak/lihat/$1';
+
 // MASTER DATA: supplier dikelola lewat pengadaan.
 $route['admin/master/pengadaan'] = 'pengadaan/master/index';
 $route['admin/master/pengadaan/(:any)'] = 'pengadaan/master/$1';

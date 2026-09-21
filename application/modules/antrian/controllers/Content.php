@@ -58,6 +58,27 @@ class Content extends App_Controller
 		redirect(SITE_AREA . '/content/antrian');
 	}
 
+	/** Tiket antrean siap cetak (thermal/biasa). */
+	public function tiket($id = null)
+	{
+		$id = (int) $id;
+		$row = $id > 0 ? $this->db->select('antrian.nomor_antrian, antrian.tanggal_antrian, antrian.status,
+				pasien.no_rm, pasien.nama AS nama_pasien, poli.nama_poli, dokter.nama_dokter', false)
+			->join('kunjungan', 'kunjungan.id_kunjungan = antrian.id_kunjungan')
+			->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien')
+			->join('poli', 'poli.id_poli = kunjungan.id_poli', 'left')
+			->join('dokter', 'dokter.id_dokter = kunjungan.id_dokter', 'left')
+			->where('antrian.id_antrian', $id)
+			->get('antrian')->row() : false;
+		if (! $row) {
+			show_404();
+		}
+		Template::set('tiket', $row);
+		Template::set('toolbar_title', 'Tiket Antrian');
+		Template::set_view('content/tiket');
+		Template::render();
+	}
+
 	public function get_data()
 	{
 		$request = $this->input->post();

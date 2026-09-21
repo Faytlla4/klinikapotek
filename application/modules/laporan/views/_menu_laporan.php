@@ -18,4 +18,3 @@ foreach ($laporan_tabs as $key => $label): ?>
     </li>
 <?php endforeach; ?>
 </ul>
-

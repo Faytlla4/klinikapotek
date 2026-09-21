@@ -31,8 +31,11 @@ class Content extends App_Controller
 
 	public function create()
 	{
-		if (isset($_POST['save']) && $this->save_kunjungan()) {
+		if (isset($_POST['save']) && ($hasil = $this->save_kunjungan())) {
 			Template::set_message('Kunjungan berhasil dibuat.', 'success');
+			if (! empty($hasil['id_antrian'])) {
+				redirect(SITE_AREA . '/' . $this->ctx . '/antrian/tiket/' . $hasil['id_antrian']);
+			}
 			redirect(SITE_AREA . '/' . $this->ctx . '/kunjungan');
 		}
 		$this->set_master_data();
@@ -120,7 +123,7 @@ class Content extends App_Controller
 			return false;
 		}
 		$this->audit_log_model->catat($this->auth->user_id(), 'create', 'kunjungan', $result['id_kunjungan'], 'No. antrian ' . $result['nomor_antrian']);
-		return true;
+		return $result;
 	}
 
 	public function get_data()

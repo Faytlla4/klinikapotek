@@ -58,6 +58,7 @@ $config['contexts'] = array(
 	'online',
 	'transaksi',
 	'laporan',
+	'cetak',
 	'master',
 	'settings',
 );
@@ -68,6 +69,7 @@ $config['contexts_icon'] = array(
 	'online' => 'fas fa-shopping-cart',
 	'transaksi' => 'fas fa-cash-register',
 	'laporan' => 'fas fa-chart-bar',
+	'cetak' => 'fas fa-print',
 	'master' => 'fas fa-database',
 	'settings' => 'fas fa-cog',
 );

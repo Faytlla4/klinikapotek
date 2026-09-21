@@ -168,6 +168,7 @@ $lang['bf_context_apotek'] = 'APOTEK';
 $lang['bf_context_online'] = 'APOTEK ONLINE';
 $lang['bf_context_transaksi'] = 'TRANSAKSI';
 $lang['bf_context_laporan'] = 'LAPORAN';
+$lang['bf_context_cetak'] = 'LAPORAN CETAK';
 $lang['bf_context_master'] = 'MASTER DATA';
 $lang['bf_context_settings'] = 'MANAJEMEN SISTEM';
 $lang['bf_context_developer'] = 'Developer';

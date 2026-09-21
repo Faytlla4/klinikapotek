@@ -89,4 +89,59 @@ class Laporan_model extends CI_Model
             ->get('obat')
             ->result();
     }
+
+    /** Daftar kunjungan detail dalam periode (untuk cetak). */
+    public function cetak_kunjungan($dari, $sampai)
+    {
+        return $this->db->select('kunjungan.tanggal_kunjungan, pasien.no_rm, pasien.nama AS nama_pasien,
+                pelayanan.nama_pelayanan, poli.nama_poli, dokter.nama_dokter, kunjungan.status', false)
+            ->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien')
+            ->join('pelayanan', 'pelayanan.id_pelayanan = kunjungan.id_pelayanan', 'left')
+            ->join('poli', 'poli.id_poli = kunjungan.id_poli', 'left')
+            ->join('dokter', 'dokter.id_dokter = kunjungan.id_dokter', 'left')
+            ->where('kunjungan.tanggal_kunjungan >=', $dari . ' 00:00:00')
+            ->where('kunjungan.tanggal_kunjungan <=', $sampai . ' 23:59:59')
+            ->order_by('kunjungan.tanggal_kunjungan', 'ASC')
+            ->get('kunjungan')
+            ->result();
+    }
+
+    /** Daftar transaksi detail dalam periode (untuk cetak). */
+    public function cetak_transaksi($dari, $sampai)
+    {
+        return $this->db->select('transaksi.nomor_transaksi, transaksi.tanggal_transaksi,
+                transaksi.total, transaksi.status', false)
+            ->where('transaksi.tanggal_transaksi >=', $dari . ' 00:00:00')
+            ->where('transaksi.tanggal_transaksi <=', $sampai . ' 23:59:59')
+            ->order_by('transaksi.tanggal_transaksi', 'ASC')
+            ->get('transaksi')
+            ->result();
+    }
+
+    /** Daftar antrian detail dalam periode (untuk cetak). */
+    public function cetak_antrian($dari, $sampai)
+    {
+        return $this->db->select('antrian.nomor_antrian, antrian.tanggal_antrian,
+                poli.nama_poli, pasien.nama AS nama_pasien, antrian.status', false)
+            ->join('kunjungan', 'kunjungan.id_kunjungan = antrian.id_kunjungan')
+            ->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien')
+            ->join('poli', 'poli.id_poli = kunjungan.id_poli', 'left')
+            ->where('antrian.tanggal_antrian >=', $dari)
+            ->where('antrian.tanggal_antrian <=', $sampai)
+            ->order_by('antrian.tanggal_antrian', 'ASC')
+            ->order_by('antrian.nomor_antrian', 'ASC')
+            ->get('antrian')
+            ->result();
+    }
+
+    /** Daftar pendaftaran pasien baru dalam periode (untuk cetak). */
+    public function cetak_pendaftaran($dari, $sampai)
+    {
+        return $this->db->select('no_rm, nama, nik, created_at', false)
+            ->where('created_at >=', $dari . ' 00:00:00')
+            ->where('created_at <=', $sampai . ' 23:59:59')
+            ->order_by('created_at', 'ASC')
+            ->get('pasien')
+            ->result();
+    }
 }
