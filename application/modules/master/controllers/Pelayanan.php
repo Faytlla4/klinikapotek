@@ -94,15 +94,15 @@ class Pelayanan extends App_Controller
 
 		$this->db->from('pelayanan');
 		if (!empty($search)) {
-			$this->db->where("nama_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-			$this->db->or_where("jenis_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->where("nama_pelayanan LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("jenis_pelayanan LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 		}
 		$total = $this->db->count_all_results();
 
 		$this->db->from('pelayanan');
 		if (!empty($search)) {
-			$this->db->where("nama_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-			$this->db->or_where("jenis_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->where("nama_pelayanan LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("jenis_pelayanan LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 		}
 		$this->db->order_by('id_pelayanan', 'DESC');
 		$this->db->limit((int) ($request['length'] ?? 10), (int) ($request['start'] ?? 0));

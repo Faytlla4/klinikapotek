@@ -23,8 +23,8 @@ class Users extends App_Controller
             ->order_by('users.id_user', 'ASC');
         if ($q !== '') {
             $this->db->group_start()
-                ->where("users.username ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
-                ->or_where("users.nama ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+                ->where("users.username LIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+                ->or_where("users.nama LIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
                 ->group_end();
         }
         Template::set(array('user_list' => $this->db->get('users')->result(), 'q' => $q));

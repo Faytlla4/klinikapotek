@@ -105,9 +105,9 @@ class Dokter extends App_Controller
 
 		if (!empty($search)) {
 			$this->db->group_start();
-			$this->db->where("dokter.nama_dokter ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-			$this->db->or_where("dokter.no_sip ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-			$this->db->or_where("spesialis.nama_spesialis ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->where("dokter.nama_dokter LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("dokter.no_sip LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("spesialis.nama_spesialis LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 			$this->db->group_end();
 		}
 		$total = $this->db->count_all_results();
@@ -118,9 +118,9 @@ class Dokter extends App_Controller
 
 		if (!empty($search)) {
 			$this->db->group_start();
-			$this->db->where("dokter.nama_dokter ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-			$this->db->or_where("dokter.no_sip ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-			$this->db->or_where("spesialis.nama_spesialis ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->where("dokter.nama_dokter LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("dokter.no_sip LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("spesialis.nama_spesialis LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 			$this->db->group_end();
 		}
 		$this->db->order_by('dokter.id_dokter', 'DESC');

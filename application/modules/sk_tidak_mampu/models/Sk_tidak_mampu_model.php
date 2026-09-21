@@ -90,13 +90,13 @@ class Sk_tidak_mampu_model extends DT_Model
 		$output['draw'] = (int) $request['draw'];
 
 		if (!empty($request['search']['value']) && strlen($request['search']['value']) > 0) {
-			$this->where($request['search']['column'] . "::TEXT ILIKE '%" . $request['search']['value'] . "%'");
+			$this->where($request['search']['column'] . "::TEXT LIKE '%" . $request['search']['value'] . "%'");
 		}
 
 		$output['recordsTotal'] = $this->db->count_all_results($this->table_name);
 
 		if (!empty($request['search']['value']) && strlen($request['search']['value']) > 0) {
-			$this->where($request['search']['column'] . "::TEXT ILIKE '%" . $request['search']['value'] . "%'");
+			$this->where($request['search']['column'] . "::TEXT LIKE '%" . $request['search']['value'] . "%'");
 		}
 
 		if (!empty($request['sort'])) {

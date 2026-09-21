@@ -139,10 +139,10 @@ class Content extends App_Controller
 				->join('ruangan',   'ruangan.id_ruangan = kunjungan.id_ruangan');
 			if ($search !== '') {
 				$this->db->group_start()
-					->where("pasien.no_rm ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
-					->or_where("pasien.nama ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
-					->or_where("pelayanan.nama_pelayanan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
-					->or_where("poli.nama_poli ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
+					->where("pasien.no_rm LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
+					->or_where("pasien.nama LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
+					->or_where("pelayanan.nama_pelayanan LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
+					->or_where("poli.nama_poli LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE)
 					->group_end();
 			}
 		};
@@ -171,9 +171,9 @@ class Content extends App_Controller
 		}
 		$like = "%" . $this->db->escape_like_str($q) . "%";
 		$rows = $this->db
-			->where('nik ILIKE', $like, FALSE)
-			->or_where('no_rm ILIKE', $like, FALSE)
-			->or_where('nama ILIKE', $like, FALSE)
+			->where('nik LIKE', $like, FALSE)
+			->or_where('no_rm LIKE', $like, FALSE)
+			->or_where('nama LIKE', $like, FALSE)
 			->limit(10)
 			->get('pasien')
 			->result();

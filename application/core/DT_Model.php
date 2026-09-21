@@ -42,13 +42,13 @@ class DT_Model extends BF_Model
 		$output['draw'] = (int) $request['draw'];
 
 		if (!empty($request['search']['value']) && strlen($request['search']['value']) > 0) {
-			parent::where($request['search']['column'] . "::TEXT ILIKE '%" . $request['search']['value'] . "%'");
+			parent::where($request['search']['column'] . "::TEXT LIKE '%" . $request['search']['value'] . "%'");
 		}
 
 		$output['recordsTotal'] = parent::count_all();
 
 		if (!empty($request['search']['value']) && strlen($request['search']['value']) > 0) {
-			parent::where($request['search']['column'] . "::TEXT ILIKE '%" . $request['search']['value'] . "%'");
+			parent::where($request['search']['column'] . "::TEXT LIKE '%" . $request['search']['value'] . "%'");
 		}
 
 		if (empty($request['sort'])) {

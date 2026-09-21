@@ -132,11 +132,11 @@ class Pasien_model extends BF_Model
             return $this->where('no_rm', $keyword)->find_all() ?: array();
         }
         if ($by === 'nama') {
-            return $this->where("nama ILIKE '%" . $this->db->escape_like_str($keyword) . "%'", NULL, FALSE)->find_all() ?: array();
+            return $this->where("nama LIKE '%" . $this->db->escape_like_str($keyword) . "%'", NULL, FALSE)->find_all() ?: array();
         }
         $rows = $this->db->where('nik', $keyword)
             ->or_where('no_rm', $keyword)
-            ->or_where("nama ILIKE '%" . $this->db->escape_like_str($keyword) . "%'", NULL, FALSE)
+            ->or_where("nama LIKE '%" . $this->db->escape_like_str($keyword) . "%'", NULL, FALSE)
             ->get($this->table_name)
             ->result();
         return $rows ?: array();

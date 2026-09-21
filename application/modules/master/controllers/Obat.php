@@ -84,9 +84,9 @@ class Obat extends App_Controller
 				->join('stok_obat', 'stok_obat.id_obat = obat.id_obat', 'left');
 			if (!empty($search)) {
 				$this->db->group_start();
-				$this->db->where("obat.kode_obat ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-				$this->db->or_where("obat.nama_obat ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-				$this->db->or_where("obat.jenis_obat ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->where("obat.kode_obat LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->or_where("obat.nama_obat LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->or_where("obat.jenis_obat LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 				$this->db->group_end();
 			}
 		};

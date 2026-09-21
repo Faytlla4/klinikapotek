@@ -77,7 +77,7 @@ class Content extends App_Controller
 			return false;
 		}
 		if (! $this->pasien_model->nik_tersedia($this->input->post('nik'), $type === 'update' ? $id : null)) {
-			$this->form_validation->set_message('nik', 'NIK sudah terdaftar.');
+			Template::set_message('NIK sudah terdaftar.', 'error');
 			return false;
 		}
 
@@ -113,9 +113,9 @@ class Content extends App_Controller
 			$this->db->from('pasien');
 			if ($search !== '') {
 				$this->db->group_start();
-				$this->db->where("no_rm ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-				$this->db->or_where("nik ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-				$this->db->or_where("nama ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->where("no_rm LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->or_where("nik LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+				$this->db->or_where("nama LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 				$this->db->group_end();
 			}
 		};

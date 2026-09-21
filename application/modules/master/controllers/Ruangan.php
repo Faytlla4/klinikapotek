@@ -100,8 +100,8 @@ class Ruangan extends App_Controller
 
 		if (!empty($search)) {
 			$this->db->group_start();
-			$this->db->where("ruangan.nama_ruangan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-			$this->db->or_where("poli.nama_poli ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->where("ruangan.nama_ruangan LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("poli.nama_poli LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 			$this->db->group_end();
 		}
 		$total = $this->db->count_all_results();
@@ -112,8 +112,8 @@ class Ruangan extends App_Controller
 
 		if (!empty($search)) {
 			$this->db->group_start();
-			$this->db->where("ruangan.nama_ruangan ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
-			$this->db->or_where("poli.nama_poli ILIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->where("ruangan.nama_ruangan LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
+			$this->db->or_where("poli.nama_poli LIKE '%" . $this->db->escape_like_str($search) . "%'", NULL, FALSE);
 			$this->db->group_end();
 		}
 		$this->db->order_by('ruangan.id_ruangan', 'DESC');

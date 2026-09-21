@@ -88,8 +88,8 @@ class Online extends App_Controller
             ->order_by('obat.nama_obat', 'ASC');
         if ($q !== '') {
             $this->db->group_start()
-                ->where("obat.nama_obat ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
-                ->or_where("obat.jenis_obat ILIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+                ->where("obat.nama_obat LIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
+                ->or_where("obat.jenis_obat LIKE '%" . $this->db->escape_like_str($q) . "%'", NULL, FALSE)
                 ->group_end();
         }
         $obats = $this->db->get('obat')->result();
