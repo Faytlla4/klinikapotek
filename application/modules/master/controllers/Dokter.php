@@ -68,7 +68,7 @@ class Dokter extends App_Controller
 		$data = array(
 			'nama_dokter'  => $this->input->post('nama_dokter'),
 			'id_spesialis' => $this->input->post('id_spesialis') ? $this->input->post('id_spesialis') : null,
-			'no_sip'       => $this->input->post('no_sip'),
+			'no_sip'       => trim($this->input->post('no_sip')) ?: null,
 			'no_hp'        => $this->input->post('no_hp'),
 			'tarif'        => $this->input->post('tarif'),
 			'status'       => $this->input->post('status') ? $this->input->post('status') : 'AKTIF',
