@@ -6,12 +6,13 @@
 </div>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Resep Menunggu Diproses</h3></div>
-    <div class="card-body table-responsive"><table class="table table-bordered table-hover table-striped">
-        <thead><tr><th>No. Resep</th><th>Tanggal</th><th>Pasien</th><th>Dokter</th><th>Status</th></tr></thead>
-        <tbody>
-        <?php if (empty($resep_list)): ?><tr><td colspan="5" class="text-center">Tidak ada resep menunggu.</td></tr>
-        <?php else: foreach ($resep_list as $r): ?><tr><td><?php echo html_escape($r->nomor_resep); ?></td><td><?php echo html_escape($r->tanggal_resep); ?></td><td><?php echo html_escape($r->nama_pasien); ?></td><td><?php echo html_escape($r->nama_dokter); ?></td><td><span class="badge badge-info"><?php echo html_escape($r->status); ?></span></td></tr>
+    <ul class="list-group list-group-flush">
+        <?php if (empty($resep_list)): ?><li class="list-group-item text-center text-muted">Tidak ada resep menunggu.</li>
+        <?php else: foreach ($resep_list as $r): ?>
+        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+            <div><strong><?php echo html_escape($r->nomor_resep); ?></strong><br><small class="text-muted"><?php echo html_escape($r->nama_pasien); ?> &middot; <?php echo html_escape($r->nama_dokter); ?> &middot; <?php echo html_escape($r->tanggal_resep); ?></small></div>
+            <span class="badge badge-info mt-1 mt-sm-0"><?php echo html_escape($r->status); ?></span>
+        </li>
         <?php endforeach; endif; ?>
-        </tbody>
-    </table></div>
+    </ul>
 </div></div></div>
