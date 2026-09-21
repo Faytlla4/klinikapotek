@@ -5,7 +5,7 @@ $(document).ready(function () {
 
     // Inisialisasi Select2 pada elemen yang sudah ada di DOM
     if ($.fn.select2) {
-        $('.select2').select2({ theme: 'bootstrap4', width: '100%' });
+        $('.select2').select2({ width: '100%' });
     }
 
     $(document).on('change', '#jenis_penjualan', function () {
@@ -27,7 +27,7 @@ $(document).ready(function () {
                 box.append(rowObat(d.id_obat, d.jumlah, d.nama_obat));
             });
             if ($.fn.select2) {
-                box.find('.select2').select2({ theme: 'bootstrap4', width: '100%' });
+                box.find('.select2').select2({ width: '100%' });
             }
         });
     });
@@ -36,7 +36,7 @@ $(document).ready(function () {
         var newRow = $(rowObat(0, '', ''));
         $('#item_rows').append(newRow);
         if ($.fn.select2) {
-            newRow.find('.select2').select2({ theme: 'bootstrap4', width: '100%' });
+            newRow.find('.select2').select2({ width: '100%' });
         }
     });
 

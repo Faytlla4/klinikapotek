@@ -9,5 +9,5 @@ $('#pemeriksaan_table').bfDataTable({
         { data: 'status', render: function(data) { return '<span class="badge badge-info">' + data + '</span>'; } }
     ]
 });
-$('.select2').select2({ theme: 'bootstrap4' });
+$('.select2').select2();
 

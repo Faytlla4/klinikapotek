@@ -29,7 +29,7 @@ $('#ruangan_table').bfDataTable({
     ]
 });
 
-$('.select2').select2({ theme: 'bootstrap4' });
+$('.select2').select2();
 
 $(document).on('click', '.btn-hapus', function(e) {
     e.preventDefault();

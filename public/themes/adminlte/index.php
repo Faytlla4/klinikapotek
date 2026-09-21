@@ -179,6 +179,55 @@
         /* Breadcrumb */
         .breadcrumb-item.active { color: #047857; }
 
+        /* Select2 - samakan hijau tema */
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #059669 !important;
+            color: #fff;
+        }
+        .select2-container--default .select2-results__option[aria-selected="true"] {
+            background-color: #d1fae5;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: #059669 !important;
+        }
+
+        /* Pagination DataTables */
+        .page-item.active .page-link {
+            background-color: #059669 !important;
+            border-color: #059669 !important;
+        }
+        .page-link { color: #059669; }
+
+        /* Primary lain yang masih biru */
+        .bg-primary { background-color: #059669 !important; }
+        .badge-primary { background-color: #059669 !important; }
+
+        /* Info (biru) -> hijau tema */
+        .badge-info { background-color: #059669 !important; }
+        .btn-info {
+            background-color: #059669 !important;
+            border-color: #059669 !important;
+        }
+        .btn-info:hover {
+            background-color: #047857 !important;
+            border-color: #047857 !important;
+        }
+        .bg-info { background-color: #059669 !important; }
+        .alert-info {
+            background-color: #d1fae5 !important;
+            border-color: #6ee7b7 !important;
+            color: #065f46 !important;
+        }
+        .card-info:not(.card-outline) > .card-header {
+            background-color: #059669 !important;
+            border-color: #059669 !important;
+            color: #fff;
+        }
+        .card-info.card-outline > .card-header {
+            border-top: 3px solid #059669;
+        }
+
         /* Text utilities */
         .text-primary { color: #059669 !important; }
     </style>

@@ -13,5 +13,5 @@ pasienTable.bfDataTable({
         { data: 'status', render: function(data) { var cls = data === 'AKTIF' ? 'badge-success' : 'badge-danger'; return '<span class="badge ' + cls + '">' + data + '</span>'; } }
     ]
 });
-$('.select2').select2({ theme: 'bootstrap4' });
+$('.select2').select2();
 
