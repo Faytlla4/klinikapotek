@@ -26,7 +26,7 @@ class Content extends App_Controller
 
 	public function create()
 	{
-		if (isset($_POST['save']) && $this->save_pasien('insert')) {
+		if ($this->input->method() === 'post' && $this->save_pasien('insert')) {
 			Template::set_message('Pasien berhasil ditambahkan.', 'success');
 			redirect(SITE_AREA . '/' . $this->ctx . '/pasien');
 		}
@@ -41,7 +41,7 @@ class Content extends App_Controller
 			Template::set_message('ID Pasien tidak valid.', 'error');
 			redirect(SITE_AREA . '/' . $this->ctx . '/pasien');
 		}
-		if (isset($_POST['save']) && $this->save_pasien('update', $id)) {
+		if ($this->input->method() === 'post' && $this->save_pasien('update', $id)) {
 			Template::set_message('Data pasien berhasil diperbarui.', 'success');
 			redirect(SITE_AREA . '/' . $this->ctx . '/pasien');
 		}

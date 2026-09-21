@@ -10,5 +10,5 @@
         <div class="row"><div class="col-md-6"><div class="form-group"><label for="no_hp">No. HP</label><input id="no_hp" name="no_hp" class="form-control" value="<?php echo set_value('no_hp'); ?>"></div></div><div class="col-md-6">
         <div class="form-group"><label for="status">Status</label><select id="status" name="status" class="form-control select2"><option value="AKTIF">AKTIF</option><option value="NONAKTIF">NONAKTIF</option></select></div></div></div>
         <div class="alert alert-info">Nomor Rekam Medis dibuat otomatis oleh sistem.</div>
-    </div><div class="card-footer"><button type="submit" name="save" class="btn btn-primary">Simpan</button><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default float-right">Batal</a></div><?php echo form_close(); ?>
+    </div><div class="card-footer"><button type="submit" name="save" value="save" class="btn btn-primary">Simpan</button><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default float-right">Batal</a></div><?php echo form_close(); ?>
 </div></div></div>
