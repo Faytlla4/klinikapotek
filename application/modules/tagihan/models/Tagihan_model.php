@@ -29,7 +29,7 @@ class Tagihan_model extends BF_Model
     /** Tagihan belum lunas + info pasien (halaman Pembayaran). */
     public function belum_lunas()
     {
-        return $this->db->select("tagihan.*, pasien.no_rm, pasien.nama AS nama_pasien,
+        return $this->db->select("tagihan.*, pasien.no_rm, COALESCE(pasien.nama, 'Umum') AS nama_pasien,
                 COALESCE((SELECT SUM(pembayaran.jumlah_bayar) FROM pembayaran
                     JOIN transaksi ON transaksi.id_transaksi = pembayaran.id_transaksi
                     WHERE transaksi.id_tagihan = tagihan.id_tagihan), 0) AS sudah_dibayar", false)
@@ -147,6 +147,112 @@ class Tagihan_model extends BF_Model
                 'total' => (float) $tagihan->total + $tambahan,
             ));
         }
+        return array('id_tagihan' => $tagihan->id_tagihan, 'total' => (float) $tagihan->total + $tambahan);
+    }
+
+    /**
+     * Kirim penjualan LANGSUNG berpasien ke tagihan (cermin
+     * tambahkan_penjualan_resep). Tanpa ini obat yang dibeli langsung saat
+     * pelayanan tidak pernah masuk antrean Pembayaran.
+     * - Ada tagihan BELUM_DIBAYAR milik pasien -> item ditambahkan ke sana.
+     * - Ada kunjungan terbuka tapi belum ada tagihan -> tagihan disusun dulu.
+     * - Tidak ada keduanya -> tagihan mandiri (id_kunjungan null).
+     */
+    public function tambahkan_penjualan_langsung($id_penjualan)
+    {
+        $penjualan = $this->db->where('id_penjualan', $id_penjualan)->get('penjualan_obat')->row();
+        if (! $penjualan || $penjualan->jenis_penjualan !== 'LANGSUNG') {
+            $this->error = 'Penjualan langsung tidak ditemukan.';
+            return false;
+        }
+        if (empty($penjualan->id_pasien)) {
+            // Tunai umum tanpa pasien: tetap tunai langsung, tanpa tagihan.
+            return array('id_tagihan' => null, 'total' => (float) $penjualan->total);
+        }
+
+        $details = $this->db->select('penjualan_obat_detail.*, obat.nama_obat')
+            ->join('obat', 'obat.id_obat = penjualan_obat_detail.id_obat')
+            ->where('id_penjualan', $id_penjualan)->get('penjualan_obat_detail')->result();
+        if (empty($details)) {
+            $this->error = 'Penjualan tidak memiliki item.';
+            return false;
+        }
+        // Idempoten: jangan tempel dua kali (mis. retry setelah sukses).
+        $ref_ids = array();
+        foreach ($details as $d) {
+            $ref_ids[] = (int) $d->id_detail;
+        }
+        $sudah = $this->db->where('jenis_item', 'OBAT')->where_in('id_referensi', $ref_ids)
+            ->get('tagihan_detail')->row();
+        if ($sudah) {
+            return array('id_tagihan' => (int) $sudah->id_tagihan, 'total' => null);
+        }
+
+        // 1. Tagihan BELUM_DIBAYAR milik pasien (kunjungan apa pun).
+        $tagihan = $this->db->select('tagihan.*')
+            ->join('kunjungan', 'kunjungan.id_kunjungan = tagihan.id_kunjungan')
+            ->where('kunjungan.id_pasien', $penjualan->id_pasien)
+            ->where('tagihan.status', 'BELUM_DIBAYAR')
+            ->order_by('tagihan.id_tagihan', 'DESC')
+            ->get('tagihan')->row();
+        if ($tagihan) {
+            return $this->tambahkan_item_obat($tagihan, $details);
+        }
+
+        // 2. Kunjungan terbuka milik pasien -> susun tagihan dulu, kecuali
+        // kunjungan itu sudah punya tagihan LUNAS (biaya jasa sudah dibayar;
+        // obat tambahan masuk tagihan mandiri agar penjualan tidak gagal).
+        $kunjungan = $this->db->where('id_pasien', $penjualan->id_pasien)
+            ->where_not_in('status', array('SELESAI', 'BATAL'))
+            ->order_by('id_kunjungan', 'DESC')
+            ->get('kunjungan')->row();
+        if ($kunjungan) {
+            $punya = $this->db->where('id_kunjungan', $kunjungan->id_kunjungan)
+                ->where('status !=', 'BATAL')->get('tagihan')->row();
+            if (! $punya) {
+                $baru = $this->susun_dari_kunjungan($kunjungan->id_kunjungan);
+                if (! $baru) {
+                    return false;
+                }
+                $tagihan = $this->db->where('id_tagihan', $baru['id_tagihan'])->get('tagihan')->row();
+                return $this->tambahkan_item_obat($tagihan, $details);
+            }
+            if ($punya->status === 'BELUM_DIBAYAR') {
+                return $this->tambahkan_item_obat($punya, $details);
+            }
+        }
+
+        // 3. Tanpa kunjungan aktif -> tagihan mandiri agar tetap bisa dibayar
+        // di Pembayaran (tampil sebagai Umum).
+        $items = array();
+        foreach ($details as $detail) {
+            $items[] = array(
+                'jenis_item' => 'OBAT', 'id_referensi' => (int) $detail->id_detail,
+                'nama_item' => $detail->nama_obat, 'jumlah' => (int) $detail->jumlah,
+                'harga' => (float) $detail->harga,
+            );
+        }
+        return $this->buat(null, $items);
+    }
+
+    /** Tempel item obat penjualan ke tagihan + naikkan total. */
+    private function tambahkan_item_obat($tagihan, $details)
+    {
+        $tambahan = 0;
+        foreach ($details as $detail) {
+            $subtotal = isset($detail->subtotal) ? (float) $detail->subtotal
+                : (float) $detail->jumlah * (float) $detail->harga;
+            $this->db->insert('tagihan_detail', array(
+                'id_tagihan' => $tagihan->id_tagihan, 'jenis_item' => 'OBAT',
+                'id_referensi' => (int) $detail->id_detail, 'nama_item' => $detail->nama_obat,
+                'jumlah' => (int) $detail->jumlah, 'harga' => (float) $detail->harga,
+                'subtotal' => $subtotal,
+            ));
+            $tambahan += $subtotal;
+        }
+        $this->db->where('id_tagihan', $tagihan->id_tagihan)->update('tagihan', array(
+            'total' => (float) $tagihan->total + $tambahan,
+        ));
         return array('id_tagihan' => $tagihan->id_tagihan, 'total' => (float) $tagihan->total + $tambahan);
     }
 

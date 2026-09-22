@@ -163,6 +163,18 @@ class Penjualan_model extends BF_Model
                 return false;
             }
         }
+        if ($jenis === 'LANGSUNG' && ! empty($id_pasien)) {
+            // ponytail: obat beli langsung untuk pasien kunjungan wajib masuk
+            // tagihan BELUM_DIBAYAR agar muncul di Pembayaran (tanpa ini obat
+            // tak pernah ditagih; tanpa pasien tetap tunai langsung).
+            $this->load->model('tagihan/tagihan_model');
+            $tagihan = $this->tagihan_model->tambahkan_penjualan_langsung($id_penjualan);
+            if (! $tagihan) {
+                $this->db->trans_rollback();
+                $this->error = $this->tagihan_model->error ?: 'Gagal membuat tagihan penjualan langsung.';
+                return false;
+            }
+        }
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === false) {
