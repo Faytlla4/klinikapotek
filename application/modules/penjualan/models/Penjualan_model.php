@@ -163,10 +163,10 @@ class Penjualan_model extends BF_Model
                 return false;
             }
         }
-        if ($jenis === 'LANGSUNG' && ! empty($id_pasien)) {
-            // ponytail: obat beli langsung untuk pasien kunjungan wajib masuk
-            // tagihan BELUM_DIBAYAR agar muncul di Pembayaran (tanpa ini obat
-            // tak pernah ditagih; tanpa pasien tetap tunai langsung).
+        if ($jenis === 'LANGSUNG') {
+            // Beli langsung (dgn/tanpa pasien) wajib masuk tagihan
+            // BELUM_DIBAYAR agar muncul di Pembayaran & daftar tagihan;
+            // tanpa pasien jadi tagihan mandiri "Umum".
             $this->load->model('tagihan/tagihan_model');
             $tagihan = $this->tagihan_model->tambahkan_penjualan_langsung($id_penjualan);
             if (! $tagihan) {

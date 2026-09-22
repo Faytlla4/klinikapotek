@@ -151,12 +151,12 @@ class Tagihan_model extends BF_Model
     }
 
     /**
-     * Kirim penjualan LANGSUNG berpasien ke tagihan (cermin
-     * tambahkan_penjualan_resep). Tanpa ini obat yang dibeli langsung saat
-     * pelayanan tidak pernah masuk antrean Pembayaran.
+     * Kirim penjualan LANGSUNG ke tagihan (cermin tambahkan_penjualan_resep).
+     * Tanpa ini obat beli langsung tidak pernah masuk antrean Pembayaran.
      * - Ada tagihan BELUM_DIBAYAR milik pasien -> item ditambahkan ke sana.
      * - Ada kunjungan terbuka tapi belum ada tagihan -> tagihan disusun dulu.
-     * - Tidak ada keduanya -> tagihan mandiri (id_kunjungan null).
+     * - Tanpa pasien (walk-in) / tanpa kunjungan aktif -> tagihan mandiri
+     *   (id_kunjungan null, tampil sebagai Umum di Pembayaran & daftar tagihan).
      */
     public function tambahkan_penjualan_langsung($id_penjualan)
     {
@@ -165,11 +165,9 @@ class Tagihan_model extends BF_Model
             $this->error = 'Penjualan langsung tidak ditemukan.';
             return false;
         }
-        if (empty($penjualan->id_pasien)) {
-            // Tunai umum tanpa pasien: tetap tunai langsung, tanpa tagihan.
-            return array('id_tagihan' => null, 'total' => (float) $penjualan->total);
-        }
-
+        // ponytail: tanpa early-return utk walk-in — id_pasien NULL membuat
+        // branch 1/2 (WHERE id_pasien = NULL -> IS NULL) tak match (kolom
+        // kunjungan.id_pasien NOT NULL), jatuh ke tagihan mandiri di bawah.
         $details = $this->db->select('penjualan_obat_detail.*, obat.nama_obat')
             ->join('obat', 'obat.id_obat = penjualan_obat_detail.id_obat')
             ->where('id_penjualan', $id_penjualan)->get('penjualan_obat_detail')->result();
