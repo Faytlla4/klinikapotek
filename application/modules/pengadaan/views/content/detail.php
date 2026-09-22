@@ -73,7 +73,7 @@
                             <th class="text-center">Dipesan</th>
                             <th class="text-center">Sudah Diterima</th>
                             <th class="text-center">Sisa Pesanan</th>
-                            <th class="text-center" style="width: 220px;">Jumlah Diterima Saat Ini</th>
+                            <th class="text-center" style="width: 360px;">Penerimaan Saat Ini</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -106,6 +106,16 @@
                                                    required>
                                             <input type="hidden" name="items[<?php echo $d->id_obat; ?>][kondisi]" value="Baik">
                                         </div>
+                                        <input type="text" name="items[<?php echo $d->id_obat; ?>][nomor_batch]" class="form-control form-control-sm mt-1" placeholder="No. batch (opsional)" maxlength="100">
+                                        <div class="input-group input-group-sm mt-1">
+                                            <input type="number" name="items[<?php echo $d->id_obat; ?>][masa_simpan]" class="form-control" min="1" max="1200" placeholder="Masa simpan" required>
+                                            <select name="items[<?php echo $d->id_obat; ?>][satuan_masa_simpan]" class="form-control" required>
+                                                <option value="HARI">Hari</option>
+                                                <option value="BULAN">Bulan</option>
+                                                <option value="TAHUN">Tahun</option>
+                                            </select>
+                                        </div>
+                                        <small class="form-text text-muted">Tanggal kedaluwarsa dihitung dari tanggal penerimaan.</small>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -143,7 +153,7 @@
                                 <th>Tanggal</th>
                                 <th>Obat</th>
                                 <th>Jumlah Terima</th>
-                                <th>Kondisi</th>
+                                <th>Kondisi</th><th>Batch</th><th>Kedaluwarsa</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -158,6 +168,8 @@
                                             <?php echo html_escape($r->kondisi); ?>
                                         </span>
                                     </td>
+                                    <td><?php echo html_escape($r->nomor_batch ?: '-'); ?></td>
+                                    <td><?php echo $r->tanggal_kadaluarsa ? date('d-m-Y', strtotime($r->tanggal_kadaluarsa)) : '-'; ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

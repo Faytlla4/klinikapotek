@@ -37,7 +37,8 @@ Sifat script ini:
 - **Hanya menambah yang belum ada**: 7 tabel pengadaan
   (`supplier`, `pengadaan_obat`+detail, `penerimaan_obat`+detail,
   `retur_pengadaan`+detail), kolom `dokter.id_user` dan `pasien.id_user`,
-  27 permission baru + grants per role. Data dan tabel lama **tidak
+  kolom batch/tanggal kedaluwarsa pada detail penerimaan, 27 permission baru
+  + grants per role. Data dan tabel lama **tidak
   dihapus dan tidak diubah**.
 - Grants memakai **nama role** (`ADMIN_PELAYANAN`/`DOKTER`/`APOTEKER`).
   Bila nama role di database teman berbeda, sesuaikan Bagian 4 script.
@@ -86,6 +87,10 @@ dengan plaintext.
   (migrasi `application/db/migrations/002_dokter_user.php`).
 - Kolom `pasien.id_user → users(id_user)` — relasi user login ke data
   pasien untuk portal pasien (migrasi `003_pasien_user.php`).
+- Kolom `penerimaan_obat_detail.nomor_batch` dan
+  `penerimaan_obat_detail.tanggal_kadaluarsa` — sumber notifikasi expired
+  dashboard apotek (migrasi `008_expiry_penerimaan.php`). Tanggal ini hanya
+  memberi peringatan dan tidak mengubah stok otomatis.
 - Permission `{Modul}.{Context}.View` dan `Site.{Context}.View` — pengatur
   tampilnya menu sidebar per role. Tanpa baris ini sidebar akan kosong.
 - Aplikasi memakai populasi status HURUF BESAR

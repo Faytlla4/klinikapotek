@@ -8,6 +8,11 @@
     <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3><?php echo (int) $antrian_menunggu; ?> / <?php echo (int) $antrian_total; ?></h3><p>Menunggu / Antrian Hari Ini</p></div><div class="icon"><i class="fas fa-list-ol"></i></div><a href="<?php echo site_url(SITE_AREA . '/pelayanan/antrian'); ?>" class="small-box-footer">Antrian <i class="fas fa-arrow-circle-right"></i></a></div></div>
     <div class="col-lg-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3><?php echo (int) $tagihan_belum; ?></h3><p>Tagihan Belum Lunas</p></div><div class="icon"><i class="fas fa-file-invoice-dollar"></i></div><a href="<?php echo site_url(SITE_AREA . '/transaksi/tagihan'); ?>" class="small-box-footer">Tagihan <i class="fas fa-arrow-circle-right"></i></a></div></div>
 </div>
+<div class="row mb-3">
+    <div class="col-md-4"><span class="badge badge-info p-2">Menunggu: <?php echo (int) $antrian_menunggu; ?></span></div>
+    <div class="col-md-4"><span class="badge badge-warning p-2">Sedang diperiksa: <?php echo (int) $antrian_diproses; ?></span></div>
+    <div class="col-md-4"><span class="badge badge-success p-2">Selesai: <?php echo (int) $antrian_selesai; ?></span></div>
+</div>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Antrian Hari Ini</h3>
     <div class="card-tools"><a href="<?php echo site_url(SITE_AREA . '/pelayanan/kunjungan/create'); ?>" class="btn btn-sm btn-primary">Tambah Kunjungan</a></div></div>

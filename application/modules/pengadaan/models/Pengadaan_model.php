@@ -97,7 +97,7 @@ class Pengadaan_model extends BF_Model
      * item Tidak sesuai otomatis dibuatkan retur (Diajukan).
      *
      * @param int   $id_pengadaan
-     * @param array $items list array(id_obat, jumlah_terima, kondisi: Baik|Rusak|Kurang|Salah)
+     * @param array $items list array(id_obat, jumlah_terima, kondisi, nomor_batch, tanggal_kadaluarsa)
      * @return array|bool
      */
     public function terima($id_pengadaan, $items)
@@ -183,12 +183,18 @@ class Pengadaan_model extends BF_Model
         // Fase 2: tulis header, detail, stok, retur.
         foreach ($items as $item) {
             $kondisi = isset($item['kondisi']) ? $item['kondisi'] : 'Baik';
-            $this->db->insert('penerimaan_obat_detail', array(
+            $detail_penerimaan = array(
                 'id_penerimaan' => $id_penerimaan,
                 'id_obat' => $item['id_obat'],
                 'jumlah_terima' => (int) $item['jumlah_terima'],
                 'kondisi' => $kondisi,
-            ));
+            );
+            if ($this->db->field_exists('nomor_batch', 'penerimaan_obat_detail')
+                && $this->db->field_exists('tanggal_kadaluarsa', 'penerimaan_obat_detail')) {
+                $detail_penerimaan['nomor_batch'] = ! empty($item['nomor_batch']) ? trim($item['nomor_batch']) : null;
+                $detail_penerimaan['tanggal_kadaluarsa'] = ! empty($item['tanggal_kadaluarsa']) ? $item['tanggal_kadaluarsa'] : null;
+            }
+            $this->db->insert('penerimaan_obat_detail', $detail_penerimaan);
             if (strtoupper($kondisi) === 'BAIK') {
                 if (! $this->stok_model->masuk($item['id_obat'], (int) $item['jumlah_terima'], 'PENGADAAN', $id_penerimaan)) {
                     $this->db->trans_complete();

@@ -11,6 +11,7 @@ class Dashboard extends App_Controller
 {
     /** @var array Peta nama role -> segmen dashboard. */
     private $role_map = array(
+        'ADMIN_SISTEM'    => 'sistem',
         'ADMIN_PELAYANAN' => 'pelayanan',
         'DOKTER'          => 'dokter',
         'APOTEKER'        => 'apoteker',
@@ -20,6 +21,21 @@ class Dashboard extends App_Controller
     public function __construct()
     {
         parent::__construct();
+    }
+
+    /** Dashboard admin sistem memakai statistik master yang sudah ada. */
+    public function sistem()
+    {
+        $this->require_role('ADMIN_SISTEM');
+        Template::set(array(
+            'user_total' => $this->db->where('status', 'AKTIF')->count_all_results('users'),
+            'dokter_total' => $this->db->where('status', 'AKTIF')->count_all_results('dokter'),
+            'pasien_total' => $this->db->where('status', 'AKTIF')->count_all_results('pasien'),
+            'role_total' => $this->db->count_all_results('roles'),
+        ));
+        Template::set('toolbar_title', 'Dashboard Admin Sistem');
+        Template::set_view('dashboard/sistem');
+        Template::render();
     }
 
     /**
@@ -51,9 +67,15 @@ class Dashboard extends App_Controller
         $besok = date('Y-m-d', strtotime($hari_ini . ' +1 day'));
         $antrian = $this->antrian_model->hari_ini();
         $menunggu = 0;
+        $diproses = 0;
+        $selesai = 0;
         foreach ($antrian as $a) {
             if ($a->status === 'MENUNGGU') {
                 $menunggu++;
+            } elseif ($a->status === 'SEDANG_DIPERIKSA') {
+                $diproses++;
+            } elseif ($a->status === 'SELESAI') {
+                $selesai++;
             }
         }
         Template::set(array(
@@ -61,6 +83,8 @@ class Dashboard extends App_Controller
             'kunjungan_hari_ini' => $this->db->where('tanggal_kunjungan >=', $hari_ini . ' 00:00:00')->where('tanggal_kunjungan <', $besok . ' 00:00:00')->count_all_results('kunjungan'),
             'antrian_total' => count($antrian),
             'antrian_menunggu' => $menunggu,
+            'antrian_diproses' => $diproses,
+            'antrian_selesai' => $selesai,
             'tagihan_belum' => $this->db->where('status', 'BELUM_DIBAYAR')->count_all_results('tagihan'),
             'antrian' => $antrian,
         ));
@@ -85,9 +109,15 @@ class Dashboard extends App_Controller
         }
         $antrian = $id_dokter ? $this->antrian_model->untuk_dokter($id_dokter) : array();
         $menunggu = 0;
+        $diproses = 0;
+        $selesai = 0;
         foreach ($antrian as $a) {
             if ($a->status === 'MENUNGGU') {
                 $menunggu++;
+            } elseif ($a->status === 'SEDANG_DIPERIKSA') {
+                $diproses++;
+            } elseif ($a->status === 'SELESAI') {
+                $selesai++;
             }
         }
         $hari_ini = date('Y-m-d');
@@ -111,6 +141,8 @@ class Dashboard extends App_Controller
             'antrian' => $antrian,
             'antrian_total' => count($antrian),
             'antrian_menunggu' => $menunggu,
+            'antrian_diproses' => $diproses,
+            'antrian_selesai' => $selesai,
             'periksa_hari_ini' => (int) $stat->total,
             'periksa_selesai' => (int) $stat->selesai,
             'resep_hari_ini' => (int) $resep_hari_ini,
@@ -125,11 +157,49 @@ class Dashboard extends App_Controller
         $this->require_role('APOTEKER');
         $this->load->model('resep/resep_model');
         $this->load->model('stok/stok_model');
+        if ($this->input->method(true) === 'POST' && $this->input->post('simpan_peringatan_expired')) {
+            $hari = filter_var($this->input->post('expiry_warning_days'), FILTER_VALIDATE_INT);
+            if ($hari === false || $hari < 1 || $hari > 3650) {
+                Template::set_message('Periode peringatan harus berupa bilangan bulat antara 1 dan 3650 hari.', 'error');
+            } elseif (! $this->settings_lib->set('apotek.expiry_warning_days', (string) $hari, 'apotek')) {
+                Template::set_message('Periode peringatan gagal disimpan.', 'error');
+            } else {
+                Template::set_message('Periode peringatan kedaluwarsa berhasil disimpan.', 'success');
+                redirect('dashboard/apoteker');
+                return;
+            }
+        }
         $hari_ini = date('Y-m-d');
         $besok = date('Y-m-d', strtotime($hari_ini . ' +1 day'));
+        $expiry_warning_days = (int) $this->settings_lib->item('apotek.expiry_warning_days');
+        if ($expiry_warning_days < 1) {
+            $expiry_warning_days = 30;
+        }
+        $stok_ringkas = $this->stok_model->ringkasan_dashboard();
+        $peringatan_stok = $this->stok_model->peringatan_dashboard();
+        $expiry_columns_available = $this->stok_model->kolom_kedaluwarsa_tersedia();
+        $peringatan_expired = $this->stok_model->peringatan_kedaluwarsa($expiry_warning_days);
+        $expired = array();
+        $segera_expired = array();
+        foreach ($peringatan_expired as $item) {
+            if ($item->status_expired === 'SUDAH KEDALUWARSA') {
+                $expired[] = $item;
+            } else {
+                $segera_expired[] = $item;
+            }
+        }
         Template::set(array(
             'resep_menunggu' => count($this->resep_model->menunggu()),
-            'stok_menipis' => count($this->stok_model->di_bawah_minimum()),
+            'total_obat' => $this->db->where('status', 'AKTIF')->count_all_results('obat'),
+            'stok_menipis' => $stok_ringkas['menipis'],
+            'stok_habis' => $stok_ringkas['habis'],
+            'stok_list' => $peringatan_stok,
+            'expired' => $expired,
+            'segera_expired' => $segera_expired,
+            'expired_total' => count($expired),
+            'segera_expired_total' => count($segera_expired),
+            'expiry_warning_days' => $expiry_warning_days,
+            'expiry_columns_available' => $expiry_columns_available,
             'penjualan_hari_ini' => $this->db->where('tanggal_penjualan >=', $hari_ini . ' 00:00:00')->where('tanggal_penjualan <', $besok . ' 00:00:00')->count_all_results('penjualan_obat'),
             'pengadaan_aktif' => $this->db->where_in('status', array('DIPESAN', 'DIPROSES'))->count_all_results('pengadaan_obat'),
             'resep_list' => $this->resep_model->menunggu(),

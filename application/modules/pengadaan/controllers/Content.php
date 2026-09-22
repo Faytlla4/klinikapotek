@@ -10,6 +10,7 @@ class Content extends App_Controller
         $this->load->model('pengadaan/pengadaan_model'); $this->load->model('pengadaan/supplier_model');
         $this->load->model('master/obat_model'); Assets::add_module_js('pengadaan', 'pengadaan.js');
     }
+
     public function index()
     {
         if (isset($_POST['save'])) {
@@ -86,13 +87,26 @@ class Content extends App_Controller
         }
 
         // Ambil riwayat penerimaan
-        $riwayat_penerimaan = $this->db->select('penerimaan_obat.*, penerimaan_obat_detail.id_obat, penerimaan_obat_detail.jumlah_terima, penerimaan_obat_detail.kondisi, obat.nama_obat')
+        $expiry_columns = $this->db->field_exists('nomor_batch', 'penerimaan_obat_detail')
+            && $this->db->field_exists('tanggal_kadaluarsa', 'penerimaan_obat_detail');
+        $riwayat_select = 'penerimaan_obat.*, penerimaan_obat_detail.id_obat, penerimaan_obat_detail.jumlah_terima, penerimaan_obat_detail.kondisi, obat.nama_obat';
+        if ($expiry_columns) {
+            $riwayat_select .= ', penerimaan_obat_detail.nomor_batch, penerimaan_obat_detail.tanggal_kadaluarsa';
+        }
+        $riwayat_penerimaan = $this->db->select($riwayat_select)
             ->join('penerimaan_obat_detail', 'penerimaan_obat_detail.id_penerimaan = penerimaan_obat.id_penerimaan')
             ->join('obat', 'obat.id_obat = penerimaan_obat_detail.id_obat')
             ->where('penerimaan_obat.id_pengadaan', $id)
             ->order_by('penerimaan_obat.id_penerimaan', 'DESC')
             ->get('penerimaan_obat')
             ->result();
+
+        if (! $expiry_columns) {
+            foreach ($riwayat_penerimaan as $riwayat) {
+                $riwayat->nomor_batch = null;
+                $riwayat->tanggal_kadaluarsa = null;
+            }
+        }
 
         Template::set('pengadaan', $pengadaan);
         Template::set('details', $details);
@@ -118,10 +132,31 @@ class Content extends App_Controller
                 foreach ($items_input as $id_obat => $row) {
                     $qty = isset($row['jumlah_terima']) ? trim($row['jumlah_terima']) : 0;
                     if ($qty !== '' && (int)$qty > 0) {
+                        $masa_simpan = isset($row['masa_simpan']) ? trim($row['masa_simpan']) : '';
+                        $satuan_masa_simpan = isset($row['satuan_masa_simpan']) ? strtoupper(trim($row['satuan_masa_simpan'])) : '';
+                        $tanggal_kadaluarsa = null;
+                        if ($satuan_masa_simpan !== '' && preg_match('/^\d+$/', $masa_simpan)
+                            && (int) $masa_simpan > 0 && in_array($satuan_masa_simpan, array('HARI', 'BULAN', 'TAHUN'), true)) {
+                            $interval_unit = ' days';
+                            if ($satuan_masa_simpan === 'BULAN') {
+                                $interval_unit = ' months';
+                            } elseif ($satuan_masa_simpan === 'TAHUN') {
+                                $interval_unit = ' years';
+                            }
+                            $interval = (int) $masa_simpan . $interval_unit;
+                            $tanggal_kadaluarsa = (new DateTimeImmutable(date('Y-m-d')))->modify('+' . $interval)->format('Y-m-d');
+                        }
+                        if ($tanggal_kadaluarsa === null
+                            && (! isset($row['kondisi']) || strtoupper($row['kondisi']) === 'BAIK')) {
+                            Template::set_message('Masa simpan obat harus diisi dalam hari, bulan, atau tahun.', 'error');
+                            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+                        }
                         $items[] = array(
                             'id_obat'       => (int) $id_obat,
                             'jumlah_terima' => (int) $qty,
                             'kondisi'       => isset($row['kondisi']) ? $row['kondisi'] : 'Baik',
+                            'nomor_batch' => isset($row['nomor_batch']) ? trim($row['nomor_batch']) : '',
+                            'tanggal_kadaluarsa' => $tanggal_kadaluarsa,
                         );
                     }
                 }

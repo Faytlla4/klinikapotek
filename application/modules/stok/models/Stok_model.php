@@ -134,9 +134,94 @@ class Stok_model extends BF_Model
     {
         return $this->db->select('obat.*, COALESCE(stok_obat.jumlah_stok, 0) AS stok')
             ->join('stok_obat', 'stok_obat.id_obat = obat.id_obat', 'left')
-            ->where('COALESCE(stok_obat.jumlah_stok, 0) < obat.stok_minimum')
+            ->where('COALESCE(stok_obat.jumlah_stok, 0) > 0', null, false)
+            ->where('COALESCE(stok_obat.jumlah_stok, 0) <= obat.stok_minimum', null, false)
             ->where('obat.status', 'AKTIF')
             ->get('obat')
             ->result();
+    }
+
+    /** Semua obat aktif dengan klasifikasi stok yang dipakai dashboard apotek. */
+    public function peringatan_dashboard()
+    {
+        $rows = $this->db->select("obat.id_obat, obat.kode_obat, obat.nama_obat,
+                obat.satuan, obat.stok_minimum,
+                COALESCE(stok_obat.jumlah_stok, 0) AS stok,
+                CASE
+                    WHEN COALESCE(stok_obat.jumlah_stok, 0) = 0 THEN 'HABIS'
+                    WHEN COALESCE(stok_obat.jumlah_stok, 0) <= obat.stok_minimum THEN 'MENIPIS'
+                    ELSE 'AMAN'
+                END AS status_stok", false)
+            ->join('stok_obat', 'stok_obat.id_obat = obat.id_obat', 'left')
+            ->where('obat.status', 'AKTIF')
+            ->where('(COALESCE(stok_obat.jumlah_stok, 0) <= obat.stok_minimum)', null, false)
+            ->order_by('stok', 'ASC')
+            ->order_by('obat.nama_obat', 'ASC')
+            ->get('obat')
+            ->result();
+
+        return $rows ?: array();
+    }
+
+    /** Ringkasan stok nyata untuk kartu dashboard. */
+    public function ringkasan_dashboard()
+    {
+        $row = $this->db->select("COUNT(*) FILTER (WHERE COALESCE(stok_obat.jumlah_stok, 0) > 0
+                    AND COALESCE(stok_obat.jumlah_stok, 0) <= obat.stok_minimum) AS menipis,
+                COUNT(*) FILTER (WHERE COALESCE(stok_obat.jumlah_stok, 0) = 0) AS habis", false)
+            ->join('stok_obat', 'stok_obat.id_obat = obat.id_obat', 'left')
+            ->where('obat.status', 'AKTIF')
+            ->get('obat')
+            ->row();
+
+        return array(
+            'menipis' => $row ? (int) $row->menipis : 0,
+            'habis' => $row ? (int) $row->habis : 0,
+        );
+    }
+
+    /** Obat masuk yang memiliki tanggal kedaluwarsa, dikelompokkan per penerimaan/batch. */
+    public function peringatan_kedaluwarsa($hari = 30)
+    {
+        // Database lama mungkin belum menjalankan migration 008. Jangan
+        // membuat seluruh dashboard gagal hanya karena fitur opsional ini
+        // belum tersedia.
+        if (! $this->kolom_kedaluwarsa_tersedia()) {
+            return array();
+        }
+
+        $hari = max(1, (int) $hari);
+        $today = date('Y-m-d');
+        $batas = date('Y-m-d', strtotime($today . ' +' . $hari . ' days'));
+        $escaped_today = $this->db->escape($today);
+        $escaped_batas = $this->db->escape($batas);
+        $rows = $this->db->select("obat.nama_obat, obat.kode_obat,
+                penerimaan_obat_detail.nomor_batch,
+                penerimaan_obat_detail.tanggal_kadaluarsa,
+                penerimaan_obat_detail.jumlah_terima AS stok,
+                (penerimaan_obat_detail.tanggal_kadaluarsa::date - {$escaped_today}::date) AS sisa_hari,
+                CASE
+                    WHEN penerimaan_obat_detail.tanggal_kadaluarsa < {$escaped_today}::date THEN 'SUDAH KEDALUWARSA'
+                    WHEN penerimaan_obat_detail.tanggal_kadaluarsa <= {$escaped_batas}::date THEN 'SEGERA KEDALUWARSA'
+                    ELSE 'MASIH AMAN'
+                END AS status_expired", false)
+            ->join('obat', 'obat.id_obat = penerimaan_obat_detail.id_obat')
+            ->join('penerimaan_obat', 'penerimaan_obat.id_penerimaan = penerimaan_obat_detail.id_penerimaan')
+            ->where('obat.status', 'AKTIF')
+            ->where('penerimaan_obat_detail.tanggal_kadaluarsa IS NOT NULL', null, false)
+            ->where('penerimaan_obat_detail.tanggal_kadaluarsa <=', $batas)
+            ->order_by('penerimaan_obat_detail.tanggal_kadaluarsa', 'ASC')
+            ->order_by('obat.nama_obat', 'ASC')
+            ->get('penerimaan_obat_detail')
+            ->result();
+
+        return $rows ?: array();
+    }
+
+    /** Apakah database sudah memiliki sumber data batch/kedaluwarsa. */
+    public function kolom_kedaluwarsa_tersedia()
+    {
+        return $this->db->field_exists('nomor_batch', 'penerimaan_obat_detail')
+            && $this->db->field_exists('tanggal_kadaluarsa', 'penerimaan_obat_detail');
     }
 }

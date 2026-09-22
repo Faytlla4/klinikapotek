@@ -412,7 +412,9 @@ CREATE TABLE public.penerimaan_obat_detail (
     id_penerimaan bigint NOT NULL,
     id_obat bigint NOT NULL,
     jumlah_terima integer NOT NULL,
-    kondisi character varying(30) DEFAULT 'Baik'::character varying NOT NULL
+    kondisi character varying(30) DEFAULT 'Baik'::character varying NOT NULL,
+    nomor_batch character varying(100),
+    tanggal_kadaluarsa date
 );
 
 

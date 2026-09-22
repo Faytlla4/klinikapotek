@@ -9,6 +9,11 @@
     <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3><?php echo (int) $periksa_selesai; ?> / <?php echo (int) $periksa_hari_ini; ?></h3><p>Pemeriksaan Selesai / Hari Ini</p></div><div class="icon"><i class="fas fa-stethoscope"></i></div><a href="<?php echo site_url(SITE_AREA . '/content/pemeriksaan'); ?>" class="small-box-footer">Pemeriksaan <i class="fas fa-arrow-circle-right"></i></a></div></div>
     <div class="col-lg-3 col-6"><div class="small-box bg-primary"><div class="inner"><h3><?php echo (int) $resep_hari_ini; ?></h3><p>Resep Dibuat Hari Ini</p></div><div class="icon"><i class="fas fa-prescription-bottle-alt"></i></div><a href="<?php echo site_url(SITE_AREA . '/content/resep'); ?>" class="small-box-footer">Resep <i class="fas fa-arrow-circle-right"></i></a></div></div>
 </div>
+<div class="row mb-3">
+    <div class="col-md-4"><span class="badge badge-info p-2">Menunggu: <?php echo (int) $antrian_menunggu; ?></span></div>
+    <div class="col-md-4"><span class="badge badge-warning p-2">Sedang diperiksa: <?php echo (int) $antrian_diproses; ?></span></div>
+    <div class="col-md-4"><span class="badge badge-success p-2">Selesai: <?php echo (int) $antrian_selesai; ?></span></div>
+</div>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Antrian Hari Ini<?php echo ! empty($dokter) ? ' — ' . html_escape($dokter->nama_dokter) : ''; ?></h3>
     <div class="card-tools"><a href="<?php echo site_url(SITE_AREA . '/content/pemeriksaan/create'); ?>" class="btn btn-sm btn-primary">Tambah Pemeriksaan</a></div></div>

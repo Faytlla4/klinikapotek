@@ -33,6 +33,14 @@
             .content-wrapper { overflow-x: hidden; }
         </style>
         <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column">
+                <li class="nav-item">
+                    <a href="<?php echo site_url('dashboard'); ?>" class="nav-link<?php echo $this->uri->segment(1) === 'dashboard' ? ' active' : ''; ?>" title="Dashboard">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+            </ul>
             <?php echo Contextslte::render_menu('text', 'normal'); ?>
         </nav>
     </div>

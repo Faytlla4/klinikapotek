@@ -40,6 +40,9 @@ $config['modules_locations'] = array(
 // to APPPATH. This is primarily used by MY_Config when writing new files.
 $config['site.backup_folder'] = 'archives/';
 
+// Periode peringatan kedaluwarsa obat pada dashboard apotek (hari).
+$config['apotek.expiry_warning_days'] = 30;
+
 //------------------------------------------------------------------------------
 // !CONTEXTS
 //------------------------------------------------------------------------------
