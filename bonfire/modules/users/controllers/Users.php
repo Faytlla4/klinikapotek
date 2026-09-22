@@ -565,6 +565,10 @@ class Users extends Front_Controller
 				$id = $this->current_user->id;
 			}
 			$_POST['id'] = $id;
+		// ponytail: rule unique[users.x,users.id_user] membaca post('id_user')
+		// untuk mengecualikan baris sendiri — tanpa ini username sendiri
+		// dianggap "already being used".
+		$_POST['id_user'] = $id;
 
 			// Security check to ensure the posted id is the current user's id.
 			if ($_POST['id'] != $this->current_user->id) {
