@@ -558,26 +558,19 @@ class Users extends Front_Controller
 	 */
 	private function saveUser($type = 'insert', $id = 0, $metaFields = array())
 	{
-		$extraUniqueRule = '';
-
 		if ($type != 'insert') {
 			if ($id == 0) {
 				$id = $this->current_user->id;
 			}
 			$_POST['id'] = $id;
-		// ponytail: rule unique[users.x,users.id_user] membaca post('id_user')
-		// untuk mengecualikan baris sendiri — tanpa ini username sendiri
-		// dianggap "already being used".
-		$_POST['id_user'] = $id;
+			$_POST['id_user'] = $id;
 
 			// Security check to ensure the posted id is the current user's id.
 			if ($_POST['id'] != $this->current_user->id) {
 				$this->form_validation->set_message('email', 'lang:us_invalid_userid');
 				return false;
 			}
-
-		$extraUniqueRule = ',users.id_user';
-	}
+		}
 
 		$this->form_validation->set_rules($this->user_model->get_validation_rules($type));
 
@@ -588,7 +581,20 @@ class Users extends Front_Controller
 			$usernameRequired = 'required|';
 		}
 
-		$this->form_validation->set_rules('username', 'lang:bf_username', "{$usernameRequired}trim|max_length[30]|unique[users.username{$extraUniqueRule}]");
+		// ponytail: unique hanya saat username beneran diganti — ganti nama
+		// saja tidak boleh kena cek "already being used".
+		$usernameRules = "{$usernameRequired}trim|max_length[30]";
+		if ($type == 'insert') {
+			$usernameRules .= '|unique[users.username]';
+		} else {
+			$existing = $this->db->where('id_user', $id)->get('users')->row();
+			$postedUsername = (string) $this->input->post('username');
+			if ($existing && $postedUsername !== (string) $existing->username) {
+				$usernameRules .= '|unique[users.username,users.id_user]';
+				$_POST['id_user'] = $id;
+			}
+		}
+		$this->form_validation->set_rules('username', 'lang:bf_username', $usernameRules);
 		if ($type == 'insert') {
 			$this->form_validation->set_rules('email', 'lang:bf_email', "required|trim|valid_email|max_length[254]|unique[users.email]");
 		} else {
