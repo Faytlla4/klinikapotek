@@ -209,6 +209,8 @@ $route['admin/settings/roles'] = 'pengguna/roles/index';
 $route['admin/settings/roles/(:any)'] = 'pengguna/roles/$1';
 $route['admin/settings/roles/(:any)/(:any)'] = 'pengguna/roles/$1/$2';
 $route['admin/profile'] = 'pengguna/users/profile';
+// ponytail: users/profile legacy (Bonfire) tak kompatibel skema custom — arahkan ke profile baru.
+$route['users/profile'] = 'pengguna/users/profile';
 
 // Alias lama admin/content/* (kompatibilitas; sidebar memakai context baru).
 // Pendaftaran dan data pasien.

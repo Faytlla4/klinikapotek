@@ -9,7 +9,10 @@ class Users extends App_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->auth->restrict('kelola_user');
+        // ponytail: profile milik sendiri boleh semua role login; kelola user lain tetap butuh kelola_user.
+        if ($this->router->fetch_method() !== 'profile') {
+            $this->auth->restrict('kelola_user');
+        }
         $this->load->model('audit/audit_log_model');
         $this->form_validation->set_error_delimiters("<span class='error text-danger'>", "</span>");
     }
@@ -131,31 +134,46 @@ class Users extends App_Controller
 
     public function profile()
     {
-        $user_id = $this->current_user->id;
+        // ponytail: skema apotek pakai id_user (bukan id); dari session agar berlaku semua role.
+        $user_id = (int) $this->auth->user_id();
 
         if (isset($_POST['save'])) {
-            $nama = $this->input->post('nama');
-            $password = $this->input->post('password');
-            $pass_confirm = $this->input->post('pass_confirm');
+            $nama = trim((string) $this->input->post('nama'));
+            $password = (string) $this->input->post('password');
+            $pass_confirm = (string) $this->input->post('pass_confirm');
 
-            $update = ['nama' => $nama];
-            if (!empty($password)) {
-                if ($password !== $pass_confirm) {
-                    Template::set_message('Konfirmasi password tidak cocok.', 'error');
-                    Template::set('toolbar_title', 'Profil Saya');
-                    Template::render();
-                    return;
+            if ($nama === '') {
+                Template::set_message('Nama tidak boleh kosong.', 'error');
+            } elseif ($password !== '' && strlen($password) < 6) {
+                Template::set_message('Password minimal 6 karakter bila diisi.', 'error');
+            } elseif ($password !== '' && $password !== $pass_confirm) {
+                Template::set_message('Konfirmasi password tidak cocok.', 'error');
+            } else {
+                $update = array('nama' => $nama, 'updated_at' => date('Y-m-d H:i:s'));
+                if ($password !== '') {
+                    $hash = $this->auth->hash_password($password, 8);
+                    if (empty($hash['hash'])) {
+                        Template::set_message('Gagal membuat hash password.', 'error');
+                        $update = false;
+                    } else {
+                        $update['password'] = $hash['hash'];
+                    }
                 }
-                $hashed = $this->auth->hash_password($password);
-                $update['password'] = $hashed['hash'];
+                if (is_array($update)) {
+                    if ($this->db->where('id_user', $user_id)->update('users', $update)) {
+                        Template::set_message('Profil berhasil diperbarui.', 'success');
+                        redirect(SITE_AREA . '/profile');
+                    }
+                    Template::set_message('Gagal memperbarui profil.', 'error');
+                }
             }
-
-            $this->db->where('id_user', $user_id)->update('users', $update);
-            Template::set_message('Profil berhasil diperbarui.', 'success');
-            Template::redirect('admin/pengguna/profile');
         }
 
         $user = $this->db->where('id_user', $user_id)->get('users')->row();
+        if (! $user) {
+            Template::set_message('Data user tidak ditemukan.', 'error');
+            redirect(SITE_AREA);
+        }
         Template::set('pengguna', $user);
         Template::set('toolbar_title', 'Profil Saya');
         Template::render();

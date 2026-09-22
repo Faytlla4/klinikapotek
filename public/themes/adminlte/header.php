@@ -19,10 +19,10 @@
             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                 <li class="user-header">
                     <img src="<?php echo base_url('assets/images/anonym.png'); ?>" class="img-circle elevation-2">
-                    <p><?php echo $userDisplayName; ?><small><?php echo $current_user->email; ?></small></p>
+                    <p><?php echo $userDisplayName; ?><small><?php echo $userRoleName; ?></small></p>
                 </li>
                 <li class="user-footer">
-                    <a href="<?php echo site_url('users/profile'); ?>" class="btn btn-default btn-flat">
+                    <a href="<?php echo site_url('admin/profile'); ?>" class="btn btn-default btn-flat">
                         <small><?php echo lang('bf_user_settings'); ?></small>
                     </a>
                     <a href="<?php echo site_url('logout'); ?>" class="btn btn-default btn-flat float-right">
