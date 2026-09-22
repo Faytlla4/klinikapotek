@@ -14,7 +14,8 @@
             echo $title_text;
         ?>
     </title>
-    <link rel="shortcut icon" href="<?php echo base_url(); ?>assets/images/logo_apotek.png" type="image/png">
+    <link rel="icon" href="<?php echo base_url(); ?>assets/images/favicon.png" type="image/png" sizes="64x64">
+    <link rel="apple-touch-icon" href="<?php echo base_url(); ?>assets/images/apple-touch-icon.png" sizes="180x180">
     <?php
         Assets::add_css([
             'plugins/fontawesome-free/css/all.min.css',
