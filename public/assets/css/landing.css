@@ -8,11 +8,11 @@ html { scroll-behavior: auto; -webkit-text-size-adjust: 100%; }
 
 /* === BASE === */
 body {
-    background: #F7FAF8;
-    color: #343A40;
+    background: #F8FAFB;
+    color: #1A2332;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -22,17 +22,23 @@ img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; text-decoration: none; }
 ul, ol { list-style: none; }
 
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
 /* ============================================
    HEADER
    ============================================ */
 .site-header {
     background: #fff;
-    border-bottom: 1px solid #e9ecef;
-    height: 54px;
+    border-bottom: 1px solid #E8ECF0;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 24px;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -40,126 +46,202 @@ ul, ol { list-style: none; }
 .site-header .logo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 .site-header .logo-img {
-    height: 28px;
+    height: 32px;
     width: auto;
 }
 .site-header .logo-text {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: #198754;
+    letter-spacing: -0.01em;
     white-space: nowrap;
 }
 .site-header .btn-masuk {
     display: inline-block;
     background: #198754;
     color: #fff;
-    padding: 6px 20px;
+    padding: 7px 22px;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
     line-height: 1.4;
+    transition: background 150ms;
 }
-.site-header .btn-masuk:hover { background: #157347; }
+.site-header .btn-masuk:hover { background: #146C43; }
 
 /* ============================================
-   HOME PAGE
+   BUTTONS
    ============================================ */
+.btn {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background 150ms, color 150ms;
+}
+.btn-primary {
+    background: #198754;
+    color: #fff;
+}
+.btn-primary:hover { background: #146C43; }
+.btn-ghost {
+    background: transparent;
+    color: #198754;
+    border: 1px solid #D1EDDB;
+}
+.btn-ghost:hover { background: #E8F5EE; }
 
-/* Hero */
+/* ============================================
+   HERO
+   ============================================ */
 .hero {
     background: #fff;
-    text-align: center;
-    padding: 72px 24px 56px;
-    max-width: 680px;
+    border-bottom: 1px solid #E8ECF0;
+}
+.hero-inner {
+    max-width: 640px;
     margin: 0 auto;
+    padding: 56px 24px 60px;
+    text-align: center;
 }
-.hero-icon {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 28px;
-    background: #EAF7F0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.hero-icon i { font-size: 48px; color: #198754; }
 .hero h1 {
     font-size: 26px;
     font-weight: 700;
-    color: #198754;
-    margin-bottom: 12px;
-    line-height: 1.3;
+    color: #1A2332;
+    line-height: 1.35;
+    margin-bottom: 14px;
+    letter-spacing: -0.02em;
 }
-.hero p {
+.hero-desc {
     font-size: 15px;
-    color: #6c757d;
+    color: #5A6B7D;
     margin-bottom: 28px;
     line-height: 1.6;
-    max-width: 520px;
-    margin-left: auto;
-    margin-right: auto;
 }
-.hero .btn-masuk {
-    display: inline-block;
-    background: #198754;
-    color: #fff;
-    padding: 10px 32px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
-.hero .btn-masuk:hover { background: #157347; }
 
-/* Services */
-.services {
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 32px 20px 48px;
+/* ============================================
+   SERVICES
+   ============================================ */
+.services-section {
+    padding: 44px 0 52px;
 }
-.services-title {
-    text-align: center;
-    font-size: 18px;
+.services-section h2 {
+    font-size: 20px;
     font-weight: 700;
-    color: #343a40;
-    margin-bottom: 24px;
+    color: #1A2332;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+    text-align: center;
+}
+.section-sub {
+    font-size: 14px;
+    color: #6B7A8D;
+    margin-bottom: 28px;
+    text-align: center;
 }
 .services-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
 }
 .service-card {
-    text-align: center;
     background: #fff;
-    border: 1px solid #e9ecef;
+    border: 1px solid #E8ECF0;
     border-radius: 10px;
-    padding: 18px 10px;
+    padding: 20px;
+    transition: border-color 150ms;
 }
 .service-card:hover { border-color: #198754; }
 .service-card .svc-icon {
     width: 40px;
     height: 40px;
-    margin: 0 auto 8px;
-    background: #EAF7F0;
+    background: #E8F5EE;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 12px;
+    color: #198754;
 }
-.service-card .svc-icon i { font-size: 16px; color: #198754; }
 .service-card h3 {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
-    color: #343a40;
+    color: #1A2332;
+    margin-bottom: 4px;
+}
+.service-card p {
+    font-size: 13px;
+    color: #6B7A8D;
+    line-height: 1.5;
+}
+
+/* ============================================
+   INFO (HOURS + CONTACT)
+   ============================================ */
+.info-section {
+    padding: 0 0 56px;
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.info-card {
+    background: #fff;
+    border: 1px solid #E8ECF0;
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+.info-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: #E8F5EE;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #198754;
+}
+.info-card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1A2332;
     margin-bottom: 2px;
 }
-.service-card span {
-    font-size: 11px;
-    color: #6c757d;
+.info-card p {
+    font-size: 13px;
+    color: #6B7A8D;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.site-footer {
+    background: #fff;
+    border-top: 1px solid #E8ECF0;
+    padding: 14px 24px;
+    text-align: center;
+}
+.site-footer p {
+    font-size: 12px;
+    color: #8494A7;
+    margin: 0;
 }
 
 /* ============================================
@@ -183,7 +265,7 @@ body.login-page .site-header {
     width: 100%;
     max-width: 380px;
     background: #fff;
-    border: 1px solid #e9ecef;
+    border: 1px solid #E8ECF0;
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     padding: 28px 24px;
@@ -204,7 +286,7 @@ body.login-page .site-header {
 }
 .login-card .lc-sub {
     font-size: 13px;
-    color: #6c757d;
+    color: #6B7A8D;
     margin-bottom: 20px;
 }
 
@@ -214,19 +296,20 @@ body.login-page .site-header {
     text-align: left;
     font-size: 12px;
     font-weight: 600;
-    color: #343a40;
+    color: #1A2332;
     margin-bottom: 4px;
 }
 .lc-form input[type="text"],
 .lc-form input[type="password"] {
     width: 100%;
     padding: 9px 12px;
-    border: 1px solid #dee2e6;
+    border: 1px solid #DDE2E8;
     border-radius: 6px;
     font-size: 14px;
-    color: #343a40;
+    color: #1A2332;
     background: #fff;
     outline: none;
+    transition: border-color 150ms;
 }
 .lc-form input:focus {
     border-color: #198754;
@@ -244,22 +327,23 @@ body.login-page .site-header {
     font-weight: 600;
     cursor: pointer;
     margin-top: 4px;
+    transition: background 150ms;
 }
-.lc-form .lc-btn:hover { background: #157347; }
+.lc-form .lc-btn:hover { background: #146C43; }
 .lc-back {
     display: block;
     text-align: center;
     margin-top: 14px;
     font-size: 12px;
-    color: #6c757d;
+    color: #6B7A8D;
 }
 .lc-back a { color: #198754; font-weight: 500; }
 .lc-back a:hover { text-decoration: underline; }
 
 /* Alert */
 .lc-alert {
-    background: #fff5f5;
-    border: 1px solid #f5c2c7;
+    background: #FFF5F5;
+    border: 1px solid #F5C2C7;
     border-radius: 6px;
     padding: 8px 12px;
     margin-bottom: 14px;
@@ -269,32 +353,18 @@ body.login-page .site-header {
 }
 
 /* ============================================
-   FOOTER
-   ============================================ */
-.site-footer {
-    background: #fff;
-    border-top: 1px solid #e9ecef;
-    padding: 12px 20px;
-    text-align: center;
-}
-.site-footer p {
-    font-size: 12px;
-    color: #6c757d;
-    margin: 0;
-}
-
-/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
-    .services-grid { grid-template-columns: repeat(3, 1fr); }
-    .hero { padding: 56px 20px 40px; }
+    .hero-inner { padding: 44px 20px 48px; }
     .hero h1 { font-size: 22px; }
+    .services-grid { grid-template-columns: repeat(2, 1fr); }
+    .info-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
-    .services-grid { grid-template-columns: repeat(2, 1fr); }
-    .site-header .logo-text { font-size: 14px; }
     .hero h1 { font-size: 20px; }
-    .hero p { font-size: 14px; }
+    .hero-desc { font-size: 14px; }
+    .services-grid { grid-template-columns: 1fr; }
+    .site-header .logo-text { font-size: 13px; }
     .login-card { padding: 24px 18px; }
 }

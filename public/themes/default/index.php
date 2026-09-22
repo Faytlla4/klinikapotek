@@ -19,10 +19,10 @@
     <?php
         Assets::add_css([
             'plugins/fontawesome-free/css/all.min.css',
-            'css/landing.css',
         ]);
         echo Assets::css();
     ?>
+    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/landing.css?v=2" media="screen">
 </head>
 <body>
     <?php echo theme_view('header'); ?>
