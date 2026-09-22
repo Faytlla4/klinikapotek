@@ -227,11 +227,24 @@ class Online extends App_Controller
             }
             redirect(SITE_AREA . '/online/pesanan/detail/' . $id);
         }
+        if ($this->input->post('ajukan_retur')) {
+            $this->load->model('apotekonline/retur_model');
+            $id_retur = $this->retur_model->ajukan($id, $pasien->id_pasien, $this->input->post('alasan'));
+            if ($id_retur) {
+                $this->audit_log_model->catat($this->auth->user_id(), 'create', 'retur_online', $id_retur, 'Retur diajukan pasien');
+                Template::set_message('Pengajuan retur terkirim, menunggu keputusan apoteker.', 'success');
+            } else {
+                Template::set_message($this->retur_model->error, 'error');
+            }
+            redirect(SITE_AREA . '/online/pesanan/detail/' . $id);
+        }
         $row = $this->pesanan_model->detail_pasien($id, $pasien->id_pasien);
         if (! $row) {
             show_404();
         }
+        $this->load->model('apotekonline/retur_model');
         Template::set('pesanan', $row);
+        Template::set('retur', $this->retur_model->retur_untuk_pesanan($id, $pasien->id_pasien));
         Template::set('nama_pemesan', isset($pasien->nama) ? $pasien->nama : null);
         Template::set('toolbar_title', 'Detail Pesanan');
         Template::set_view('online/pesanan_detail');

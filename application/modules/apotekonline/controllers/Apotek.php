@@ -11,6 +11,7 @@ class Apotek extends App_Controller
         parent::__construct();
         $this->auth->restrict('kelola_pesanan_online');
         $this->load->model('apotekonline/pesanan_model');
+        $this->load->model('apotekonline/retur_model');
         $this->load->model('audit/audit_log_model');
     }
 
@@ -100,6 +101,63 @@ class Apotek extends App_Controller
         Template::set('pesanan', $row);
         Template::set('toolbar_title', 'Detail Pesanan Online');
         Template::set_view('online/kelola_detail');
+        Template::render();
+    }
+
+    /** Daftar pengajuan retur (filter status via ?status=). */
+    public function retur()
+    {
+        $status = $this->input->get('status');
+        if ($status !== null && ! in_array($status, array('DIMINTA', 'SELESAI', 'DITOLAK'))) {
+            $status = null;
+        }
+        Template::set(array(
+            'retur_list' => $this->retur_model->daftar($status),
+            'f_status' => $status,
+        ));
+        Template::set('toolbar_title', 'Retur Online');
+        Template::set_view('online/retur');
+        Template::render();
+    }
+
+    /** Putus retur: setujui (disposisi+refund) atau tolak (catatan). */
+    public function retur_detail($id)
+    {
+        $id = (int) $id > 0 ? (int) $id : 0;
+        $aksi = $this->input->post('aksi');
+        if ($aksi === 'setujui') {
+            $ok = $this->retur_model->setujui(
+                $id,
+                (array) $this->input->post('disposisi'),
+                $this->input->post('metode_refund'),
+                $this->input->post('nominal_refund'),
+                $this->input->post('catatan'),
+                $this->auth->user_id()
+            );
+            if ($ok) {
+                $this->audit_log_model->catat($this->auth->user_id(), 'update', 'retur_online', $id, 'Retur disetujui');
+                Template::set_message('Retur disetujui, stok dan refund tercatat.', 'success');
+            } else {
+                Template::set_message($this->retur_model->error, 'error');
+            }
+            redirect(SITE_AREA . '/apotek/retur/' . $id);
+        } elseif ($aksi === 'tolak') {
+            $ok = $this->retur_model->tolak($id, $this->input->post('catatan'), $this->auth->user_id());
+            if ($ok) {
+                $this->audit_log_model->catat($this->auth->user_id(), 'update', 'retur_online', $id, 'Retur ditolak');
+                Template::set_message('Retur ditolak.', 'success');
+            } else {
+                Template::set_message($this->retur_model->error, 'error');
+            }
+            redirect(SITE_AREA . '/apotek/retur/' . $id);
+        }
+        $row = $id ? $this->retur_model->detail($id) : false;
+        if (! $row) {
+            show_404();
+        }
+        Template::set('retur', $row);
+        Template::set('toolbar_title', 'Putusan Retur Online');
+        Template::set_view('online/retur_detail');
         Template::render();
     }
 }

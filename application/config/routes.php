@@ -164,6 +164,10 @@ $route['admin/apotek/pesanan-online'] = 'apotekonline/apotek/index';
 $route['admin/apotek/pesanan-online/(:any)'] = 'apotekonline/apotek/$1';
 $route['admin/apotek/pesanan-online/(:any)/(:any)'] = 'apotekonline/apotek/$1/$2';
 
+// Retur online (apoteker memutus, pasien mengajukan dari detail pesanan).
+$route['admin/apotek/retur'] = 'apotekonline/apotek/retur';
+$route['admin/apotek/retur/(:num)'] = 'apotekonline/apotek/retur_detail/$1';
+
 // APOTEK ONLINE sisi PASIEN (context online).
 $route['admin/online/obat'] = 'apotekonline/online/obat';
 $route['admin/online/keranjang'] = 'apotekonline/online/keranjang';
