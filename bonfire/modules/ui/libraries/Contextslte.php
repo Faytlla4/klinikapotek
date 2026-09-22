@@ -624,6 +624,18 @@ class Contextslte
 
 		// Sub Menus? Only works if it's a valid view...
 		// To maintain backwards compatility, strip out any <ul> tags.
+		$view = str_ireplace(
+			array('<ul>', '</ul>'),
+			array('', ''),
+			self::$ci->load->view($menu_view, null, true)
+		);
+
+		// ponytail: menu yang render tepat 1 <li> -> flatten jadi link
+		// langsung; dropdown berisi 1 anak hanya menambah 1 klik.
+		if (substr_count($view, '<li') === 1 && preg_match('/<li\b[^>]*>.*<\/li>/s', $view, $m)) {
+			return $m[0];
+		}
+
 		return str_replace(
 			array('{submenu_class}', '{url}', '{display}', '{child_class}', '{view}'),
 			array(
@@ -631,11 +643,7 @@ class Contextslte
 				'#',
 				$displayName,
 				self::$child_class,
-				str_ireplace(
-					array('<ul>', '</ul>'),
-					array('', ''),
-					self::$ci->load->view($menu_view, null, true)
-				),
+				$view,
 			),
 			self::$templateSubMenu
 		);
