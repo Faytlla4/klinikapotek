@@ -15,7 +15,7 @@
             <div class="info">
                 <a href="#" class="d-block"><?php
                     $user = $this->auth->user();
-                    echo html_escape(!empty($user->display_name) ? $user->display_name : $user->username);
+                    echo html_escape(!empty($user->nama) ? $user->nama : $user->username);
                 ?></a>
             </div>
         </div>

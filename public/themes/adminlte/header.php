@@ -8,7 +8,7 @@
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown user-menu">
             <?php
-            	$userDisplayName = !empty($current_user->display_name) ? $current_user->display_name : ($this->settings_lib->item('auth.use_usernames') ? $current_user->username : $current_user->email);
+            	$userDisplayName = !empty($current_user->nama) ? $current_user->nama : ($this->settings_lib->item('auth.use_usernames') ? $current_user->username : $current_user->email);
             	$userRoleName = !empty($current_user->role_name) ? $current_user->role_name : ($this->settings_lib->item('auth.use_usernames') ? $current_user->username : $current_user->email);
             	// echo gravatar_link($current_user->email, 96, null, $userDisplayName);
             ?>
