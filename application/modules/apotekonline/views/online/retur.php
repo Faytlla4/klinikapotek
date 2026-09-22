@@ -7,7 +7,7 @@
             <a href="<?php echo site_url(SITE_AREA . '/apotek/retur?status=SELESAI'); ?>" class="btn btn-sm <?php echo $f_status === 'SELESAI' ? 'btn-primary' : 'btn-default'; ?>">Selesai</a>
             <a href="<?php echo site_url(SITE_AREA . '/apotek/retur?status=DITOLAK'); ?>" class="btn btn-sm <?php echo $f_status === 'DITOLAK' ? 'btn-primary' : 'btn-default'; ?>">Ditolak</a>
         </div>
-        <div class="table-responsive"><table class="table table-bordered table-striped">
+        <div class="table-responsive"><table class="table table-bordered table-striped table-hover">
             <thead><tr><th>Nomor Retur</th><th>Pesanan</th><th>Pasien</th><th>Pengajuan</th><th>Status</th><th>Aksi</th></tr></thead>
             <tbody>
             <?php if (empty($retur_list)): ?><tr><td colspan="6" class="text-center text-muted">Belum ada pengajuan retur.</td></tr><?php endif; ?>

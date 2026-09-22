@@ -25,9 +25,9 @@
 </div></div>    </div>
     <?php $retur_aktif = ! empty($retur) && in_array($retur->status, array('DIMINTA', 'SELESAI')); ?>
     <?php if (! empty($retur)): ?>
-    <div class="row"><div class="col-md-12"><div class="card <?php echo $retur->status === 'SELESAI' ? 'card-success' : ($retur->status === 'DITOLAK' ? 'card-danger' : 'card-warning'); ?> card-outline">
+    <div class="row"><div class="col-md-12"><div class="card <?php echo $retur->status === 'SELESAI' ? 'card-success' : ($retur->status === 'DITOLAK' ? 'card-danger' : 'card-warning'); ?>">
         <div class="card-header"><h3 class="card-title"><i class="fas fa-undo"></i> Retur <?php echo html_escape($retur->nomor_retur); ?></h3>
-            <div class="card-tools"><span class="badge <?php echo $retur->status === 'SELESAI' ? 'badge-success' : ($retur->status === 'DITOLAK' ? 'badge-danger' : 'badge-warning'); ?>"><?php echo html_escape($retur->status); ?></span></div>
+            <div class="card-tools"><span class="badge <?php echo $retur->status === 'DIMINTA' ? 'badge-dark' : 'badge-light'; ?>"><?php echo html_escape($retur->status); ?></span></div>
         </div>
         <div class="card-body">
             <div class="callout callout-warning">
