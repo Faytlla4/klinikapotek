@@ -600,6 +600,10 @@ class Users extends Front_Controller
 		// would still pass.
 		if ($type != 'insert' && $this->input->post('password')) {
 			$this->form_validation->set_rules('pass_confirm', 'lang:bf_password_confirm', "required|matches[password]");
+		} elseif ($type != 'insert') {
+			// ponytail: ganti nama/username saja tanpa wajib isi password.
+			$this->form_validation->set_rules('password', 'lang:bf_password', 'trim|max_length[120]');
+			$this->form_validation->set_rules('pass_confirm', 'lang:bf_password_confirm', 'trim');
 		}
 
 		$userIsAdmin = isset($this->current_user) && $this->current_user->role_id == 1;

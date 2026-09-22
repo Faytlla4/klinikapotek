@@ -108,7 +108,7 @@
             margin-bottom: 0;
             padding-bottom: 12px;
         }
-        .sidebar-dark-primary .user-panel a { color: rgba(255,255,255,.9) !important; }
+        .sidebar-dark-primary .user-panel a { color: rgba(255,255,255,.9) !important; font-weight: 600 !important; }
 
         /* Sidebar collapsed hover */
         body.sidebar-mini.sidebar-collapse .main-sidebar {
