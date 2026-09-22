@@ -517,6 +517,34 @@ class Contextslte
 	public static function build_sub_menu($context, $ignore_ul = false)
 	{
 		$list = '';
+
+		// ponytail: context yang hanya berisi 1 module bermenu -> anak
+		// menu langsung jadi isi context, tanpa parent perantara
+		// (cth. Laporan > Laporan > tab jadi Laporan > tab).
+		if (count(self::$menu) === 1) {
+			foreach (self::$menu as $topic) {
+				if (count($topic) === 1) {
+					$vals = reset($topic);
+					if (! empty($vals['menu_view'])) {
+						$list = str_ireplace(
+							array('<ul>', '</ul>'),
+							array('', ''),
+							self::$ci->load->view($vals['menu_view'], null, true)
+						);
+						self::$menu = array();
+						if ($ignore_ul) {
+							return $list;
+						}
+						return str_replace(
+							array('{class}', '{extra}', '{menu}'),
+							array(self::$child_class, '', $list),
+							self::$templateContextNav
+						);
+					}
+				}
+			}
+		}
+
 		foreach (self::$menu as $topic_name => $topic) {
 			if (count($topic) <= 1) {
 				foreach ($topic as $module => $vals) {
