@@ -1,76 +1,49 @@
-<?php
-
-$errorClass   = empty($errorClass) ? ' error' : $errorClass;
-$controlClass = empty($controlClass) ? 'span6' : $controlClass;
-$fieldData = array(
-    'errorClass'   => $errorClass,
-    'controlClass' => $controlClass,
-);
-
-if (isset($password_hints)) {
-    $fieldData['password_hints'] = $password_hints;
-}
-
-// In order for $renderPayload to be set properly, the order of the isset() checks
-// for $current_user, $user, and $this->auth should be maintained. An if/elseif
-// structure could be used for $renderPayload, but the separate if statements would
-// still be needed to set $fieldData properly.
-$renderPayload = null;
-if (isset($current_user)) {
-    $fieldData['current_user'] = $current_user;
-    $renderPayload = $current_user;
-}
-if (isset($user)) {
-    $fieldData['user'] = $user;
-    $renderPayload = $user;
-}
-if (empty($renderPayload) && isset($this->auth)) {
-    $renderPayload = $this->auth->user();
-}
-
+<?php /* /users/views/profile.php — ponytail: field sesuai skema apotek (nama, username, password) + markup Bootstrap 4 agar nyatu dengan adminlte. */
+$userNama = set_value('display_name', isset($user->nama) ? $user->nama : (isset($user->username) ? $user->username : ''));
+$userName = set_value('username', isset($user->username) ? $user->username : '');
 ?>
-<section id="profile">
-    <h1 class="page-header"><?php echo lang('us_edit_profile'); ?></h1>
-    <?php if (validation_errors()) : ?>
-    <div class="alert alert-error">
-        <?php echo validation_errors(); ?>
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title"><?php echo lang('us_edit_profile'); ?></h3>
     </div>
-    <?php
-    endif;
-    if (isset($user) && $user->role_name == 'Banned') :
-    ?>
-    <div data-dismiss="alert" class="alert alert-error">
-        <?php echo lang('us_banned_admin_note'); ?>
-    </div>
-    <?php endif; ?>
-    <div class="alert alert-info">
-        <h4 class="alert-heading"><?php echo lang('bf_required_note'); ?></h4>
-        <?php
-        if (isset($password_hints)) {
-            echo $password_hints;
-        }
-        ?>
-    </div>
-    <div class="row-fluid">
-        <div class="span12">
-            <?php echo form_open($this->uri->uri_string(), array('class' => 'form-horizontal', 'autocomplete' => 'off')); ?>
-                <fieldset>
-                    <?php Template::block('user_fields', 'user_fields', $fieldData); ?>
-                </fieldset>
-                <fieldset>
-                    <?php
-                    // Allow modules to render custom fields
-                    Events::trigger('render_user_form', $renderPayload);
-                    ?>
-                    <!-- Start User Meta -->
-                    <?php $this->load->view('users/user_meta', array('frontend_only' => true)); ?>
-                    <!-- End of User Meta -->
-                </fieldset>
-                <fieldset class="form-actions">
-                    <input type="submit" name="save" class="btn btn-primary" value="<?php echo lang('bf_action_save') . ' ' . lang('bf_user'); ?>" />
-                    <?php echo lang('bf_or') . ' ' . anchor('/', lang('bf_action_cancel')); ?>
-                </fieldset>
-            <?php echo form_close(); ?>
+    <?php echo form_open($this->uri->uri_string(), array('autocomplete' => 'off')); ?>
+    <div class="card-body">
+        <?php if (validation_errors()) : ?>
+        <div class="alert alert-danger">
+            <?php echo validation_errors(); ?>
+        </div>
+        <?php endif; ?>
+        <div class="form-group row<?php echo form_error('display_name') ? ' has-error' : ''; ?>">
+            <label class="col-sm-3 col-form-label" for="display_name">Nama</label>
+            <div class="col-sm-9">
+                <input class="form-control" type="text" id="display_name" name="display_name" value="<?php echo html_escape($userNama); ?>" />
+                <?php echo form_error('display_name', '<span class="text-danger">', '</span>'); ?>
+            </div>
+        </div>
+        <div class="form-group row<?php echo form_error('username') ? ' has-error' : ''; ?>">
+            <label class="col-sm-3 col-form-label" for="username"><?php echo lang('bf_username'); ?> *</label>
+            <div class="col-sm-9">
+                <input class="form-control" type="text" id="username" name="username" value="<?php echo html_escape($userName); ?>" />
+                <?php echo form_error('username', '<span class="text-danger">', '</span>'); ?>
+            </div>
+        </div>
+        <div class="form-group row<?php echo form_error('password') ? ' has-error' : ''; ?>">
+            <label class="col-sm-3 col-form-label" for="password"><?php echo lang('bf_password'); ?></label>
+            <div class="col-sm-9">
+                <input class="form-control" type="password" id="password" name="password" value="" placeholder="Kosongkan bila tidak ganti password" />
+                <?php echo form_error('password', '<span class="text-danger">', '</span>'); ?>
+            </div>
+        </div>
+        <div class="form-group row<?php echo form_error('pass_confirm') ? ' has-error' : ''; ?>">
+            <label class="col-sm-3 col-form-label" for="pass_confirm"><?php echo lang('bf_password_confirm'); ?></label>
+            <div class="col-sm-9">
+                <input class="form-control" type="password" id="pass_confirm" name="pass_confirm" value="" />
+                <?php echo form_error('pass_confirm', '<span class="text-danger">', '</span>'); ?>
+            </div>
         </div>
     </div>
-</section>
+    <div class="card-footer">
+        <input type="submit" name="save" class="btn btn-primary" value="<?php echo lang('bf_action_save'); ?>" />
+    </div>
+    <?php echo form_close(); ?>
+</div>

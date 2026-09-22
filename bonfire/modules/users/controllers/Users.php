@@ -174,6 +174,11 @@ class Users extends Front_Controller
 		$this->auth->restrict();
 		$this->set_current_user();
 
+		// ponytail: profile dibuka dari menu user di layout admin — render di
+		// tema adminlte (tema depan tak ada CSS-nya) agar ber-style.
+		Template::set_theme($this->config->item('template.adminlte_theme'), $this->config->item('template.default_theme'));
+		$this->load->library('ui/contextslte');
+
 		$this->load->helper('date');
 
 		$this->load->config('address');
@@ -567,8 +572,8 @@ class Users extends Front_Controller
 				return false;
 			}
 
-			$extraUniqueRule = ',users.id';
-		}
+		$extraUniqueRule = ',users.id_user';
+	}
 
 		$this->form_validation->set_rules($this->user_model->get_validation_rules($type));
 
@@ -580,7 +585,15 @@ class Users extends Front_Controller
 		}
 
 		$this->form_validation->set_rules('username', 'lang:bf_username', "{$usernameRequired}trim|max_length[30]|unique[users.username{$extraUniqueRule}]");
-		$this->form_validation->set_rules('email', 'lang:bf_email', "required|trim|valid_email|max_length[254]|unique[users.email{$extraUniqueRule}]");
+		if ($type == 'insert') {
+			$this->form_validation->set_rules('email', 'lang:bf_email', "required|trim|valid_email|max_length[254]|unique[users.email]");
+		} else {
+			// ponytail: tabel users apotek tanpa kolom email/bahasa/zona —
+			// netralkan rule bawaan model agar tak menggagalkan update profile.
+			$this->form_validation->set_rules('email', 'lang:bf_email', 'trim|max_length[254]');
+			$this->form_validation->set_rules('language', 'lang:bf_language', 'trim');
+			$this->form_validation->set_rules('timezones', 'lang:bf_timezone', 'trim');
+		}
 
 		// If a value has been entered for the password, pass_confirm is required.
 		// Otherwise, the pass_confirm field could be left blank and the form validation
@@ -591,6 +604,8 @@ class Users extends Front_Controller
 
 		$userIsAdmin = isset($this->current_user) && $this->current_user->role_id == 1;
 		$metaData = array();
+		// ponytail: tabel user_meta tak ada — meta hanya untuk insert.
+		if ($type == 'insert') {
 		foreach ($metaFields as $field) {
 			$adminOnlyField = isset($field['admin_only']) && $field['admin_only'] === true;
 			$frontEndField = !isset($field['frontend']) || $field['frontend'];
@@ -600,6 +615,7 @@ class Users extends Front_Controller
 				$this->form_validation->set_rules($field['name'], $field['label'], $field['rules']);
 				$metaData[$field['name']] = $this->input->post($field['name']);
 			}
+		}
 		}
 
 		// Setting the payload for Events system.
@@ -628,7 +644,31 @@ class Users extends Front_Controller
 				$result = $id;
 			}
 		} else {
-			$result = $this->user_model->update($id, $data);
+			// ponytail: skema apotek (id_user, username, password, nama,
+			// status) — tulis langsung kolom yang ada; User_model::update()
+			// menarget kolom Bonfire (password_hash, email, ...) yang tak ada.
+			$apotek = array();
+			$postUsername = $this->input->post('username');
+			if ($postUsername !== null && $postUsername !== '') {
+				$apotek['username'] = $postUsername;
+			}
+			$postNama = $this->input->post('display_name');
+			if ($postNama !== null && $postNama !== '') {
+				$apotek['nama'] = $postNama;
+			}
+			if ($this->input->post('password')) {
+				$hash = $this->auth->hash_password($this->input->post('password'));
+				if (empty($hash['hash'])) {
+					return false;
+				}
+				$apotek['password'] = $hash['hash'];
+			}
+			if (empty($apotek)) {
+				$result = true;
+			} else {
+				$apotek['updated_at'] = date('Y-m-d H:i:s');
+				$result = $this->db->where('id_user', $id)->update('users', $apotek);
+			}
 		}
 
 		if (is_numeric($id) && !empty($metaData)) {
