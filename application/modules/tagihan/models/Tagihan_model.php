@@ -208,6 +208,14 @@ class Tagihan_model extends BF_Model
         if (! $row) {
             return false;
         }
+        $pas = $this->db->select('pasien.no_rm, pasien.nama AS nama_pasien')
+            ->from('tagihan')
+            ->join('kunjungan', 'kunjungan.id_kunjungan = tagihan.id_kunjungan', 'left')
+            ->join('pasien', 'pasien.id_pasien = kunjungan.id_pasien', 'left')
+            ->where('tagihan.id_tagihan', (int) $id_tagihan)
+            ->get()->row();
+        $row->no_rm = $pas ? $pas->no_rm : null;
+        $row->nama_pasien = ($pas && $pas->nama_pasien) ? $pas->nama_pasien : null;
         $row->items = $this->db->where('id_tagihan', $id_tagihan)->get('tagihan_detail')->result();
         $bayar = $this->db->select_sum('jumlah_bayar', 'dibayar')
             ->where('id_transaksi IN (SELECT id_transaksi FROM transaksi WHERE id_tagihan = ' . (int) $id_tagihan . ')', null, false)

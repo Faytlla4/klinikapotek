@@ -110,12 +110,21 @@ class Stok_model extends BF_Model
         ));
     }
 
-    /** Riwayat mutasi sebuah obat. */
-    public function riwayat($id_obat, $limit = 50)
+    /** Riwayat mutasi sebuah obat (opsional saring jenis + rentang tanggal). */
+    public function riwayat($id_obat, $limit = 50, $dari = null, $sampai = null, $jenis = null)
     {
-        return $this->db->where('id_obat', $id_obat)
-            ->order_by('tanggal', 'DESC')
-            ->limit($limit)
+        $this->db->where('id_obat', $id_obat);
+        if ($jenis === 'MASUK' || $jenis === 'KELUAR') {
+            $this->db->where('jenis_mutasi', $jenis);
+        }
+        if (is_string($dari) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dari)) {
+            $this->db->where('tanggal >=', $dari . ' 00:00:00');
+        }
+        if (is_string($sampai) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $sampai)) {
+            $this->db->where('tanggal <=', $sampai . ' 23:59:59');
+        }
+        return $this->db->order_by('tanggal', 'DESC')
+            ->limit((int) $limit)
             ->get('mutasi_stok')
             ->result();
     }

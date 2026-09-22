@@ -144,4 +144,45 @@ class Laporan_model extends CI_Model
             ->get('pasien')
             ->result();
     }
+
+    /** Daftar mutasi stok detail dalam periode (untuk cetak). */
+    public function cetak_mutasi($dari, $sampai)
+    {
+        return $this->db->select('mutasi_stok.tanggal, obat.kode_obat, obat.nama_obat,
+                mutasi_stok.jenis_mutasi, mutasi_stok.jumlah, mutasi_stok.sumber', false)
+            ->join('obat', 'obat.id_obat = mutasi_stok.id_obat')
+            ->where('mutasi_stok.tanggal >=', $dari . ' 00:00:00')
+            ->where('mutasi_stok.tanggal <=', $sampai . ' 23:59:59')
+            ->order_by('mutasi_stok.tanggal', 'ASC')
+            ->get('mutasi_stok')
+            ->result();
+    }
+
+    /** Daftar file backup database dalam periode (untuk cetak). */
+    public function cetak_backup($dari, $sampai)
+    {
+        $dir = APPPATH . 'archives' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR;
+        $rows = array();
+        foreach (glob($dir . 'backup-*.zip') ?: array() as $f) {
+            $tgl = date('Y-m-d', filemtime($f));
+            if (preg_match('/^backup-(\d{4})(\d{2})(\d{2})-\d{6}\.zip$/', basename($f), $m)) {
+                $tgl = $m[1] . '-' . $m[2] . '-' . $m[3];
+            }
+            if ($tgl < $dari || $tgl > $sampai) {
+                continue;
+            }
+            $b = filesize($f);
+            $rows[] = (object) array(
+                'nama'    => basename($f),
+                'ukuran'  => $b >= 1048576
+                    ? number_format($b / 1048576, 2, ',', '.') . ' MB'
+                    : number_format(max(1, round($b / 1024)), 0, ',', '.') . ' KB',
+                'tanggal' => date('Y-m-d H:i:s', filemtime($f)),
+            );
+        }
+        usort($rows, function ($a, $b) {
+            return strcmp($a->tanggal, $b->tanggal);
+        });
+        return $rows;
+    }
 }

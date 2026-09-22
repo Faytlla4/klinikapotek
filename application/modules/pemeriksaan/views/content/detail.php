@@ -31,7 +31,9 @@
                 
                 <hr>
                 
-                <div class="row">
+<?php $this->load->view('transaksi/partials/_nota'); ?>
+<div class="nota-screen">
+<div class="row">
                     <div class="col-md-6">
                         <h4>Diagnosis</h4>
                         <?php if (empty($pemeriksaan->diagnosis)): ?>
@@ -194,6 +196,7 @@
             </div>
             <div class="card-footer">
                 <a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a>
+                <button onclick="window.print()" class="btn btn-secondary"><i class="fas fa-print"></i> Cetak</button>
                 <?php if ($pemeriksaan->status === 'DIPROSES'): ?>
                     <?php echo form_open(site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3) . '/selesaikan/' . $pemeriksaan->id_pemeriksaan), array('class' => 'float-right')); ?>
                         <button type="submit" class="btn btn-success" onclick="return confirm('Selesaikan pemeriksaan dan susun tagihan pasien?');">
@@ -203,6 +206,39 @@
                 <?php endif; ?>
             </div>
         </div>
+    </div>
+</div>
+</div>
+<div class="nota-print">
+    <div class="nota">
+        <div class="nota-head"><h4>Klinik &amp; Apotek</h4><p>Ringkasan Rekam Medis</p></div>
+        <?php if (!empty($kunjungan)): ?>
+        <div class="nota-row"><span>Pasien</span><span><?php echo html_escape($kunjungan->nama_pasien . ' (' . $kunjungan->no_rm . ')'); ?></span></div>
+        <div class="nota-row"><span>Kunjungan</span><span><?php echo html_escape(($kunjungan->nomor_kunjungan ?? '-') . ' • ' . ($kunjungan->tanggal_kunjungan ?? '-')); ?></span></div>
+        <div class="nota-row"><span>Dokter / Poli</span><span><?php echo html_escape($kunjungan->nama_dokter . ' / ' . $kunjungan->nama_poli); ?></span></div>
+        <div class="nota-sep"></div>
+        <?php endif; ?>
+        <div class="nota-row"><span>Keluhan</span><span><?php echo html_escape($pemeriksaan->keluhan ?: '-'); ?></span></div>
+        <div class="nota-row"><span>Hasil</span><span><?php echo html_escape($pemeriksaan->hasil_pemeriksaan ?: '-'); ?></span></div>
+        <?php if (!empty($pemeriksaan->diagnosis)): ?>
+        <div class="nota-sep"></div>
+        <?php foreach($pemeriksaan->diagnosis as $d): ?>
+        <div class="nota-row"><span>Diagnosis</span><span><?php echo html_escape($d->nama_diagnosis); ?></span></div>
+        <?php endforeach; ?>
+        <?php endif; ?>
+        <?php if (!empty($pemeriksaan->tindakan)): ?>
+        <div class="nota-sep"></div>
+        <?php foreach($pemeriksaan->tindakan as $t): ?>
+        <div class="nota-row"><span><?php echo html_escape($t->nama_tindakan); ?></span><span>Rp <?php echo number_format((float) $t->biaya, 0, ',', '.'); ?></span></div>
+        <?php endforeach; ?>
+        <?php endif; ?>
+        <?php if (!empty($pemeriksaan->resep)): ?>
+        <div class="nota-sep"></div>
+        <?php foreach($pemeriksaan->resep as $rs): ?>
+        <div class="nota-row"><span>Resep <?php echo html_escape($rs->nomor_resep); ?></span><span><?php echo html_escape($rs->status); ?></span></div>
+        <?php endforeach; ?>
+        <?php endif; ?>
+        <div class="nota-foot">Terima kasih atas kunjungan Anda.<br>Semoga lekas sembuh.</div>
     </div>
 </div>
 

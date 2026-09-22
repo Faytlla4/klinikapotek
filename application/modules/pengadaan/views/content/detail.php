@@ -1,3 +1,5 @@
+<?php $this->load->view('transaksi/partials/_nota'); ?>
+<div class="nota-screen">
 <div class="row">
     <div class="col-md-4">
         <div class="card card-primary card-outline">
@@ -44,6 +46,9 @@
                 <a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/pengadaan'); ?>" class="btn btn-default btn-block">
                     <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
                 </a>
+                <button onclick="window.print()" class="btn btn-secondary btn-block mt-2">
+                    <i class="fas fa-print mr-1"></i> Cetak
+                </button>
             </div>
         </div>
     </div>
@@ -160,5 +165,29 @@
                 </div>
             </div>
         <?php endif; ?>
+    </div>
+</div>
+</div>
+<div class="nota-print">
+    <div class="nota">
+        <div class="nota-head"><h4>Klinik &amp; Apotek</h4><p>Bukti Pengadaan Obat</p></div>
+        <div class="nota-row"><span>Nomor</span><strong><?php echo html_escape($pengadaan->nomor_pengadaan); ?></strong></div>
+        <div class="nota-row"><span>Supplier</span><span><?php echo html_escape($pengadaan->nama_supplier); ?></span></div>
+        <div class="nota-row"><span>Tanggal Pesan</span><span><?php echo date('d-m-Y H:i', strtotime($pengadaan->tanggal_pesanan)); ?></span></div>
+        <div class="nota-row"><span>Status</span><strong><?php echo html_escape(strtoupper($pengadaan->status)); ?></strong></div>
+        <div class="nota-sep"></div>
+        <?php foreach ($details as $d): ?>
+        <div class="nota-row"><span><?php echo html_escape($d->nama_obat); ?></span><span></span></div>
+        <div class="nota-row"><span class="text-muted">Pesan <?php echo (int) $d->jumlah_pesan; ?> <?php echo html_escape($d->satuan); ?> &bull; Terima <?php echo (int) $d->jumlah_sudah_terima; ?></span><span>Sisa <?php echo (int) $d->sisa_pesanan; ?></span></div>
+        <?php endforeach; ?>
+        <div class="nota-sep"></div>
+        <div class="nota-row nota-total"><span>TOTAL</span><span>Rp <?php echo number_format((float) $pengadaan->total, 0, ',', '.'); ?></span></div>
+        <?php if (!empty($riwayat_penerimaan)): ?>
+        <div class="nota-sep"></div>
+        <?php foreach ($riwayat_penerimaan as $r): ?>
+        <div class="nota-row"><span><?php echo html_escape($r->nomor_penerimaan . ' • ' . date('d-m-Y', strtotime($r->tanggal_terima))); ?></span><span>+<?php echo (int) $r->jumlah_terima; ?> <?php echo html_escape($r->nama_obat); ?></span></div>
+        <?php endforeach; ?>
+        <?php endif; ?>
+        <div class="nota-foot">Terima kasih atas kunjungan Anda.<br>Semoga lekas sembuh.</div>
     </div>
 </div>

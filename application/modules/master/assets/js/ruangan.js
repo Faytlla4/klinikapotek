@@ -1,6 +1,5 @@
 $('#ruangan_table').bfDataTable({
     url: site_url + 'admin/master/ruangan/get_data',
-    targetUrl: site_url + 'admin/master/ruangan/edit',
     filterCols: [0, 1, 2],
     sortCols: { id_ruangan: 'desc' },
     lengthMenu: [10, 25, 50, 100],

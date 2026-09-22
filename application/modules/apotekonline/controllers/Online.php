@@ -232,6 +232,7 @@ class Online extends App_Controller
             show_404();
         }
         Template::set('pesanan', $row);
+        Template::set('nama_pemesan', isset($pasien->nama) ? $pasien->nama : null);
         Template::set('toolbar_title', 'Detail Pesanan');
         Template::set_view('online/pesanan_detail');
         Template::render();

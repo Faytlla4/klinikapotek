@@ -8,7 +8,7 @@
         <button type="button" id="filter-reset" class="btn btn-sm btn-default mb-1" title="Reset filter">&times;</button>
     </div>
     <div class="table-responsive"><table id="kunjungan_table" class="table table-bordered table-hover table-striped">
-        <thead><tr><th>Tanggal</th><th>No. RM</th><th>Pasien</th><th>Pelayanan</th><th>Poli</th><th>Dokter</th><th>Ruangan</th><th>Status</th></tr></thead>
+        <thead><tr><th>Tanggal</th><th>No. RM</th><th>Pasien</th><th>Pelayanan</th><th>Poli</th><th>Dokter</th><th>Ruangan</th><th>Status</th><th>Aksi</th></tr></thead>
     </table></div>
     </div>
 </div></div></div>

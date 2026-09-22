@@ -1,6 +1,5 @@
 $('#poli_table').bfDataTable({
     url: site_url + 'admin/master/poli/get_data',
-    targetUrl: site_url + 'admin/master/poli/edit',
     filterCols: [0, 1],
     sortCols: { id_poli: 'desc' },
     lengthMenu: [10, 25, 50, 100],

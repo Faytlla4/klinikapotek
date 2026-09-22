@@ -1,3 +1,5 @@
+<?php $this->load->view('transaksi/partials/_nota'); ?>
+<div class="nota-screen">
 <div class="row"><div class="col-md-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title">Detail Kunjungan</h3></div>
     <div class="card-body"><dl class="row">
@@ -47,7 +49,10 @@
     ?>
 
     <div class="card-footer d-flex align-items-center justify-content-between flex-wrap" style="gap:8px">
-        <a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a>
+        <div class="d-flex" style="gap:8px">
+            <a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a>
+            <button onclick="window.print()" class="btn btn-secondary"><i class="fas fa-print"></i> Cetak</button>
+        </div>
 
         <div class="d-flex flex-wrap" style="gap:8px">
             <?php foreach ($status_berikut as $st): ?>
@@ -74,9 +79,26 @@
         </div>
     </div>
 </div></div></div>
+</div>
+<div class="nota-print">
+    <div class="nota">
+        <div class="nota-head"><h4>Klinik &amp; Apotek</h4><p>Bukti Kunjungan</p></div>
+        <div class="nota-row"><span>Tanggal</span><span><?php echo html_escape($kunjungan->tanggal_kunjungan); ?></span></div>
+        <div class="nota-row"><span>Pasien</span><span><?php echo html_escape($kunjungan->no_rm . ' — ' . $kunjungan->nama_pasien); ?></span></div>
+        <div class="nota-row"><span>Pelayanan</span><span><?php echo html_escape($kunjungan->nama_pelayanan); ?></span></div>
+        <div class="nota-row"><span>Poli / Ruangan</span><span><?php echo html_escape($kunjungan->nama_poli . ' / ' . $kunjungan->nama_ruangan); ?></span></div>
+        <div class="nota-row"><span>Dokter</span><span><?php echo html_escape($kunjungan->nama_dokter); ?></span></div>
+        <div class="nota-row"><span>Status</span><strong><?php echo html_escape($kunjungan->status); ?></strong></div>
+        <div class="nota-foot">Terima kasih atas kunjungan Anda.<br>Semoga lekas sembuh.</div>
+    </div>
+</div>
 
 <script>
-$(document).ready(function () {
+// Inline script view dieksekusi sebelum jQuery dimuat (di akhir body) — tunggu DOM siap.
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof jQuery === 'undefined') {
+        return;
+    }
     $('#btn_susun_tagihan').on('click', function () {
         var idKunjungan = $(this).data('id');
         var $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memproses...');

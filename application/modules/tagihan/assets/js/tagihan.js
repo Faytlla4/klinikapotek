@@ -14,7 +14,6 @@ $(document).ready(function () {
                 data.sampai = $('#filter-sampai').val();
             }
         },
-        targetUrl: ctxBase + '/detail',
         filterCols: [0, 1, 2, 3, 4, 5],
         sortCols: { id_tagihan: 'desc' },
         lengthMenu: [10, 25, 50],

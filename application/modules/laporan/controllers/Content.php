@@ -5,7 +5,6 @@ class Content extends App_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->pastikan_permission_cetak();
         $this->auth->restrict('lihat_laporan');
         $this->load->model('laporan/laporan_model');
     }

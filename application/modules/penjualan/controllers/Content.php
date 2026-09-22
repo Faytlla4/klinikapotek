@@ -61,4 +61,16 @@ class Content extends App_Controller
         Template::set('pasien_list', $this->db->where('status', 'AKTIF')->order_by('nama', 'ASC')->get('pasien')->result());
         Template::set('toolbar_title', 'Jual Obat'); Template::render();
     }
+
+    /** Struk penjualan + item (cetak nota). */
+    public function detail($id)
+    {
+        $id = (int) $id > 0 ? (int) $id : 0;
+        $row = $id ? $this->penjualan_model->detail($id) : false;
+        if (! $row) {
+            show_404();
+        }
+        Template::set('jual', $row);
+        Template::set('toolbar_title', 'Struk Penjualan'); Template::render();
+    }
 }

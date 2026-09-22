@@ -181,6 +181,12 @@ class Penjualan_model extends BF_Model
         if (! $row) {
             return false;
         }
+        $pas = $this->db->select('pasien.nama AS nama_pasien')
+            ->from('penjualan_obat')
+            ->join('pasien', 'pasien.id_pasien = penjualan_obat.id_pasien', 'left')
+            ->where('penjualan_obat.id_penjualan', (int) $id_penjualan)
+            ->get()->row();
+        $row->nama_pasien = ($pas && $pas->nama_pasien) ? $pas->nama_pasien : null;
         $row->items = $this->db->select('penjualan_obat_detail.*, obat.nama_obat, obat.satuan')
             ->join('obat', 'obat.id_obat = penjualan_obat_detail.id_obat')
             ->where('id_penjualan', $id_penjualan)

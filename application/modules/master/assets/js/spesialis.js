@@ -1,6 +1,5 @@
 $('#spesialis_table').bfDataTable({
     url: site_url + 'admin/master/spesialis/get_data',
-    targetUrl: site_url + 'admin/master/spesialis/edit',
     filterCols: [0, 1],
     sortCols: { id_spesialis: 'desc' },
     lengthMenu: [10, 25, 50, 100],

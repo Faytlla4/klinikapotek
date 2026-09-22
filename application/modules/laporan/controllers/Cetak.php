@@ -27,6 +27,8 @@ class Cetak extends Content
             'transaksi'   => 'Laporan Transaksi',
             'antrian'     => 'Laporan Antrian',
             'pendaftaran' => 'Laporan Pendaftaran Pasien',
+            'mutasi'      => 'Laporan Mutasi Obat',
+            'backup'      => 'Laporan Backup Database',
         );
         if (! isset($cetak[$jenis])) {
             redirect(SITE_AREA . '/cetak');
@@ -53,6 +55,8 @@ class Cetak extends Content
             'transaksi'   => 'Laporan Transaksi',
             'antrian'     => 'Laporan Antrian',
             'pendaftaran' => 'Laporan Pendaftaran Pasien',
+            'mutasi'      => 'Laporan Mutasi Obat',
+            'backup'      => 'Laporan Backup Database',
         );
         if (! isset($judul[$jenis])) {
             redirect(SITE_AREA . '/cetak');
@@ -83,12 +87,16 @@ class Cetak extends Content
             'transaksi'   => array('Nomor', 'Tanggal', 'Total', 'Status'),
             'antrian'     => array('Nomor', 'Tanggal', 'Poli', 'Pasien', 'Status'),
             'pendaftaran' => array('No. RM', 'Nama', 'NIK', 'Terdaftar'),
+            'mutasi'      => array('Tanggal', 'Kode', 'Obat', 'Jenis', 'Jumlah', 'Sumber'),
+            'backup'      => array('Nama File', 'Ukuran', 'Tanggal'),
         );
         $map = array(
             'kunjungan'   => array('tanggal_kunjungan', 'no_rm', 'nama_pasien', 'nama_pelayanan', 'nama_poli', 'nama_dokter', 'status'),
             'transaksi'   => array('nomor_transaksi', 'tanggal_transaksi', 'total', 'status'),
             'antrian'     => array('nomor_antrian', 'tanggal_antrian', 'nama_poli', 'nama_pasien', 'status'),
             'pendaftaran' => array('no_rm', 'nama', 'nik', 'created_at'),
+            'mutasi'      => array('tanggal', 'kode_obat', 'nama_obat', 'jenis_mutasi', 'jumlah', 'sumber'),
+            'backup'      => array('nama', 'ukuran', 'tanggal'),
         );
         // Kolom yang wajib teks (awet nol depan, mis. NIK) + kolom yang tampil '-' jika kosong.
         $teks  = array(
@@ -96,8 +104,10 @@ class Cetak extends Content
             'transaksi'   => array('nomor_transaksi'),
             'antrian'     => array('nomor_antrian'),
             'pendaftaran' => array('no_rm', 'nik'),
+            'mutasi'      => array('kode_obat'),
+            'backup'      => array(),
         );
-        $strip = array('nama_pelayanan', 'nama_poli', 'nama_dokter', 'nik');
+        $strip = array('nama_pelayanan', 'nama_poli', 'nama_dokter', 'nik', 'sumber');
 
         $spread = new Spreadsheet();
         $sheet = $spread->getActiveSheet();

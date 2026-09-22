@@ -1,6 +1,5 @@
 $('#pelayanan_table').bfDataTable({
     url: site_url + 'admin/master/pelayanan/get_data',
-    targetUrl: site_url + 'admin/master/pelayanan/edit',
     filterCols: [0, 1, 2],
     sortCols: { id_pelayanan: 'desc' },
     lengthMenu: [10, 25, 50, 100],

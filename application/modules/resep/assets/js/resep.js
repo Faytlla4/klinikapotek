@@ -2,7 +2,6 @@
 var ctxBase = _p.slice(0, _p.indexOf('admin') + 3).join('/');
 $('#resep_table').bfDataTable({
     url: ctxBase + '/get_data',
-    targetUrl: ctxBase + '/detail',
     filterCols: [0, 1, 2, 3, 4],
     sortCols: {id_resep: 'asc'},
     lengthMenu: [10, 25, 50],

@@ -1,3 +1,5 @@
+<?php $this->load->view('transaksi/partials/_nota'); ?>
+<div class="nota-screen">
 <div class="row"><div class="col-md-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title">Detail Pasien</h3></div>
     <div class="card-body"><dl class="row">
@@ -21,5 +23,21 @@
     </tbody></table><h4>Riwayat Transaksi Pelayanan</h4>
     <table class="table table-bordered table-hover"><thead><tr><th>Nomor</th><th>Tagihan</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead><tbody>
         <?php if (empty($pasien->transaksi)): ?><tr><td colspan="5" class="text-center">Belum ada transaksi pelayanan.</td></tr><?php else: foreach ($pasien->transaksi as $t): ?><tr><td><?php echo html_escape($t->nomor_transaksi); ?></td><td><?php echo html_escape($t->nomor_tagihan); ?></td><td><?php echo html_escape($t->tanggal_transaksi); ?></td><td><?php echo html_escape($t->total); ?></td><td><?php echo html_escape($t->status); ?></td></tr><?php endforeach; endif; ?>
-    </tbody></table></div><div class="card-footer"><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a></div>
+    </tbody></table></div><div class="card-footer"><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3)); ?>" class="btn btn-default">Kembali</a> <button onclick="window.print()" class="btn btn-secondary"><i class="fas fa-print"></i> Cetak</button></div>
 </div></div></div>
+</div>
+<div class="nota-print">
+    <div class="nota">
+        <div class="nota-head"><h4>Klinik &amp; Apotek</h4><p>Kartu Pasien</p></div>
+        <div class="nota-row"><span>No. RM</span><strong><?php echo html_escape($pasien->no_rm); ?></strong></div>
+        <div class="nota-row"><span>Nama</span><span><?php echo html_escape($pasien->nama); ?></span></div>
+        <div class="nota-row"><span>NIK</span><span><?php echo html_escape($pasien->nik ?: '-'); ?></span></div>
+        <div class="nota-row"><span>Lahir</span><span><?php echo html_escape(($pasien->tanggal_lahir ?: '-') . ' / ' . ($pasien->jenis_kelamin ?: '-')); ?></span></div>
+        <?php if (!empty($pasien->kunjungan)): $tk = $pasien->kunjungan[0]; ?>
+        <div class="nota-sep"></div>
+        <div class="nota-row"><span>Kunjungan Terakhir</span><span><?php echo html_escape($tk->tanggal_kunjungan); ?></span></div>
+        <div class="nota-row"><span>Pelayanan</span><span><?php echo html_escape($tk->nama_pelayanan ?: '-'); ?></span></div>
+        <?php endif; ?>
+        <div class="nota-foot">Simpan kartu ini untuk setiap kunjungan.</div>
+    </div>
+</div>

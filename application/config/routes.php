@@ -136,6 +136,7 @@ $route['admin/apotek/resep/(:any)'] = 'resep/apotek/$1';
 $route['admin/apotek/resep/(:any)/(:any)'] = 'resep/apotek/$1/$2';
 $route['admin/apotek/penjualan'] = 'penjualan/apotek/index';
 $route['admin/apotek/penjualan/(:any)'] = 'penjualan/apotek/$1';
+$route['admin/apotek/penjualan/(:any)/(:any)'] = 'penjualan/apotek/$1/$2';
 $route['admin/apotek/stok'] = 'stok/apotek/index';
 $route['admin/apotek/stok/(:any)'] = 'stok/apotek/$1';
 $route['admin/apotek/stok/(:any)/(:any)'] = 'stok/apotek/$1/$2';
@@ -193,6 +194,11 @@ $route['admin/master/pengadaan/(:any)'] = 'pengadaan/master/$1';
 // MANAJEMEN SISTEM: audit log.
 $route['admin/settings/audit'] = 'audit/settings/index';
 $route['admin/settings/audit/(:any)'] = 'audit/settings/$1';
+
+// MANAJEMEN SISTEM: backup database (pg_dump).
+$route['admin/settings/backup'] = 'backup/settings/index';
+$route['admin/settings/backup/(:any)'] = 'backup/settings/$1';
+$route['admin/settings/backup/(:any)/(:any)'] = 'backup/settings/$1/$2';
 
 // MANAJEMEN SISTEM: user & role via modul pengguna (pengganti Bonfire
 // legacy yang tak kompatibel dengan skema custom).

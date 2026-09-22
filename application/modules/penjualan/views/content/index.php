@@ -9,10 +9,10 @@
         <?php if ($f_dari || $f_sampai): ?><a href="<?php echo site_url($this->uri->uri_string()); ?>" class="btn btn-sm btn-default mb-1" title="Reset filter">&times;</a><?php endif; ?>
     </form>
     <div class="card-body table-responsive"><table class="table table-bordered table-hover table-striped">
-        <thead><tr><th>Nomor</th><th>Tanggal</th><th>Jenis</th><th>Pasien</th><th>Total</th><th>Status</th></tr></thead>
+        <thead><tr><th>Nomor</th><th>Tanggal</th><th>Jenis</th><th>Pasien</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
         <tbody>
-        <?php if (empty($jual_list)): ?><tr><td colspan="6" class="text-center">Belum ada penjualan.</td></tr>
-        <?php else: foreach ($jual_list as $j): ?><tr><td><?php echo html_escape($j->nomor_penjualan); ?></td><td><?php echo html_escape($j->tanggal_penjualan); ?></td><td><span class="badge badge-info"><?php echo html_escape($j->jenis_penjualan); ?></span></td><td><?php echo html_escape($j->nama_pasien ?: '-'); ?></td><td>Rp <?php echo number_format((float) $j->total, 0, ',', '.'); ?></td><td><?php echo html_escape($j->status); ?></td></tr>
+        <?php if (empty($jual_list)): ?><tr><td colspan="7" class="text-center">Belum ada penjualan.</td></tr>
+        <?php else: foreach ($jual_list as $j): ?><tr><td><?php echo html_escape($j->nomor_penjualan); ?></td><td><?php echo html_escape($j->tanggal_penjualan); ?></td><td><span class="badge badge-info"><?php echo html_escape($j->jenis_penjualan); ?></span></td><td><?php echo html_escape($j->nama_pasien ?: '-'); ?></td><td>Rp <?php echo number_format((float) $j->total, 0, ',', '.'); ?></td><td><?php echo html_escape($j->status); ?></td><td><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/penjualan/detail/' . (int) $j->id_penjualan); ?>" class="btn btn-sm btn-primary" title="Lihat Struk"><i class="fas fa-eye"></i></a></td></tr>
         <?php endforeach; endif; ?>
         </tbody>
     </table></div>

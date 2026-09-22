@@ -1,3 +1,5 @@
+<?php $this->load->view('transaksi/partials/_nota'); ?>
+<div class="nota-screen">
 <div class="row"><div class="col-md-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title">Pesanan <?php echo html_escape($pesanan->nomor_pesanan); ?></h3></div>
     <div class="card-body">
@@ -17,6 +19,25 @@
     </div>
     <div class="card-footer">
         <a href="<?php echo site_url(SITE_AREA . '/online/pesanan'); ?>" class="btn btn-default">Kembali</a>
+        <button onclick="window.print()" class="btn btn-secondary"><i class="fas fa-print"></i> Cetak</button>
         <?php if ($pesanan->status === 'MENUNGGU'): echo form_open($this->uri->uri_string(), array('class' => 'd-inline float-right')); ?><button type="submit" name="batalkan" value="1" class="btn btn-danger" onclick="return confirm('Batalkan pesanan ini?')">Batalkan Pesanan</button><?php echo form_close(); endif; ?>
     </div>
 </div></div></div>
+</div>
+<div class="nota-print">
+    <div class="nota">
+        <div class="nota-head"><h4>Klinik &amp; Apotek</h4><p>Bukti Pesanan Online</p></div>
+        <div class="nota-row"><span>Nomor</span><strong><?php echo html_escape($pesanan->nomor_pesanan); ?></strong></div>
+        <div class="nota-row"><span>Tanggal</span><span><?php echo html_escape($pesanan->tanggal_pesanan); ?></span></div>
+        <div class="nota-row"><span>Pemesan</span><span><?php echo html_escape(isset($nama_pemesan) && $nama_pemesan ? $nama_pemesan : '-'); ?></span></div>
+        <div class="nota-row"><span>Status</span><strong><?php echo html_escape($pesanan->status . ' / ' . $pesanan->status_bayar); ?></strong></div>
+        <div class="nota-sep"></div>
+        <?php foreach ($pesanan->items as $it): ?>
+        <div class="nota-row"><span><?php echo html_escape($it->nama_obat); ?></span><span></span></div>
+        <div class="nota-row"><span class="text-muted"><?php echo (int) $it->jumlah; ?> &times; Rp <?php echo number_format((float) $it->harga, 0, ',', '.'); ?></span><span>Rp <?php echo number_format((float) $it->subtotal, 0, ',', '.'); ?></span></div>
+        <?php endforeach; ?>
+        <div class="nota-sep"></div>
+        <div class="nota-row nota-total"><span>TOTAL</span><span>Rp <?php echo number_format((float) $pesanan->total, 0, ',', '.'); ?></span></div>
+        <div class="nota-foot">Terima kasih atas kunjungan Anda.<br>Semoga lekas sembuh.</div>
+    </div>
+</div>

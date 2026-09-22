@@ -33,4 +33,20 @@
     <?php else : foreach ($rows as $r) : ?><tr><td><?php echo html_escape($r->no_rm); ?></td><td><?php echo html_escape($r->nama); ?></td><td><?php echo html_escape($r->nik ?: '-'); ?></td><td><?php echo html_escape($r->created_at); ?></td></tr><?php endforeach; endif; ?>
     </tbody>
 </table>
+<?php elseif ($jenis === 'mutasi') : ?>
+<table border="1" cellspacing="0" cellpadding="4">
+    <thead><tr><th>Tanggal</th><th>Kode</th><th>Obat</th><th>Jenis</th><th>Jumlah</th><th>Sumber</th></tr></thead>
+    <tbody>
+    <?php if (empty($rows)) : ?><tr><td colspan="6" align="center">Tidak ada data.</td></tr>
+    <?php else : foreach ($rows as $r) : ?><tr><td><?php echo html_escape($r->tanggal); ?></td><td><?php echo html_escape($r->kode_obat); ?></td><td><?php echo html_escape($r->nama_obat); ?></td><td><?php echo html_escape($r->jenis_mutasi); ?></td><td><?php echo (int) $r->jumlah; ?></td><td><?php echo html_escape($r->sumber ?: '-'); ?></td></tr><?php endforeach; endif; ?>
+    </tbody>
+</table>
+<?php elseif ($jenis === 'backup') : ?>
+<table border="1" cellspacing="0" cellpadding="4">
+    <thead><tr><th>Nama File</th><th>Ukuran</th><th>Tanggal</th></tr></thead>
+    <tbody>
+    <?php if (empty($rows)) : ?><tr><td colspan="3" align="center">Tidak ada data.</td></tr>
+    <?php else : foreach ($rows as $r) : ?><tr><td><?php echo html_escape($r->nama); ?></td><td><?php echo html_escape($r->ukuran); ?></td><td><?php echo html_escape($r->tanggal); ?></td></tr><?php endforeach; endif; ?>
+    </tbody>
+</table>
 <?php endif; ?>

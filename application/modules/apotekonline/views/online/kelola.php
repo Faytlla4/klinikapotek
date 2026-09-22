@@ -9,10 +9,10 @@
             </select>
         </form>
         <div class="table-responsive"><table class="table table-bordered table-hover table-striped">
-            <thead><tr><th>Nomor</th><th>Tanggal</th><th>Pasien</th><th>Total</th><th>Status</th><th>Bayar</th></tr></thead>
+            <thead><tr><th>Nomor</th><th>Tanggal</th><th>Pasien</th><th>Total</th><th>Status</th><th>Bayar</th><th>Aksi</th></tr></thead>
             <tbody>
-            <?php if (empty($pesanan_list)): ?><tr><td colspan="6" class="text-center">Tidak ada pesanan.</td></tr>
-            <?php else: foreach ($pesanan_list as $p): ?><tr><td><a href="<?php echo site_url(SITE_AREA . '/apotek/pesanan-online/detail/' . $p->id_pesanan); ?>"><?php echo html_escape($p->nomor_pesanan); ?></a></td><td><?php echo html_escape($p->tanggal_pesanan); ?></td><td><?php echo html_escape($p->nama_pasien); ?></td><td>Rp <?php echo number_format((float) $p->total, 0, ',', '.'); ?></td><td><span class="badge badge-info"><?php echo html_escape($p->status); ?></span></td><td><span class="badge <?php echo $p->status_bayar === 'LUNAS' ? 'badge-success' : 'badge-warning'; ?>"><?php echo html_escape($p->status_bayar); ?></span></td></tr>
+            <?php if (empty($pesanan_list)): ?><tr><td colspan="7" class="text-center">Tidak ada pesanan.</td></tr>
+            <?php else: foreach ($pesanan_list as $p): ?><tr><td><?php echo html_escape($p->nomor_pesanan); ?></td><td><?php echo html_escape($p->tanggal_pesanan); ?></td><td><?php echo html_escape($p->nama_pasien); ?></td><td>Rp <?php echo number_format((float) $p->total, 0, ',', '.'); ?></td><td><span class="badge badge-info"><?php echo html_escape($p->status); ?></span></td><td><span class="badge <?php echo $p->status_bayar === 'LUNAS' ? 'badge-success' : 'badge-warning'; ?>"><?php echo html_escape($p->status_bayar); ?></span></td><td><a href="<?php echo site_url(SITE_AREA . '/apotek/pesanan-online/detail/' . $p->id_pesanan); ?>" class="btn btn-sm btn-primary" title="Lihat Detail"><i class="fas fa-eye"></i></a></td></tr>
             <?php endforeach; endif; ?>
             </tbody>
         </table></div>

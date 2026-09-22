@@ -1,6 +1,5 @@
 $('#dokter_table').bfDataTable({
     url: site_url + 'admin/master/dokter/get_data',
-    targetUrl: site_url + 'admin/master/dokter/edit',
     filterCols: [0, 1, 2, 3],
     sortCols: { id_dokter: 'desc' },
     lengthMenu: [10, 25, 50, 100],

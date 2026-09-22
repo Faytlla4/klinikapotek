@@ -112,6 +112,14 @@ class Resep_model extends BF_Model
         if (! $row) {
             return false;
         }
+        $info = $this->db->select('pasien.nama AS nama_pasien, dokter.nama_dokter')
+            ->from('resep')
+            ->join('pasien', 'pasien.id_pasien = resep.id_pasien', 'left')
+            ->join('dokter', 'dokter.id_dokter = resep.id_dokter', 'left')
+            ->where('resep.id_resep', (int) $id_resep)
+            ->get()->row();
+        $row->nama_pasien = ($info && $info->nama_pasien) ? $info->nama_pasien : null;
+        $row->nama_dokter = ($info && $info->nama_dokter) ? $info->nama_dokter : null;
         $row->detail = $this->db->select('resep_detail.*, obat.kode_obat, obat.nama_obat,
                 obat.satuan, obat.harga, COALESCE(stok_obat.jumlah_stok, 0) AS stok')
             ->join('obat', 'obat.id_obat = resep_detail.id_obat')

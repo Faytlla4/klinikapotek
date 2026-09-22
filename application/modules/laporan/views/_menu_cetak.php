@@ -5,6 +5,8 @@ $cetak_tabs = array(
     'transaksi'   => 'Transaksi',
     'antrian'     => 'Antrian',
     'pendaftaran' => 'Pendaftaran Pasien',
+    'mutasi'      => 'Mutasi Obat',
+    'backup'      => 'Backup Database',
 );
 $jenis_aktif = isset($jenis) ? $jenis : '';
 foreach ($cetak_tabs as $key => $label): ?>

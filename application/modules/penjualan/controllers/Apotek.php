@@ -18,4 +18,10 @@ class Apotek extends Content
         Template::set_view('content/create');
         parent::create();
     }
+
+    public function detail($id)
+    {
+        Template::set_view('content/detail');
+        parent::detail($id);
+    }
 }
