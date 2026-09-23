@@ -1,3 +1,4 @@
+<?php // Halaman cetak: tabel rapi siap print + tombol export Excel (PhpSpreadsheet). ?>
 <style>
 @media print {
     .main-sidebar, .main-header, .main-footer, .content-header,

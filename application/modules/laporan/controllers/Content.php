@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// Mesin laporan: ?report=kunjungan|pendapatan|penjualan_obat|resep|mutasi_stok|stok + rentang tanggal.
+// Semua hitung di Laporan_model (read-only); default tampil bulan berjalan.
+
 class Content extends App_Controller
 {
     public function __construct()

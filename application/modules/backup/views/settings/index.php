@@ -1,3 +1,4 @@
+<?php // Halaman backup: tombol buat ZIP (pg_dump) + daftar file + unduh/hapus manual. ?>
 <div class="row"><div class="col-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title"><i class="fas fa-database mr-2"></i>Backup Database</h3></div>
     <div class="card-body">

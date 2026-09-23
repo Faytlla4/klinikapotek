@@ -1,4 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
+// Riwayat transaksi pembayaran (filter tanggal + cari nomor) + bukti per transaksi.
+// Uangnya sendiri dibayar lewat menu Pembayaran (modul tagihan).
 class Content extends App_Controller
 {
     public function __construct() { parent::__construct(); $this->auth->restrict('kelola_transaksi'); $this->load->model('transaksi/transaksi_model'); Assets::add_module_js('transaksi', 'transaksi.js'); }

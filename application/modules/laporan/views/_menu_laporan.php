@@ -1,3 +1,4 @@
+<?php // Tab laporan layar: Pelayanan, Pendapatan, Penjualan Obat, Obat Masuk/Keluar, Stok. ?>
 <ul>
 <?php
 $laporan_tabs = array(

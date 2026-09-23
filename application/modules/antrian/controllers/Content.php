@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// Papan antrian: panggil -> periksa -> selesai (atau lewati/batal). Dokter hanya lihat
+// antriannya sendiri (kelola_antrian_dokter); admin pelayanan lihat semua.
+
 class Content extends App_Controller
 {
 	public function __construct()

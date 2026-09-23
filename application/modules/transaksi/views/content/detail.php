@@ -1,4 +1,4 @@
-<?php /* ponytail: nota bukti transaksi (bahasa terpadu di partials/_nota) */ ?>
+<?php /* Bukti transaksi: nota di layar sekaligus versi cetak (blok di bawah). */ ?>
 <?php $this->load->view('transaksi/partials/_nota'); ?>
 <div class="row"><div class="col-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title">Bukti Transaksi</h3></div>

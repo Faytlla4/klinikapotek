@@ -1,3 +1,4 @@
+<?php // Tab laporan cetak: Kunjungan, Transaksi, Antrian, Pendaftaran, Mutasi (+ export Excel). ?>
 <ul>
 <?php
 $cetak_tabs = array(

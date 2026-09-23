@@ -1,3 +1,4 @@
+<?php // Papan antrian hari ini (DataTables): nomor, poli, pasien, status + tombol panggil/selesai. ?>
 <div class="row">
     <div class="col-12">
         <div class="card">

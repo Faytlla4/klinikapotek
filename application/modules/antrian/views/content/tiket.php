@@ -1,3 +1,4 @@
+<?php // Karcis antrian kecil (320px): nomor besar + poli, siap print/sobek. ?>
 <style>
 .tiket-kertas { max-width: 320px; margin: 0 auto; background: #fff; text-align: center; }
 .tiket-nomor { font-size: 3.2rem; font-weight: 800; color: #064e3b; line-height: 1.1; }

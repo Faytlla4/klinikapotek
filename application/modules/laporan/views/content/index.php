@@ -1,3 +1,4 @@
+<?php // Laporan layar: tab per jenis + filter tanggal, tabel + grafik di bawahnya. ?>
 <div class="row">
   <div class="col-12">
     <div class="card card-primary card-outline card-tabs">
