@@ -11,7 +11,8 @@
 .nota-print { display: none; }
 @media print {
     .main-sidebar, .main-header, .main-footer, .content-header,
-    .card-footer, .card-tools, .breadcrumb, .nota-aksi { display: none !important; }
+    .card-footer, .card-tools, .breadcrumb, .nota-aksi,
+    .modal, .modal-backdrop { display: none !important; }
     .content-wrapper { margin: 0 !important; background: #fff !important; }
     .content { padding: 0 !important; }
     .card { border: none !important; box-shadow: none !important; }
