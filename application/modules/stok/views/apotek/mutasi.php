@@ -1,8 +1,10 @@
 <?php
 $nama_obat = '-';
+$satuan_obat = '-';
 foreach ($obat_list as $o) {
     if ((int) $id_obat === (int) $o->id_obat) {
         $nama_obat = $o->nama_obat;
+        $satuan_obat = $o->satuan;
         break;
     }
 }
@@ -65,7 +67,7 @@ $base = site_url($this->uri->uri_string());
             <tbody>
             <?php if (empty($id_obat)): ?><tr><td colspan="6" class="text-center text-muted">Pilih obat untuk melihat riwayat.</td></tr>
             <?php elseif (empty($riwayat)): ?><tr><td colspan="6" class="text-center text-muted">Belum ada mutasi.</td></tr>
-            <?php else: foreach ($riwayat as $r): ?><tr><td><?php echo html_escape($r->tanggal); ?></td><td><span class="badge <?php echo $r->jenis_mutasi === 'MASUK' ? 'badge-success' : 'badge-danger'; ?>"><?php echo html_escape($r->jenis_mutasi); ?></span></td><td class="text-center"><?php echo (int) $r->jumlah; ?></td><td><?php echo html_escape($r->sumber ?: '-'); ?></td><td><?php echo html_escape($r->keterangan ?: '-'); ?></td><td class="text-center"><button type="button" class="btn btn-xs btn-primary btn-mutasi-detail" title="Lihat Detail" data-obat="<?php echo html_escape($nama_obat); ?>" data-tanggal="<?php echo html_escape($r->tanggal); ?>" data-jenis="<?php echo html_escape($r->jenis_mutasi); ?>" data-jumlah="<?php echo (int) $r->jumlah; ?>" data-sumber="<?php echo html_escape($r->sumber ?: '-'); ?>" data-referensi="<?php echo html_escape(isset($r->id_referensi) && $r->id_referensi ? '#' . $r->id_referensi : '-'); ?>" data-keterangan="<?php echo html_escape($r->keterangan ?: '-'); ?>"><i class="fas fa-eye"></i></button> <button type="button" class="btn btn-xs btn-secondary btn-mutasi-cetak" title="Cetak Bukti" data-obat="<?php echo html_escape($nama_obat); ?>" data-tanggal="<?php echo html_escape($r->tanggal); ?>" data-jenis="<?php echo html_escape($r->jenis_mutasi); ?>" data-jumlah="<?php echo (int) $r->jumlah; ?>" data-sumber="<?php echo html_escape($r->sumber ?: '-'); ?>" data-referensi="<?php echo html_escape(isset($r->id_referensi) && $r->id_referensi ? '#' . $r->id_referensi : '-'); ?>" data-keterangan="<?php echo html_escape($r->keterangan ?: '-'); ?>"><i class="fas fa-print"></i></button></td></tr>
+            <?php else: foreach ($riwayat as $r): ?><tr><td><?php echo html_escape($r->tanggal); ?></td><td><span class="badge <?php echo $r->jenis_mutasi === 'MASUK' ? 'badge-success' : 'badge-danger'; ?>"><?php echo html_escape($r->jenis_mutasi); ?></span></td><td class="text-center"><?php echo (int) $r->jumlah; ?></td><td><?php echo html_escape($r->sumber ?: '-'); ?></td><td><?php echo html_escape($r->keterangan ?: '-'); ?></td><td class="text-center"><button type="button" class="btn btn-xs btn-primary btn-mutasi-detail" title="Lihat Detail" data-obat="<?php echo html_escape($nama_obat); ?>" data-satuan="<?php echo html_escape($satuan_obat); ?>" data-tanggal="<?php echo html_escape($r->tanggal); ?>" data-jenis="<?php echo html_escape($r->jenis_mutasi); ?>" data-jumlah="<?php echo (int) $r->jumlah; ?>" data-sumber="<?php echo html_escape($r->sumber ?: '-'); ?>" data-referensi="<?php echo html_escape(isset($r->id_referensi) && $r->id_referensi ? '#' . $r->id_referensi : '-'); ?>" data-keterangan="<?php echo html_escape($r->keterangan ?: '-'); ?>"><i class="fas fa-eye"></i></button> <button type="button" class="btn btn-xs btn-secondary btn-mutasi-cetak" title="Cetak Bukti" data-obat="<?php echo html_escape($nama_obat); ?>" data-satuan="<?php echo html_escape($satuan_obat); ?>" data-tanggal="<?php echo html_escape($r->tanggal); ?>" data-jenis="<?php echo html_escape($r->jenis_mutasi); ?>" data-jumlah="<?php echo (int) $r->jumlah; ?>" data-sumber="<?php echo html_escape($r->sumber ?: '-'); ?>" data-referensi="<?php echo html_escape(isset($r->id_referensi) && $r->id_referensi ? '#' . $r->id_referensi : '-'); ?>" data-keterangan="<?php echo html_escape($r->keterangan ?: '-'); ?>"><i class="fas fa-print"></i></button></td></tr>
             <?php endforeach; endif; ?>
             </tbody>
         </table></div>
@@ -80,6 +82,7 @@ $base = site_url($this->uri->uri_string());
             <dt class="col-sm-4">Tanggal</dt><dd class="col-sm-8" id="m-tanggal">-</dd>
             <dt class="col-sm-4">Jenis</dt><dd class="col-sm-8" id="m-jenis">-</dd>
             <dt class="col-sm-4">Jumlah</dt><dd class="col-sm-8" id="m-jumlah">-</dd>
+            <dt class="col-sm-4">Satuan</dt><dd class="col-sm-8" id="m-satuan">-</dd>
             <dt class="col-sm-4">Sumber</dt><dd class="col-sm-8" id="m-sumber">-</dd>
             <dt class="col-sm-4">Referensi</dt><dd class="col-sm-8" id="m-referensi">-</dd>
             <dt class="col-sm-4">Keterangan</dt><dd class="col-sm-8" id="m-keterangan">-</dd>
@@ -88,6 +91,7 @@ $base = site_url($this->uri->uri_string());
     </div></div>
 </div>
 <script>
+window._mutasiPencetak = <?php echo json_encode(isset($current_user->nama) && $current_user->nama ? $current_user->nama : 'Sistem', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 // Inline script view dieksekusi sebelum jQuery dimuat (di akhir body) — tunggu DOM siap.
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof jQuery === 'undefined') {
@@ -100,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#m-tanggal').text(b.tanggal);
         $('#m-jenis').html('<span class="badge ' + (b.jenis === 'MASUK' ? 'badge-success' : 'badge-danger') + '">' + b.jenis + '</span>');
         $('#m-jumlah').text(b.jumlah);
+        $('#m-satuan').text(b.satuan || '-');
         $('#m-sumber').text(b.sumber);
         $('#m-referensi').text(b.referensi);
         $('#m-keterangan').text(b.keterangan);
@@ -111,17 +116,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     function cetakMutasi(b) {
         var tanda = b.jenis === 'MASUK' ? '+' : '−';
+        var satuan = b.satuan && b.satuan !== '-' ? ' ' + b.satuan : '';
+        var kapan = new Date().toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         $('#nota-mutasi-cetak').html(
             '<div class="nota">' +
             '<div class="nota-head"><h4>Klinik &amp; Apotek</h4><p>Bukti Mutasi Obat</p></div>' +
             '<div class="nota-row"><span>Obat</span><strong>' + escHtml(b.obat) + '</strong></div>' +
             '<div class="nota-row"><span>Tanggal</span><span>' + escHtml(b.tanggal) + '</span></div>' +
             '<div class="nota-row"><span>Jenis</span><strong>' + escHtml(b.jenis) + '</strong></div>' +
-            '<div class="nota-row"><span>Jumlah</span><span>' + tanda + escHtml(b.jumlah) + '</span></div>' +
+            '<div class="nota-row"><span>Jumlah</span><span>' + tanda + escHtml(b.jumlah) + escHtml(satuan) + '</span></div>' +
             '<div class="nota-row"><span>Sumber</span><span>' + escHtml(b.sumber) + '</span></div>' +
             '<div class="nota-row"><span>Referensi</span><span>' + escHtml(b.referensi) + '</span></div>' +
             '<div class="nota-row"><span>Keterangan</span><span>' + escHtml(b.keterangan) + '</span></div>' +
-            '<div class="nota-foot">Terima kasih atas kunjungan Anda.<br>Semoga lekas sembuh.</div>' +
+            '<div class="nota-sep"></div>' +
+            '<div class="nota-foot">Dokumen internal mutasi stok.<br>Dicetak oleh ' + escHtml(window._mutasiPencetak) + ' pada ' + escHtml(kapan) + '.</div>' +
             '</div>'
         );
         window.print();
