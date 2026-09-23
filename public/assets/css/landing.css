@@ -2,14 +2,32 @@
    KLINIK & APOTEK — Landing CSS
    ============================================ */
 
+/* === VARIABEL WARNA (ganti cukup di sini) === */
+:root {
+    --hijau-utama: #198754;      /* tombol, logo, judul, ikon */
+    --hijau-gelap: #146C43;      /* hover tombol */
+    --hijau-muda: #E8F5EE;       /* latar ikon & badge */
+    --hijau-garis: #D1EDDB;      /* border tombol ghost */
+    --teks-utama: #1A2332;       /* judul & teks */
+    --teks-sekunder: #6B7A8D;    /* deskripsi */
+    --teks-samar: #5A6B7D;       /* deskripsi hero */
+    --teks-kaki: #8494A7;        /* teks footer */
+    --latar: #F8FAFB;            /* latar halaman */
+    --garis: #E8ECF0;            /* border kartu & header */
+    --garis-input: #DDE2E8;      /* border input form */
+    --merah-latar: #FFF5F5;      /* latar alert error */
+    --merah-garis: #F5C2C7;      /* border alert error */
+    --merah-teks: #842029;       /* teks alert error */
+}
+
 /* === RESET === */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: auto; -webkit-text-size-adjust: 100%; }
 
 /* === BASE === */
 body {
-    background: #F8FAFB;
-    color: #1A2332;
+    background: var(--latar);
+    color: var(--teks-utama);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 14px;
     line-height: 1.6;
@@ -33,7 +51,7 @@ ul, ol { list-style: none; }
    ============================================ */
 .site-header {
     background: #fff;
-    border-bottom: 1px solid #E8ECF0;
+    border-bottom: 1px solid var(--garis);
     height: 56px;
     display: flex;
     align-items: center;
@@ -55,13 +73,13 @@ ul, ol { list-style: none; }
 .site-header .logo-text {
     font-size: 15px;
     font-weight: 700;
-    color: #198754;
+    color: var(--hijau-utama);
     letter-spacing: -0.01em;
     white-space: nowrap;
 }
 .site-header .btn-masuk {
     display: inline-block;
-    background: #198754;
+    background: var(--hijau-utama);
     color: #fff;
     padding: 7px 22px;
     border-radius: 6px;
@@ -70,7 +88,7 @@ ul, ol { list-style: none; }
     line-height: 1.4;
     transition: background 150ms;
 }
-.site-header .btn-masuk:hover { background: #146C43; }
+.site-header .btn-masuk:hover { background: var(--hijau-gelap); }
 
 /* ============================================
    BUTTONS
@@ -86,23 +104,23 @@ ul, ol { list-style: none; }
     transition: background 150ms, color 150ms;
 }
 .btn-primary {
-    background: #198754;
+    background: var(--hijau-utama);
     color: #fff;
 }
-.btn-primary:hover { background: #146C43; }
+.btn-primary:hover { background: var(--hijau-gelap); }
 .btn-ghost {
     background: transparent;
-    color: #198754;
-    border: 1px solid #D1EDDB;
+    color: var(--hijau-utama);
+    border: 1px solid var(--hijau-garis);
 }
-.btn-ghost:hover { background: #E8F5EE; }
+.btn-ghost:hover { background: var(--hijau-muda); }
 
 /* ============================================
    HERO
    ============================================ */
 .hero {
     background: #fff;
-    border-bottom: 1px solid #E8ECF0;
+    border-bottom: 1px solid var(--garis);
 }
 .hero-inner {
     max-width: 640px;
@@ -113,14 +131,14 @@ ul, ol { list-style: none; }
 .hero h1 {
     font-size: 26px;
     font-weight: 700;
-    color: #1A2332;
+    color: var(--teks-utama);
     line-height: 1.35;
     margin-bottom: 14px;
     letter-spacing: -0.02em;
 }
 .hero-desc {
     font-size: 15px;
-    color: #5A6B7D;
+    color: var(--teks-samar);
     margin-bottom: 28px;
     line-height: 1.6;
 }
@@ -140,14 +158,14 @@ ul, ol { list-style: none; }
 .services-section h2 {
     font-size: 20px;
     font-weight: 700;
-    color: #1A2332;
+    color: var(--teks-utama);
     margin-bottom: 4px;
     letter-spacing: -0.01em;
     text-align: center;
 }
 .section-sub {
     font-size: 14px;
-    color: #6B7A8D;
+    color: var(--teks-sekunder);
     margin-bottom: 28px;
     text-align: center;
 }
@@ -158,32 +176,32 @@ ul, ol { list-style: none; }
 }
 .service-card {
     background: #fff;
-    border: 1px solid #E8ECF0;
+    border: 1px solid var(--garis);
     border-radius: 10px;
     padding: 20px;
     transition: border-color 150ms;
 }
-.service-card:hover { border-color: #198754; }
+.service-card:hover { border-color: var(--hijau-utama); }
 .service-card .svc-icon {
     width: 40px;
     height: 40px;
-    background: #E8F5EE;
+    background: var(--hijau-muda);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 12px;
-    color: #198754;
+    color: var(--hijau-utama);
 }
 .service-card h3 {
     font-size: 14px;
     font-weight: 600;
-    color: #1A2332;
+    color: var(--teks-utama);
     margin-bottom: 4px;
 }
 .service-card p {
     font-size: 13px;
-    color: #6B7A8D;
+    color: var(--teks-sekunder);
     line-height: 1.5;
 }
 
@@ -200,7 +218,7 @@ ul, ol { list-style: none; }
 }
 .info-card {
     background: #fff;
-    border: 1px solid #E8ECF0;
+    border: 1px solid var(--garis);
     border-radius: 10px;
     padding: 18px 20px;
     display: flex;
@@ -211,22 +229,22 @@ ul, ol { list-style: none; }
     flex-shrink: 0;
     width: 36px;
     height: 36px;
-    background: #E8F5EE;
+    background: var(--hijau-muda);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #198754;
+    color: var(--hijau-utama);
 }
 .info-card h3 {
     font-size: 13px;
     font-weight: 600;
-    color: #1A2332;
+    color: var(--teks-utama);
     margin-bottom: 2px;
 }
 .info-card p {
     font-size: 13px;
-    color: #6B7A8D;
+    color: var(--teks-sekunder);
 }
 
 /* ============================================
@@ -234,13 +252,13 @@ ul, ol { list-style: none; }
    ============================================ */
 .site-footer {
     background: #fff;
-    border-top: 1px solid #E8ECF0;
+    border-top: 1px solid var(--garis);
     padding: 14px 24px;
     text-align: center;
 }
 .site-footer p {
     font-size: 12px;
-    color: #8494A7;
+    color: var(--teks-kaki);
     margin: 0;
 }
 
@@ -265,7 +283,7 @@ body.login-page .site-header {
     width: 100%;
     max-width: 380px;
     background: #fff;
-    border: 1px solid #E8ECF0;
+    border: 1px solid var(--garis);
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     padding: 28px 24px;
@@ -281,12 +299,12 @@ body.login-page .site-header {
 .login-card .lc-title {
     font-size: 18px;
     font-weight: 700;
-    color: #198754;
+    color: var(--hijau-utama);
     margin-bottom: 2px;
 }
 .login-card .lc-sub {
     font-size: 13px;
-    color: #6B7A8D;
+    color: var(--teks-sekunder);
     margin-bottom: 20px;
 }
 
@@ -296,30 +314,30 @@ body.login-page .site-header {
     text-align: left;
     font-size: 12px;
     font-weight: 600;
-    color: #1A2332;
+    color: var(--teks-utama);
     margin-bottom: 4px;
 }
 .lc-form input[type="text"],
 .lc-form input[type="password"] {
     width: 100%;
     padding: 9px 12px;
-    border: 1px solid #DDE2E8;
+    border: 1px solid var(--garis-input);
     border-radius: 6px;
     font-size: 14px;
-    color: #1A2332;
+    color: var(--teks-utama);
     background: #fff;
     outline: none;
     transition: border-color 150ms;
 }
 .lc-form input:focus {
-    border-color: #198754;
+    border-color: var(--hijau-utama);
     box-shadow: 0 0 0 3px rgba(25,135,84,0.1);
 }
 .lc-form .lc-field { margin-bottom: 14px; text-align: left; }
 .lc-form .lc-btn {
     width: 100%;
     padding: 10px;
-    background: #198754;
+    background: var(--hijau-utama);
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -329,26 +347,26 @@ body.login-page .site-header {
     margin-top: 4px;
     transition: background 150ms;
 }
-.lc-form .lc-btn:hover { background: #146C43; }
+.lc-form .lc-btn:hover { background: var(--hijau-gelap); }
 .lc-back {
     display: block;
     text-align: center;
     margin-top: 14px;
     font-size: 12px;
-    color: #6B7A8D;
+    color: var(--teks-sekunder);
 }
-.lc-back a { color: #198754; font-weight: 500; }
+.lc-back a { color: var(--hijau-utama); font-weight: 500; }
 .lc-back a:hover { text-decoration: underline; }
 
 /* Alert */
 .lc-alert {
-    background: #FFF5F5;
-    border: 1px solid #F5C2C7;
+    background: var(--merah-latar);
+    border: 1px solid var(--merah-garis);
     border-radius: 6px;
     padding: 8px 12px;
     margin-bottom: 14px;
     font-size: 12px;
-    color: #842029;
+    color: var(--merah-teks);
     text-align: left;
 }
 
