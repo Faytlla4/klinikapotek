@@ -1,3 +1,4 @@
+<?php // Ruang putusan retur: alasan pasien (kuning) -> disposisi per item -> refund manual -> Setujui/Tolak + cetak nota. ?>
 <?php $this->load->view('transaksi/partials/_nota'); ?>
 <div class="nota-screen">
 <div class="row"><div class="col-md-12"><div class="card <?php echo $retur->status === 'SELESAI' ? 'card-success' : ($retur->status === 'DITOLAK' ? 'card-danger' : 'card-warning'); ?>">

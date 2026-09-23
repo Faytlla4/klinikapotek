@@ -1,3 +1,4 @@
+<?php // Sidebar pasien: Dashboard, Daftar Obat, Keranjang, Checkout, Pesanan Saya, Data Pribadi. ?>
 <ul>
 <?php $seg2 = $this->uri->segment(2); $seg3 = $this->uri->segment(3); $seg4 = $this->uri->segment(4); ?>
     <li class="nav-item">

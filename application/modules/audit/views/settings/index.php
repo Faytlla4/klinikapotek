@@ -1,3 +1,4 @@
+<?php // Jejak aktivitas: 100 terbaru, filter modul + aksi. Read-only, tulisnya lewat Audit_log_model::catat(). ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Jejak Aktivitas (100 terbaru)</h3></div>
     <div class="card-body">

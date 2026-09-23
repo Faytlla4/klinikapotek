@@ -1,3 +1,4 @@
+<?php // Keranjang pasien (isi dari session): stepper tambah/kurang, total, lanjut checkout. ?>
 <style>
 /* ponytail: keranjang pasien — item cards + total bar, selaras katalog obat */
 .krj-item { border: 1px solid #d1fae5; border-radius: 10px; }

@@ -1,3 +1,4 @@
+<?php // Daftar pesanan milik pasien yang login: nomor, status, bayar, link ke detail. ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Pesanan Saya</h3>
     <div class="card-tools"><a href="<?php echo site_url(SITE_AREA . '/online/obat'); ?>" class="btn btn-sm btn-primary">Belanja Obat</a></div></div>

@@ -1,3 +1,4 @@
+<?php // Sidebar apoteker: kelola Pesanan Online + putusan Retur Online. ?>
 <ul>
     <li class="nav-item">
         <a href="<?php echo site_url(SITE_AREA . '/apotek/pesanan-online'); ?>" class="nav-link <?php echo $this->uri->segment(2) == 'apotek' && $this->uri->segment(3) == 'pesanan-online' ? 'active' : ''; ?>">

@@ -1,4 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
+// index = riwayat (filter tanggal, 50 terakhir default); create = form jual (jenis+resep+pasien+item);
+// detail = struk + cetak. Beratnya di Penjualan_model::jual(), controller ini tipis.
 class Content extends App_Controller
 {
     /** Context aktif (sidebar/redirect). Child per-context meng-override. */

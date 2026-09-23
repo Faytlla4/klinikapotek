@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// Sisi pasien: katalog -> keranjang (session) -> checkout -> pesanan saya + ajukan retur.
+// Harga/stok/resep selalu divalidasi ulang dari DB; jangan percaya angka dari browser.
+
 /**
  * Apotek Online sisi PASIEN (context online). Orchestration di atas
  * model existing (obat/stok/resep/penjualan/tagihan); cart = session.

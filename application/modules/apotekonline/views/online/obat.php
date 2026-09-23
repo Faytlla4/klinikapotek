@@ -1,3 +1,4 @@
+<?php // Katalog obat pasien: kartu + label wajib-resep; tombol tambah lari ke keranjang (session). ?>
 <style>
 /* ponytail: katalog obat pasien — flat cards selaras tema emerald */
 .obat-grid .obat-card { border: 1px solid #d1fae5; border-radius: 10px; }

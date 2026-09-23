@@ -1,3 +1,4 @@
+<?php // Meja kerja apoteker: semua pesanan + filter status, bayar selalu diselaraskan dari tagihan. ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Pesanan Online Pasien</h3></div>
     <div class="card-body">

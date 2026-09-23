@@ -1,3 +1,4 @@
+<?php // Checkout pasien: langkah Data Pengiriman (no HP + alamat) -> buat pesanan MENUNGGU. ?>
 <style>
 /* ponytail: checkout pasien — stepper + ringkasan + konfirmasi */
 .co-steps { display: flex; gap: 0; margin-bottom: 16px; }

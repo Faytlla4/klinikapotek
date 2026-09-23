@@ -1,3 +1,4 @@
+<?php // Detail pesanan versi apoteker: info stok per item + tagihan + tombol alur (Validasi/Proses/Siap/Selesai/Batal). ?>
 <?php $this->load->view('transaksi/partials/_nota'); ?>
 <div class="nota-screen">
 <div class="row"><div class="col-md-12"><div class="card card-primary">

@@ -1,4 +1,6 @@
 <?php
+// Riwayat keluar-masuk satu obat: filter obat/jenis/tanggal, chip total, tabel + modal detail,
+// cetak bukti per baris (nota dirakit JS). Pilih obat dulu, tabel kosong sebelum itu.
 $nama_obat = '-';
 $satuan_obat = '-';
 foreach ($obat_list as $o) {

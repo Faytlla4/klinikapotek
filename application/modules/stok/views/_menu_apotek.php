@@ -1,3 +1,4 @@
+<?php // Sidebar stok: tabel Stok Obat + riwayat Obat Masuk/Keluar (mutasi per obat). ?>
 <ul>
 <?php $seg2 = $this->uri->segment(2); ?>
     <li class="nav-item">

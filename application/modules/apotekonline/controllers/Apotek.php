@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// Sisi apoteker: validasi -> proses (saat inilah stok berkurang + tagihan lahir) -> siap -> selesai.
+// Tombol di detail menyesuaikan status, jadi urutan kerja tidak bisa dilompati. Retur diputus di sini juga.
+
 /**
  * Apotek Online sisi APOTEKER (context apotek). Daftar + validasi +
  * proses + status, di atas Pesanan_model (stok via jual() existing).

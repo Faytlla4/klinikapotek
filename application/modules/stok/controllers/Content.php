@@ -1,4 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
+// Tabel stok obat (DataTables via get_data). Stoknya sendiri hanya berubah lewat
+// penerimaan/penjualan/retur — halaman ini murni baca, tidak ada tombol ubah stok.
 class Content extends App_Controller
 {
     public function __construct() { parent::__construct(); $this->auth->restrict('kelola_stok_obat'); $this->load->model('stok/stok_model'); $this->load->model('master/obat_model'); Assets::add_module_js('stok', 'stok.js'); }

@@ -1,3 +1,4 @@
+<?php // Struk penjualan: info + item + blok nota cetak (tombol Cetak ada di footer bawah). ?>
 <?php $this->load->view('transaksi/partials/_nota'); ?>
 <div class="nota-screen">
 <div class="row"><div class="col-12"><div class="card card-primary">

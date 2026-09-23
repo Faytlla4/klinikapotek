@@ -8,6 +8,7 @@
  * memproses; stok hanya berkurang di Penjualan_model::jual().
  * Status: MENUNGGU -> DIVERIFIKASI -> DIPROSES -> SIAP -> SELESAI (+BATAL).
  * Bayar: BELUM_DIBAYAR -> LUNAS (+BATAL), diselaraskan dari tagihan.
+ * Satu pesanan = satu resep; resep yang sudah jadi penjualan SELESAI terkunci.
  */
 class Pesanan_model extends BF_Model
 {

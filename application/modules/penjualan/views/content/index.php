@@ -1,3 +1,4 @@
+<?php // Riwayat penjualan: filter tanggal, 50 terbaru default (500 bila filter aktif), link ke struk. ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Riwayat Penjualan<?php echo ($f_dari || $f_sampai) ? '' : ' (50 terbaru)'; ?></h3>
     <div class="card-tools"><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3) . '/create'); ?>" class="btn btn-sm btn-primary">Jual Obat</a></div></div>
