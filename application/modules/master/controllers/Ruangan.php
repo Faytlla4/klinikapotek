@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// CRUD ruangan: selalu menunjuk ke satu poli (tujuan kunjungan per ruangan).
+
 class Ruangan extends App_Controller
 {
 	protected $permission = 'kelola_master_data';

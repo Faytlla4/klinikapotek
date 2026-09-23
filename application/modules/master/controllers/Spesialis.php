@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// CRUD spesialisasi dokter (bedah, anak, dst): dipakai dropdown dokter + filter.
+
 class Spesialis extends App_Controller
 {
 	protected $permission = 'kelola_master_data';

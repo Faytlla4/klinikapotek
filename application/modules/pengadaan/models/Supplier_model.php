@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Supplier Model (§16). */
+/** Supplier Model (§16). Pemasok obat; satu pengadaan wajib menunjuk satu supplier aktif. */
 class Supplier_model extends BF_Model
 {
     protected $table_name = 'supplier';

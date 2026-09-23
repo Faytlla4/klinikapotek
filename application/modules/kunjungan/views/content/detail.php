@@ -1,3 +1,4 @@
+<?php // Jejak satu kunjungan: pasien, tujuan, antrian, pemeriksaan, tagihan + nota cetak. ?>
 <?php $this->load->view('transaksi/partials/_nota'); ?>
 <div class="nota-screen">
 <div class="row"><div class="col-md-12"><div class="card card-primary">

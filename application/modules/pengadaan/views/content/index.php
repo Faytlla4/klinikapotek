@@ -1,7 +1,8 @@
 <div class="row"><div class="col-md-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title"><i class="fas fa-plus mr-1"></i> Tambah Pengadaan</h3></div>
     <?php echo form_open($this->uri->uri_string()); ?><div class="card-body">
-        <div class="row">
+<?php // Form pesan cepat: supplier + obat + jumlah + harga; riwayat pesanan di bawahnya. ?>
+<div class="row">
             <div class="col-md-3"><div class="form-group"><label>Supplier</label><select name="id_supplier" class="form-control select2" required><option value="">-- Pilih --</option><?php foreach($supplier_list as $s): ?><option value="<?php echo $s->id_supplier; ?>"><?php echo html_escape($s->nama_supplier); ?></option><?php endforeach; ?></select></div></div>
             <div class="col-md-3"><div class="form-group"><label>Obat</label><select name="id_obat" class="form-control select2" required><option value="">-- Pilih --</option><?php foreach($obat_list as $o): ?><option value="<?php echo $o->id_obat; ?>"><?php echo html_escape($o->nama_obat); ?></option><?php endforeach; ?></select></div></div>
             <div class="col-md-2"><div class="form-group"><label>Jumlah</label><input type="number" min="1" name="jumlah_pesan" class="form-control" required></div></div>

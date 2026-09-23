@@ -1,3 +1,4 @@
+<?php // Sidebar master: satu-satunya menu modul ini, Supplier (link langsung, bukan dropdown). ?>
 <ul>
     <li class="nav-item">
         <a href="<?php echo site_url(SITE_AREA . '/master/pengadaan/supplier'); ?>" class="nav-link <?php echo $this->uri->segment(2) == 'master' && $this->uri->segment(3) == 'pengadaan' && $this->uri->segment(4) == 'supplier' ? 'active' : ''; ?>">

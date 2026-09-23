@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// Isi rekam medis: pemeriksaan + diagnosis + tindakan per kunjungan, lalu resep bila perlu.
+
 $config['module_config'] = array(
 	'description' => 'Pemeriksaan dan Rekam Medis',
 	'name'        => 'Pemeriksaan',

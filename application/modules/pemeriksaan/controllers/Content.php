@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// Meja dokter: create = periksa (keluhan+hasil+catatan, dokter terkunci bila login dokter),
+// detail/edit = rekam medis. Selesai periksa bisa lanjut buat resep.
+
 class Content extends App_Controller
 {
 	protected $permission = 'kelola_pemeriksaan';

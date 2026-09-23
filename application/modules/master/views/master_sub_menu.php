@@ -1,3 +1,4 @@
+<?php // Sidebar master data: Pelayanan, Poli, Spesialis, Ruangan, Dokter, Obat (+ Supplier bila berizin). ?>
 <ul>
 <?php $seg2 = $this->uri->segment(2); ?>
 <?php if ($this->auth->has_permission('kelola_master_data')): ?>

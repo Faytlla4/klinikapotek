@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// CRUD obat. Apoteker (kelola_stok_obat) boleh baca walau bukan admin master.
+// Harga & satuan di sini = acuan semua jual/beli; wajib_resep mengunci penjualan.
+
 class Obat extends App_Controller
 {
 	protected $permission = 'kelola_master_data';

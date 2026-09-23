@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Tindakan Model (§13). Relasi: tindakan -> pemeriksaan. */
+/** Tindakan Model (§13). Relasi: tindakan -> pemeriksaan. Tindakan berbayar masuk tagihan. */
 class Tindakan_model extends BF_Model
 {
     protected $table_name = 'tindakan';

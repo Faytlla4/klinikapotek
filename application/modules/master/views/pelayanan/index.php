@@ -1,3 +1,4 @@
+<?php // Tabel jenis pelayanan (DataTables). ?>
 <div class="row">
     <div class="col-12">
         <div class="card">

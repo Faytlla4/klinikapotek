@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// Belanja obat ke supplier: index = form pesan cepat; create/detail = pesan, terima (stok +,
+// batch + kadaluarsa), retur bila tak sesuai. Beratnya di Pengadaan_model.
+
 class Content extends App_Controller
 {
     /** Context aktif (sidebar/redirect). Child per-context meng-override. */

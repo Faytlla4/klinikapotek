@@ -1,3 +1,4 @@
+<?php // Sub-navigasi spesialis: Daftar <-> Tambah (tombol aktif ikut segment URL). ?>
 <?php
 	$checkSegment = $this->uri->segment(4);
 	$areaUrl = SITE_AREA . '/master/spesialis';

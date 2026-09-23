@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// CRUD poli klinik: tujuan kunjungan + pengelompok ruangan dan dokter.
+
 class Poli extends App_Controller
 {
 	protected $permission = 'kelola_master_data';

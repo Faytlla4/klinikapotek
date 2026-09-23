@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Master Dokter (§10). Relasi: dokter -> spesialis. */
+/** Master Dokter (§10). Relasi: dokter -> spesialis. Dipakai jadwal, resep, dan kunjungan. */
 class Dokter_model extends BF_Model
 {
     protected $table_name = 'dokter';

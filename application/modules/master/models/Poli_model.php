@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Master Poli (§10). */
+/** Master Poli (§10). Tujuan kunjungan; ruangan dan dokter mengelompok ke sini. */
 class Poli_model extends BF_Model
 {
     protected $table_name = 'poli';

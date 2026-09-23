@@ -1,3 +1,4 @@
+<?php // Sub-navigasi kunjungan: Daftar <-> Tambah (ngikut context aktif). ?>
 <?php $areaUrl = SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3); ?>
 <div class="float-sm-right">
     <a href="<?php echo site_url($areaUrl); ?>" class="btn btn-flat btn-<?php echo $this->uri->segment(4) == '' ? 'primary' : 'default'; ?>">Daftar Kunjungan</a>

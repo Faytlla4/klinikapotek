@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Diagnosis Model (§13). Relasi: diagnosis -> pemeriksaan. */
+/** Diagnosis Model (§13). Relasi: diagnosis -> pemeriksaan. Satu periksa bisa banyak diagnosis. */
 class Diagnosis_model extends BF_Model
 {
     protected $table_name = 'diagnosis';

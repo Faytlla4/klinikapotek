@@ -1,3 +1,4 @@
+<?php // Sidebar pemeriksaan: Daftar Pemeriksaan (+ sub-menu lain di bawahnya). ?>
 <ul>
 <?php $seg2 = $this->uri->segment(2); ?>
     <li class="nav-item">

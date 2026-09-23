@@ -1,3 +1,4 @@
+<?php // Sub-navigasi dokter: Daftar <-> Tambah. ?>
 <?php $areaUrl = SITE_AREA . '/master/dokter'; ?>
 <div class="float-sm-right">
     <a href="<?php echo site_url($areaUrl); ?>" class="btn btn-flat btn-<?php echo $this->uri->segment(4) == '' ? 'primary' : 'default'; ?>">Daftar Dokter</a>

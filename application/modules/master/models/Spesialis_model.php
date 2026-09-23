@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Master Spesialis (§10). */
+/** Master Spesialis (§10). Daftar keahlian dokter (bedah, anak, dst). */
 class Spesialis_model extends BF_Model
 {
     protected $table_name = 'spesialis';

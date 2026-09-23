@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Master Pelayanan (§10). */
+/** Master Pelayanan (§10). Jenis layanan yang dipilih saat pendaftaran kunjungan. */
 class Pelayanan_model extends BF_Model
 {
     protected $table_name = 'pelayanan';

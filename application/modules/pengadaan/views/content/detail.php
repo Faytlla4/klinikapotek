@@ -1,3 +1,4 @@
+<?php // Detail pengadaan: info + item + terima barang (batch + kadaluarsa) + retur + nota. ?>
 <?php $this->load->view('transaksi/partials/_nota'); ?>
 <div class="nota-screen">
 <div class="row">

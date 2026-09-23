@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// CRUD dokter: nyambung ke spesialis + akun user (jadwal, resep, dan kunjungan per dokter).
+
 class Dokter extends App_Controller
 {
 	protected $permission = 'kelola_master_data';

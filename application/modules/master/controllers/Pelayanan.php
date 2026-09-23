@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// CRUD jenis pelayanan: inilah yang dipilih admin saat pendaftaran kunjungan pasien.
+
 class Pelayanan extends App_Controller
 {
 	protected $permission = 'kelola_master_data';

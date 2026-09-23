@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// index = daftar + filter; create = form pendaftaran (pasien+tujuan); detail = jejak kunjungan.
+// Status jalan: TERDAFTAR -> MENUNGGU -> DIPROSES -> SELESAI (+BATAL).
+
 class Content extends App_Controller
 {
 	protected $permission = 'kelola_pendaftaran';

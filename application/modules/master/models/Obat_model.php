@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Master Obat (§10). */
+/** Master Obat (§10). Harga & satuan di sini = acuan semua jual/beli; wajib_resep mengunci penjualan. */
 class Obat_model extends BF_Model
 {
     protected $table_name = 'obat';

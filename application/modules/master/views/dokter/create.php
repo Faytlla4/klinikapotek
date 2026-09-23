@@ -1,3 +1,4 @@
+<?php // Form tambah dokter + pilih spesialis + sambungkan akun user. ?>
 <?php if (validation_errors()): ?><div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button><?php echo validation_errors(); ?></div><?php endif; ?>
 <div class="row"><div class="col-md-12"><div class="card card-primary">
     <div class="card-header"><h3 class="card-title">Form Tambah Dokter</h3></div>

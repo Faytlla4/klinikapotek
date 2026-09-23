@@ -1,3 +1,4 @@
+<?php // Tabel obat (DataTables): kode, harga, stok, minimum, wajib resep, status. ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Daftar Obat</h3></div>
     <div class="card-body table-responsive"><table id="obat_table" class="table table-bordered table-hover table-striped">
