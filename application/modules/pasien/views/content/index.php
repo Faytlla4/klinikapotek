@@ -1,3 +1,4 @@
+<?php // Tabel pasien (DataTables via get_data): No. RM, NIK, nama, lahir, JK, status. ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Daftar Pasien</h3></div>
     <div class="card-body table-responsive"><table id="pasien_table" class="table table-bordered table-hover table-striped" data-endpoint="<?php echo html_escape(site_url($this->uri->uri_string() . '/get_data')); ?>" data-edit-url="<?php echo html_escape(site_url($this->uri->uri_string() . '/edit')); ?>">

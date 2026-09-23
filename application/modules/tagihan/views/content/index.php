@@ -1,3 +1,4 @@
+<?php // Tabel tagihan (DataTables + filter tanggal): nomor, RM, pasien, total, status. ?>
 <div class="row"><div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title">Daftar Tagihan</h3></div><div class="card-body">
 <div class="form-inline mb-2">
     <div class="input-group input-group-sm mr-2 mb-1"><div class="input-group-prepend"><span class="input-group-text"><i class="far fa-calendar-alt"></i></span></div><input type="date" id="filter-dari" class="form-control" style="max-width:160px;" title="Dari tanggal"></div>

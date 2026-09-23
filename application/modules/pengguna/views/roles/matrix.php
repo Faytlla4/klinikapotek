@@ -1,3 +1,4 @@
+<?php // Matriks permission: centang massal per role. Hak sendiri tidak bisa dicabut (dijaga controller). ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Matriks Permission: <?php echo html_escape($role->nama_role); ?></h3>
     <div class="card-tools"><a href="<?php echo site_url(SITE_AREA . '/settings/roles'); ?>" class="btn btn-sm btn-default">Kembali</a></div></div>

@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// CRUD pasien: index (DataTables) -> create (no_rm otomatis) -> detail/edit.
+// No. RM tidak bisa diubah; NIK/nama dipakai pencarian resep & online.
+
 class Content extends App_Controller
 {
 	protected $permission = 'kelola_pasien';

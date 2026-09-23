@@ -1,3 +1,4 @@
+<?php // Sub-navigasi pasien: Daftar <-> Tambah; URL ngikut context aktif (pelayanan/...). ?>
 <?php $areaUrl = SITE_AREA . '/' . $this->uri->segment(2) . '/' . $this->uri->segment(3); ?>
 <div class="float-sm-right">
     <a href="<?php echo site_url($areaUrl); ?>" class="btn btn-flat btn-<?php echo $this->uri->segment(4) == '' ? 'primary' : 'default'; ?>">Daftar Pasien</a>

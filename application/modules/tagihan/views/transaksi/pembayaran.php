@@ -1,3 +1,4 @@
+<?php // Kasir: hanya tagihan BELUM_DIBAYAR yang tampil; bayar penuh/sebagian di sini. Lunas = hilang dari list. ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Pembayaran — Tagihan Belum Lunas</h3></div>
     <div class="card-body table-responsive"><table class="table table-bordered table-hover table-striped">

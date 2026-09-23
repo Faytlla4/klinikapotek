@@ -1,4 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
+// Daftar tagihan (DataTables + cari nomor/RM/nama) + detail rincian.
+// Tagihan tidak dibuat manual di sini; ia akibat penjualan/kunjungan.
 class Content extends App_Controller
 {
     public function __construct() { parent::__construct(); $this->auth->restrict('kelola_tagihan'); $this->load->model('tagihan/tagihan_model'); Assets::add_module_js('tagihan', 'tagihan.js'); }

@@ -1,3 +1,4 @@
+<?php // Sidebar transaksi: Daftar Tagihan + Pembayaran (yang belum lunas saja). ?>
 <ul>
 <?php $seg2 = $this->uri->segment(2); ?>
     <li class="nav-item">

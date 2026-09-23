@@ -1,4 +1,5 @@
 <?php
+// Rincian tagihan: badge status + progress bar sudah-vs-sisa bayar + item TINDAKAN/OBAT/dll.
 $status = strtoupper($tagihan->status);
 $badge = array('LUNAS' => 'success', 'BELUM_DIBAYAR' => 'warning', 'BATAL' => 'danger');
 $badge = isset($badge[$status]) ? $badge[$status] : 'secondary';

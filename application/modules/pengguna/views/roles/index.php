@@ -1,3 +1,4 @@
+<?php // Daftar role + hitung user & permission per role; tombol ke matriks permission. ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Daftar Role</h3>
     <div class="card-tools"><a href="<?php echo site_url(SITE_AREA . '/settings/roles/create'); ?>" class="btn btn-sm btn-primary">Tambah Role</a></div></div>

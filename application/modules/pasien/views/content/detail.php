@@ -1,3 +1,4 @@
+<?php // Biodata + riwayat pasien (kunjungan/resep/tagihan) + blok nota bila dicetak. ?>
 <?php $this->load->view('transaksi/partials/_nota'); ?>
 <div class="nota-screen">
 <div class="row"><div class="col-md-12"><div class="card card-primary">

@@ -1,4 +1,6 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
+// Antrian resep: index = menunggu diproses (dokter hanya lihat resep buatannya sendiri),
+// detail = cek stok per item + cetak salinan. Hapus hanya yang belum dipakai jual.
 class Content extends App_Controller
 {
     public function __construct()

@@ -1,3 +1,4 @@
+<?php // Daftar user + cari username/nama; password TIDAK pernah ditampilkan di sini. ?>
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Daftar User</h3>
     <div class="card-tools"><a href="<?php echo site_url(SITE_AREA . '/settings/users/create'); ?>" class="btn btn-sm btn-primary">Tambah User</a></div></div>
