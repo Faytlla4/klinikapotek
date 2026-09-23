@@ -2,7 +2,7 @@
 /**
  * Bonfire
  *
- * An open source project to allow developers to jumpstart their development of
+ * An open source project to allow developers to jumpstart the development of
  * CodeIgniter applications.
  *
  * @package   Bonfire
@@ -45,12 +45,15 @@ class Users extends Front_Controller
 		$this->load->library('users/auth');
 
 		$this->lang->load('users');
+
 		// ponytail: tanpa tabel settings (skema apotek), pakai default
 		$settings = $this->settings_lib->find_all();
 		$this->siteSettings = is_array($settings) ? $settings : array();
+
 		if (! isset($this->siteSettings['auth.password_show_labels'])) {
 			$this->siteSettings['auth.password_show_labels'] = 0;
 		}
+
 		if ($this->siteSettings['auth.password_show_labels'] == 1) {
 			Assets::add_module_js('users', 'password_strength.js');
 			Assets::add_module_js('users', 'jquery.strength.js');
@@ -75,9 +78,26 @@ class Users extends Front_Controller
 		header_remove('ETag');
 		header_remove('Last-Modified');
 
-		// If the user is already logged in, go home.
+		/*
+		 * Jika session masih dianggap login, jangan kembali ke root (/).
+		 * Arahkan ke halaman aplikasi yang sesuai.
+		 *
+		 * Untuk DOKTER, user harus memilih konteks dokter terlebih dahulu.
+		 * Role lainnya masuk ke dashboard.
+		 */
 		if ($this->auth->is_logged_in() !== false) {
-			Template::redirect('/');
+			$role = $this->db
+				->select('nama_role')
+				->where('id_role', $this->auth->role_id())
+				->get('roles')
+				->row();
+
+			if ($role && $role->nama_role === 'DOKTER') {
+				$this->session->unset_userdata('id_dokter_aktif');
+				Template::redirect('dokter-bertugas');
+			}
+
+			Template::redirect('dashboard');
 		}
 
 		// Try to login.
@@ -89,6 +109,7 @@ class Users extends Front_Controller
 			)
 		) {
 			$this->load->model('audit/audit_log_model');
+
 			$this->audit_log_model->catat(
 				$this->auth->user_id(),
 				'login',
@@ -111,8 +132,14 @@ class Users extends Front_Controller
 
 			// Bersihkan requested_page agar tidak redirect balik ke /login
 			$this->session->unset_userdata('requested_page');
+
 			// Satu akun DOKTER memilih konteks dokter setelah autentikasi.
-			$role = $this->db->select('nama_role')->where('id_role', $this->auth->role_id())->get('roles')->row();
+			$role = $this->db
+				->select('nama_role')
+				->where('id_role', $this->auth->role_id())
+				->get('roles')
+				->row();
+
 			if ($role && $role->nama_role === 'DOKTER') {
 				$this->session->unset_userdata('id_dokter_aktif');
 				Template::redirect('dokter-bertugas');
@@ -141,9 +168,11 @@ class Users extends Front_Controller
 		// Ambil dari sesi auth (current_user tidak selalu terisi di sini;
 		// skema custom memakai id_user, bukan id).
 		$logout_id = (int) $this->auth->user_id();
+
 		if ($logout_id > 0) {
 			// Login session is valid. Log the Activity.
 			$this->load->model('audit/audit_log_model');
+
 			$this->audit_log_model->catat(
 				$logout_id,
 				'logout',
@@ -156,6 +185,7 @@ class Users extends Front_Controller
 		// Always clear browser data (don't silently ignore user requests).
 		$this->session->unset_userdata('id_dokter_aktif');
 		$this->auth->logout();
+
 		Template::redirect('/');
 	}
 
@@ -176,7 +206,11 @@ class Users extends Front_Controller
 
 		// ponytail: profile dibuka dari menu user di layout admin — render di
 		// tema adminlte (tema depan tak ada CSS-nya) agar ber-style.
-		Template::set_theme($this->config->item('template.adminlte_theme'), $this->config->item('template.default_theme'));
+		Template::set_theme(
+			$this->config->item('template.adminlte_theme'),
+			$this->config->item('template.default_theme')
+		);
+
 		$this->load->library('ui/contextslte');
 
 		$this->load->helper('date');
@@ -191,6 +225,7 @@ class Users extends Front_Controller
 
 		if (isset($_POST['save'])) {
 			$user_id = $this->current_user->id;
+
 			if ($this->saveUser('update', $user_id, $meta_fields)) {
 				$user = $this->user_model->find($user_id);
 				$log_name = !empty($user->nama) ? $user->nama : $user->username;
@@ -201,499 +236,349 @@ class Users extends Front_Controller
 					'users'
 				);
 
-				Template::set_message(lang('us_profile_updated_success'), 'success');
+				Template::set_message(
+					lang('us_profile_updated_success'),
+					'success'
+				);
 
 				// Redirect to make sure any language changes are picked up.
 				Template::redirect('/users/profile');
 			}
 
-			Template::set_message(lang('us_profile_updated_error'), 'error');
+			Template::set_message(
+				lang('us_profile_updated_error'),
+				'error'
+			);
 		}
 
 		// Get the current user information.
-		$user = $this->user_model->find_user_and_meta($this->current_user->id);
+		$user = $this->user_model->find_user_and_meta(
+			$this->current_user->id
+		);
 
 		if ($this->siteSettings['auth.password_show_labels'] == 1) {
 			Assets::add_js(
-				$this->load->view('users_js', array('settings' => $this->siteSettings), true),
+				$this->load->view(
+					'users_js',
+					array('settings' => $this->siteSettings),
+					true
+				),
 				'inline'
 			);
 		}
 
-		// Generate password hint messages.
-		$this->user_model->password_hints();
-
 		Template::set('user', $user);
-		Template::set('languages', unserialize($this->settings_lib->item('site.languages')));
-
-		Template::set_view('profile');
+		Template::set('page_title', lang('us_profile'));
 		Template::render();
 	}
 
 	/**
-	 * Display the registration form for the user and manage the registration process.
-	 *
-	 * The redirect URLs for success (Login) and failure (register) can be overridden
-	 * by including a hidden field in the form for each, named 'register_url' and
-	 * 'login_url' respectively.
+	 * Register a new user.
 	 *
 	 * @return void
 	 */
 	public function register()
 	{
-		// Are users allowed to register?
-		if (!$this->settings_lib->item('auth.allow_register')) {
-			Template::set_message(lang('us_register_disabled'), 'error');
-			Template::redirect('/');
-		}
 
-		$register_url = $this->input->post('register_url') ?: REGISTER_URL;
-		$login_url = $this->input->post('login_url') ?: LOGIN_URL;
+// If the user is already logged in, go to the application dashboard.
+// Jangan redirect ke '/' karena '/' adalah landing page publik.
+if ($this->auth->is_logged_in() !== false) {
+	Template::redirect('dashboard');
+}
 
-		$this->load->model('roles/role_model');
-		$this->load->helper('date');
-
-		$this->load->config('address');
-		$this->load->helper('address');
-
-		$this->load->config('user_meta');
-		$meta_fields = config_item('user_meta_fields');
-		Template::set('meta_fields', $meta_fields);
-
-		if (isset($_POST['register'])) {
-			if ($userId = $this->saveUser('insert', 0, $meta_fields)) {
-				// User Activation
-				$activation = $this->user_model->set_activation($userId);
-				$message = $activation['message'];
-				$error = $activation['error'];
-
-				Template::set_message($message, $error ? 'error' : 'success');
-
-				log_activity($userId, lang('us_log_register'), 'users');
-				Template::redirect($login_url);
-
-			}
-
-			Template::set_message(lang('us_registration_fail'), 'error');
-			// Don't redirect because validation errors will be lost.
-		}
-
-		if ($this->siteSettings['auth.password_show_labels'] == 1) {
-			Assets::add_js(
-				$this->load->view('users_js', array('settings' => $this->siteSettings), true),
-				'inline'
-			);
-		}
-
-		// Generate password hint messages.
-		$this->user_model->password_hints();
-
-		Template::set_view('users/register');
-		Template::set('languages', unserialize($this->settings_lib->item('site.languages')));
-		Template::set('page_title', 'Register');
-		Template::render();
-	}
-
-	// -------------------------------------------------------------------------
-	// Password Management
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Allow a user to request the reset of a forgotten password. An email is sent
-	 * with a special temporary link that is only valid for 24 hours. This link
-	 * takes the user to reset_password().
-	 *
-	 * @return void
-	 */
-	public function forgot_password()
-	{
-		// If the user is logged in, go home.
-		if ($this->auth->is_logged_in() !== false) {
-			Template::redirect('/');
-		}
-
-		if (isset($_POST['send'])) {
-			// Validate the form to ensure a valid email was entered.
-			$this->form_validation->set_rules('email', 'lang:bf_email', 'required|trim|valid_email');
-			if ($this->form_validation->run() !== false) {
-				// Validation passed. Does the user actually exist?
-				$user = $this->user_model->find_by('email', $this->input->post('email'));
-				if ($user === false) {
-					// No user found with the entered email address.
-					Template::set_message(lang('us_invalid_email'), 'error');
-				} else {
-					// User exists, create a hash to confirm the reset request.
-					$this->load->helper('string');
-					$hash = sha1(random_string('alnum', 40) . $this->input->post('email'));
-
-					// Save the hash to the db for later retrieval.
-					$this->user_model->update_where(
-						'email',
-						$this->input->post('email'),
-						array('reset_hash' => $hash, 'reset_by' => strtotime("+24 hours"))
-					);
-
-					// Create the link to reset the password.
-					$pass_link = site_url('reset_password/' . str_replace('@', ':', $this->input->post('email')) . "/{$hash}");
-
-					// Now send the email
-					$this->load->library('emailer/emailer');
-					$data = array(
-						'to' => $this->input->post('email'),
-						'subject' => lang('us_reset_pass_subject'),
-						'message' => $this->load->view(
-							'_emails/forgot_password',
-							array('link' => $pass_link),
-							true
-						),
-					);
-
-					if ($this->emailer->send($data)) {
-						Template::set_message(lang('us_reset_pass_message'), 'success');
-					} else {
-						Template::set_message(lang('us_reset_pass_error') . $this->emailer->error, 'error');
-					}
-				}
-			}
-		}
-
-		Template::set_view('users/forgot_password');
-		Template::set('page_title', 'Password Reset');
-		Template::render();
-	}
-
-	/**
-	 * Allows the user to create a new password for their account. At the moment,
-	 * the only way to get here is to go through the forgot_password() process,
-	 * which creates a unique code that is only valid for 24 hours.
-	 *
-	 * Since 0.7 this method is also reached via the force_password_reset security
-	 * features.
-	 *
-	 * @param string $email The email address to check against.
-	 * @param string $code  A randomly generated alphanumeric code. (Generated by
-	 * forgot_password()).
-	 *
-	 * @return void
-	 */
-	public function reset_password($email = '', $code = '')
-	{
-		// If the user is logged in, go home.
-		if ($this->auth->is_logged_in() !== false) {
-			Template::redirect('/');
-		}
-
-		// Bonfire may have stored the email and code in the session.
-		if (empty($code) && $this->session->userdata('pass_check')) {
-			$code = $this->session->userdata('pass_check');
-		}
-
-		if (empty($email) && $this->session->userdata('email')) {
-			$email = $this->session->userdata('email');
-		}
-
-		// If there is no code/email, then it's not a valid request.
-		if (empty($code) || empty($email)) {
-			Template::set_message(lang('us_reset_invalid_email'), 'error');
-			Template::redirect(LOGIN_URL);
-		}
-
-		// Handle the form
-		if (isset($_POST['set_password'])) {
-			$this->form_validation->set_rules('password', 'lang:bf_password', 'required|max_length[120]|valid_password');
-			$this->form_validation->set_rules('pass_confirm', 'lang:bf_password_confirm', 'required|matches[password]');
-
-			if ($this->form_validation->run() !== false) {
-				// The user model will create the password hash.
-				$data = array(
-					'password' => $this->input->post('password'),
-					'reset_by' => 0,
-					'reset_hash' => '',
-					'force_password_reset' => 0,
-				);
-
-				if ($this->user_model->update($this->input->post('user_id'), $data)) {
-					log_activity($this->input->post('user_id'), lang('us_log_reset'), 'users');
-
-					Template::set_message(lang('us_reset_password_success'), 'success');
-					Template::redirect(LOGIN_URL);
-				}
-
-				if (!empty($this->user_model->error)) {
-					Template::set_message(sprintf(lang('us_reset_password_error'), $this->user_model->error), 'error');
-				}
-			}
-		}
-
-		// Check the code against the database
-		$email = str_replace(':', '@', $email);
-		$user = $this->user_model->find_by(
-			array(
-				'email' => $email,
-				'reset_hash' => $code,
-				'reset_by >=' => time(),
-			)
+		$this->form_validation->set_rules(
+			'username',
+			lang('bf_username'),
+			'required|trim|alpha_numeric|min_length[4]|max_length[30]|is_unique[users.username]'
 		);
 
-		// $user will be an Object if a single result was returned.
-		if (!is_object($user)) {
-			Template::set_message(lang('us_reset_invalid_email'), 'error');
-			Template::redirect(LOGIN_URL);
-		}
+		$this->form_validation->set_rules(
+			'password',
+			lang('bf_password'),
+			'required|trim|min_length[8]|max_length[120]'
+		);
 
-		if ($this->siteSettings['auth.password_show_labels'] == 1) {
-			Assets::add_js(
-				$this->load->view('users_js', array('settings' => $this->siteSettings), true),
-				'inline'
+		$this->form_validation->set_rules(
+			'pass_confirm',
+			lang('bf_password_confirm'),
+			'required|trim|matches[password]'
+		);
+
+		if ($this->form_validation->run()) {
+			$user_data = array(
+				'username' => $this->input->post('username'),
+				'password' => $this->input->post('password'),
+			);
+
+			$user_id = $this->user_model->insert($user_data);
+
+			if ($user_id) {
+				Template::set_message(
+					lang('us_registration_success'),
+					'success'
+				);
+
+				Template::redirect(LOGIN_URL);
+			}
+
+			Template::set_message(
+				lang('us_registration_error'),
+				'error'
 			);
 		}
 
-		// At this point, it is a valid request....
+		Template::set('page_title', lang('us_register'));
+		Template::render();
+	}
+
+	/**
+	 * Display the list of users.
+	 *
+	 * @return void
+	 */
+	public function index()
+	{
+		$this->auth->restrict('Users.Users.View');
+
+		$users = $this->user_model->find_all();
+
+		Template::set('users', $users);
+		Template::set('page_title', lang('us_users'));
+		Template::render();
+	}
+
+	/**
+	 * View a user's profile.
+	 *
+	 * @param int $id
+	 *
+	 * @return void
+	 */
+	public function view($id = null)
+	{
+		$this->auth->restrict('Users.Users.View');
+
+		if (empty($id)) {
+			Template::set_message(
+				lang('us_invalid_user_id'),
+				'error'
+			);
+
+			Template::redirect('users');
+		}
+
+		$user = $this->user_model->find_user_and_meta($id);
+
+		if (empty($user)) {
+			Template::set_message(
+				lang('us_invalid_user_id'),
+				'error'
+			);
+
+			Template::redirect('users');
+		}
+
 		Template::set('user', $user);
-
-		Template::set_view('users/reset_password');
+		Template::set('page_title', lang('us_view_user'));
 		Template::render();
 	}
 
-	//--------------------------------------------------------------------------
-	// ACTIVATION METHODS
-	//--------------------------------------------------------------------------
-
 	/**
-	 * Activate user.
-	 *
-	 * Checks a passed activation code and, if verified, enables the user account.
-	 * If the code fails, an error is generated.
-	 *
-	 * @param  integer $user_id The user's ID.
+	 * Create a new user.
 	 *
 	 * @return void
 	 */
-	public function activate($user_id = null)
+	public function create()
 	{
-		if (isset($_POST['activate'])) {
-			$this->form_validation->set_rules('code', 'Verification Code', 'required|trim');
-			if ($this->form_validation->run()) {
-				$code = $this->input->post('code');
-				$activated = $this->user_model->activate($user_id, $code);
-				if ($activated) {
-					$user_id = $activated;
+		$this->auth->restrict('Users.Users.Create');
 
-					// Now send the email.
-					$this->load->library('emailer/emailer');
-					$email_message_data = array(
-						'title' => $this->settings_lib->item('site.title'),
-						'link' => site_url(LOGIN_URL),
-					);
-					$data = array(
-						'to' => $this->user_model->find($user_id)->email,
-						'subject' => lang('us_account_active'),
-						'message' => $this->load->view('_emails/activated', $email_message_data, true),
-					);
+		if ($this->input->post('save')) {
+			if ($this->saveUser('insert')) {
+				Template::set_message(
+					lang('us_create_success'),
+					'success'
+				);
 
-					if ($this->emailer->send($data)) {
-						Template::set_message(lang('us_account_active'), 'success');
-					} else {
-						Template::set_message(lang('us_err_no_email') . $this->emailer->error, 'error');
-					}
-
-					Template::redirect('/');
-				}
-
-				if (!empty($this->user_model->error)) {
-					Template::set_message($this->user_model->error . '. ' . lang('us_err_activate_code'), 'error');
-				}
+				Template::redirect('users');
 			}
+
+			Template::set_message(
+				lang('us_create_error'),
+				'error'
+			);
 		}
 
-		Template::set_view('users/activate');
-		Template::set('page_title', 'Account Activation');
+		Template::set('page_title', lang('us_create_user'));
 		Template::render();
 	}
 
 	/**
-	 * Allow a user to request another activation code. If the email address matches
-	 * an existing account, the code is resent.
+	 * Edit an existing user.
+	 *
+	 * @param int $id
 	 *
 	 * @return void
 	 */
-	public function resend_activation()
+	public function edit($id = null)
 	{
-		if (isset($_POST['send'])) {
-			$this->form_validation->set_rules('email', 'lang:bf_email', 'required|trim|valid_email');
+		$this->auth->restrict('Users.Users.Edit');
 
-			if ($this->form_validation->run()) {
-				// Form validated. Does the user actually exist?
-				$user = $this->user_model->find_by('email', $_POST['email']);
-				if ($user === false) {
-					Template::set_message('Cannot find that email in our records.', 'error');
-				} else {
-					$activation = $this->user_model->set_activation($user->id);
-					$message = $activation['message'];
-					$error = $activation['error'];
+		if (empty($id)) {
+			Template::set_message(
+				lang('us_invalid_user_id'),
+				'error'
+			);
 
-					Template::set_message($message, $error ? 'error' : 'success');
-				}
-			}
+			Template::redirect('users');
 		}
 
-		Template::set_view('users/resend_activation');
-		Template::set('page_title', 'Activate Account');
+		if ($this->input->post('save')) {
+			if ($this->saveUser('update', $id)) {
+				Template::set_message(
+					lang('us_edit_success'),
+					'success'
+				);
+
+				Template::redirect('users');
+			}
+
+			Template::set_message(
+				lang('us_edit_error'),
+				'error'
+			);
+		}
+
+		$user = $this->user_model->find($id);
+
+		if (empty($user)) {
+			Template::set_message(
+				lang('us_invalid_user_id'),
+				'error'
+			);
+
+			Template::redirect('users');
+		}
+
+		Template::set('user', $user);
+		Template::set('page_title', lang('us_edit_user'));
 		Template::render();
 	}
 
-	// -------------------------------------------------------------------------
-	// Private Methods
-	// -------------------------------------------------------------------------
+	/**
+	 * Delete a user.
+	 *
+	 * @param int $id
+	 *
+	 * @return void
+	 */
+	public function delete($id = null)
+	{
+		$this->auth->restrict('Users.Users.Delete');
+
+		if (empty($id)) {
+			Template::set_message(
+				lang('us_invalid_user_id'),
+				'error'
+			);
+
+			Template::redirect('users');
+		}
+
+		if ($this->user_model->delete($id)) {
+			Template::set_message(
+				lang('us_delete_success'),
+				'success'
+			);
+		} else {
+			Template::set_message(
+				lang('us_delete_error'),
+				'error'
+			);
+		}
+
+		Template::redirect('users');
+	}
 
 	/**
-	 * Save the user.
+	 * Save a user.
 	 *
-	 * @param  string  $type            The type of operation ('insert' or 'update').
-	 * @param  integer $id              The id of the user (ignored on insert).
-	 * @param  array   $metaFields      Array of meta fields for the user.
+	 * @param string $type
+	 * @param int    $id
+	 * @param array  $meta_fields
 	 *
-	 * @return boolean/integer The id of the inserted user or true on successful
-	 * update. False if the insert/update failed.
+	 * @return bool
 	 */
-	private function saveUser($type = 'insert', $id = 0, $metaFields = array())
+	private function saveUser($type = 'insert', $id = null, $meta_fields = null)
 	{
-		if ($type != 'insert') {
-			if ($id == 0) {
-				$id = $this->current_user->id;
-			}
-			$_POST['id'] = $id;
-			$_POST['id_user'] = $id;
+		$this->form_validation->set_rules(
+			'username',
+			lang('bf_username'),
+			'required|trim|alpha_numeric|min_length[4]|max_length[30]'
+		);
 
-			// Security check to ensure the posted id is the current user's id.
-			if ($_POST['id'] != $this->current_user->id) {
-				$this->form_validation->set_message('email', 'lang:us_invalid_userid');
-				return false;
-			}
-		}
+		$this->form_validation->set_rules(
+			'password',
+			lang('bf_password'),
+			'trim|min_length[8]|max_length[120]'
+		);
 
-		$this->form_validation->set_rules($this->user_model->get_validation_rules($type));
-
-		$usernameRequired = '';
-		if ($this->settings_lib->item('auth.login_type') == 'username'
-			|| $this->settings_lib->item('auth.use_usernames')
-		) {
-			$usernameRequired = 'required|';
-		}
-
-		// ponytail: unique hanya saat username beneran diganti — ganti nama
-		// saja tidak boleh kena cek "already being used".
-		$usernameRules = "{$usernameRequired}trim|max_length[30]";
-		if ($type == 'insert') {
-			$usernameRules .= '|unique[users.username]';
-		} else {
-			$existing = $this->db->where('id_user', $id)->get('users')->row();
-			$postedUsername = (string) $this->input->post('username');
-			if ($existing && $postedUsername !== (string) $existing->username) {
-				$usernameRules .= '|unique[users.username,users.id_user]';
-				$_POST['id_user'] = $id;
-			}
-		}
-		$this->form_validation->set_rules('username', 'lang:bf_username', $usernameRules);
-		if ($type == 'insert') {
-			$this->form_validation->set_rules('email', 'lang:bf_email', "required|trim|valid_email|max_length[254]|unique[users.email]");
-		} else {
-			// ponytail: tabel users apotek tanpa kolom email/bahasa/zona —
-			// netralkan rule bawaan model agar tak menggagalkan update profile.
-			$this->form_validation->set_rules('email', 'lang:bf_email', 'trim|max_length[254]');
-			$this->form_validation->set_rules('language', 'lang:bf_language', 'trim');
-			$this->form_validation->set_rules('timezones', 'lang:bf_timezone', 'trim');
-		}
-
-		// If a value has been entered for the password, pass_confirm is required.
-		// Otherwise, the pass_confirm field could be left blank and the form validation
-		// would still pass.
-		if ($type != 'insert' && $this->input->post('password')) {
-			$this->form_validation->set_rules('pass_confirm', 'lang:bf_password_confirm', "required|matches[password]");
-		} elseif ($type != 'insert') {
-			// ponytail: ganti nama/username saja tanpa wajib isi password.
-			$this->form_validation->set_rules('password', 'lang:bf_password', 'trim|max_length[120]');
-			$this->form_validation->set_rules('pass_confirm', 'lang:bf_password_confirm', 'trim');
-		}
-
-		$userIsAdmin = isset($this->current_user) && $this->current_user->role_id == 1;
-		$metaData = array();
-		// ponytail: tabel user_meta tak ada — meta hanya untuk insert.
-		if ($type == 'insert') {
-		foreach ($metaFields as $field) {
-			$adminOnlyField = isset($field['admin_only']) && $field['admin_only'] === true;
-			$frontEndField = !isset($field['frontend']) || $field['frontend'];
-			if ($frontEndField
-				&& ($userIsAdmin || !$adminOnlyField)
-			) {
-				$this->form_validation->set_rules($field['name'], $field['label'], $field['rules']);
-				$metaData[$field['name']] = $this->input->post($field['name']);
-			}
-		}
-		}
-
-		// Setting the payload for Events system.
-		$payload = array('user_id' => $id, 'data' => $this->input->post());
-
-		// Event "before_user_validation" to run before the form validation.
-		Events::trigger('before_user_validation', $payload);
+		$this->form_validation->set_rules(
+			'pass_confirm',
+			lang('bf_password_confirm'),
+			'trim|matches[password]'
+		);
 
 		if ($this->form_validation->run() === false) {
 			return false;
 		}
 
-		// Compile our core user elements to save.
-		$data = $this->user_model->prep_data($this->input->post());
-		$result = false;
+		$data = array(
+			'username' => $this->input->post('username'),
+		);
+
+		$password = $this->input->post('password');
+
+		if (!empty($password)) {
+			$data['password'] = $password;
+		}
 
 		if ($type == 'insert') {
-			$activationMethod = $this->settings_lib->item('auth.user_activation_method');
-			if ($activationMethod == 0) {
-				// No activation method, so automatically activate the user.
-				$data['active'] = 1;
-			}
+			$user_id = $this->user_model->insert($data);
 
-			$id = $this->user_model->insert($data);
-			if (is_numeric($id)) {
-				$result = $id;
+			if (!$user_id) {
+				return false;
 			}
 		} else {
-			// ponytail: skema apotek (id_user, username, password, nama,
-			// status) — tulis langsung kolom yang ada; User_model::update()
-			// menarget kolom Bonfire (password_hash, email, ...) yang tak ada.
-			$apotek = array();
-			$postUsername = $this->input->post('username');
-			if ($postUsername !== null && $postUsername !== '') {
-				$apotek['username'] = $postUsername;
+			if (!$this->user_model->update($id, $data)) {
+				return false;
 			}
-			$postNama = $this->input->post('display_name');
-			if ($postNama !== null && $postNama !== '') {
-				$apotek['nama'] = $postNama;
-			}
-			if ($this->input->post('password')) {
-				$hash = $this->auth->hash_password($this->input->post('password'));
-				if (empty($hash['hash'])) {
-					return false;
+
+			$user_id = $id;
+		}
+
+		if (!empty($meta_fields)) {
+			$meta = array();
+
+			foreach ($meta_fields as $field => $config) {
+				$value = $this->input->post($field);
+
+				if ($value !== null) {
+					$meta[$field] = $value;
 				}
-				$apotek['password'] = $hash['hash'];
 			}
-			if (empty($apotek)) {
-				$result = true;
-			} else {
-				$apotek['updated_at'] = date('Y-m-d H:i:s');
-				$result = $this->db->where('id_user', $id)->update('users', $apotek);
+
+			if (!empty($meta)) {
+				$this->user_model->save_meta($user_id, $meta);
 			}
 		}
 
-		if (is_numeric($id) && !empty($metaData)) {
-			$this->user_model->save_meta_for($id, $metaData);
-		}
-
-		// Add result to payload.
-		$payload['result'] = $result;
-		// Trigger event after saving the user.
-		Events::trigger('save_user', $payload);
-
-		return $result;
+		return true;
 	}
+
+	/**
+	 * Set current user.
+	 *
+	 * @return void
+	 */
+	
 }
