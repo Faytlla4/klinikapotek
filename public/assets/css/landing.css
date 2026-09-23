@@ -18,6 +18,37 @@
     --merah-latar: #FFF5F5;      /* latar alert error */
     --merah-garis: #F5C2C7;      /* border alert error */
     --merah-teks: #842029;       /* teks alert error */
+
+    /* === UKURAN LAYOUT === */
+    --lebar-konten: 960px;       /* lebar maksimum isi halaman */
+    --lebar-hero: 640px;         /* lebar maksimum teks hero */
+    --lebar-login: 380px;        /* lebar kartu login */
+    --tinggi-header: 56px;       /* tinggi header atas */
+
+    /* === LENGKUNG SUDUT === */
+    --radius-kecil: 6px;         /* tombol, input, alert */
+    --radius-sedang: 8px;        /* ikon info */
+    --radius-kartu: 10px;        /* kartu layanan & info */
+    --radius-besar: 12px;        /* kartu login */
+
+    /* === UKURAN FONT === */
+    --ukuran-teks-isi: 14px;           /* teks isi umum */
+    --ukuran-teks-kecil: 13px;         /* teks pendamping kartu */
+    --ukuran-teks-mungil: 12px;        /* label, footer, info kecil */
+    --ukuran-teks-logo: 15px;          /* teks logo header */
+    --ukuran-teks-deskripsi: 15px;     /* deskripsi hero */
+    --ukuran-judul-seksi: 20px;        /* judul "Layanan Kami" */
+    --ukuran-judul-hero: 26px;         /* judul besar hero */
+    --ukuran-judul-login: 18px;        /* judul kartu login */
+    --ukuran-judul-hero-tablet: 22px;  /* judul hero di tablet */
+    --ukuran-judul-hero-hp: 20px;      /* judul hero di HP */
+    --ukuran-teks-deskripsi-hp: 14px;  /* deskripsi hero di HP */
+    --ukuran-teks-logo-hp: 13px;       /* teks logo di HP */
+
+    /* === EFEK === */
+    --transisi-cepat: 150ms;                                  /* durasi hover */
+    --bayangan-kartu-login: 0 1px 4px rgba(0,0,0,0.04);       /* bayangan kartu login */
+    --bayangan-fokus-input: 0 0 0 3px rgba(25,135,84,0.1);    /* ring fokus input (= hijau-utama 10%) */
 }
 
 /* === RESET === */
@@ -29,7 +60,7 @@ body {
     background: var(--latar);
     color: var(--teks-utama);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 14px;
+    font-size: var(--ukuran-teks-isi);
     line-height: 1.6;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -41,7 +72,7 @@ a { color: inherit; text-decoration: none; }
 ul, ol { list-style: none; }
 
 .container {
-    max-width: 960px;
+    max-width: var(--lebar-konten);
     margin: 0 auto;
     padding: 0 24px;
 }
@@ -52,7 +83,7 @@ ul, ol { list-style: none; }
 .site-header {
     background: #fff;
     border-bottom: 1px solid var(--garis);
-    height: 56px;
+    height: var(--tinggi-header);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -71,7 +102,7 @@ ul, ol { list-style: none; }
     width: auto;
 }
 .site-header .logo-text {
-    font-size: 15px;
+    font-size: var(--ukuran-teks-logo);
     font-weight: 700;
     color: var(--hijau-utama);
     letter-spacing: -0.01em;
@@ -82,11 +113,11 @@ ul, ol { list-style: none; }
     background: var(--hijau-utama);
     color: #fff;
     padding: 7px 22px;
-    border-radius: 6px;
-    font-size: 13px;
+    border-radius: var(--radius-kecil);
+    font-size: var(--ukuran-teks-kecil);
     font-weight: 600;
     line-height: 1.4;
-    transition: background 150ms;
+    transition: background var(--transisi-cepat);
 }
 .site-header .btn-masuk:hover { background: var(--hijau-gelap); }
 
@@ -96,12 +127,12 @@ ul, ol { list-style: none; }
 .btn {
     display: inline-block;
     padding: 10px 24px;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: var(--radius-kecil);
+    font-size: var(--ukuran-teks-isi);
     font-weight: 600;
     line-height: 1.4;
     cursor: pointer;
-    transition: background 150ms, color 150ms;
+    transition: background var(--transisi-cepat), color var(--transisi-cepat);
 }
 .btn-primary {
     background: var(--hijau-utama);
@@ -123,13 +154,13 @@ ul, ol { list-style: none; }
     border-bottom: 1px solid var(--garis);
 }
 .hero-inner {
-    max-width: 640px;
+    max-width: var(--lebar-hero);
     margin: 0 auto;
     padding: 56px 24px 60px;
     text-align: center;
 }
 .hero h1 {
-    font-size: 26px;
+    font-size: var(--ukuran-judul-hero);
     font-weight: 700;
     color: var(--teks-utama);
     line-height: 1.35;
@@ -137,7 +168,7 @@ ul, ol { list-style: none; }
     letter-spacing: -0.02em;
 }
 .hero-desc {
-    font-size: 15px;
+    font-size: var(--ukuran-teks-deskripsi);
     color: var(--teks-samar);
     margin-bottom: 28px;
     line-height: 1.6;
@@ -156,7 +187,7 @@ ul, ol { list-style: none; }
     padding: 44px 0 52px;
 }
 .services-section h2 {
-    font-size: 20px;
+    font-size: var(--ukuran-judul-seksi);
     font-weight: 700;
     color: var(--teks-utama);
     margin-bottom: 4px;
@@ -164,7 +195,7 @@ ul, ol { list-style: none; }
     text-align: center;
 }
 .section-sub {
-    font-size: 14px;
+    font-size: var(--ukuran-teks-isi);
     color: var(--teks-sekunder);
     margin-bottom: 28px;
     text-align: center;
@@ -177,16 +208,16 @@ ul, ol { list-style: none; }
 .service-card {
     background: #fff;
     border: 1px solid var(--garis);
-    border-radius: 10px;
+    border-radius: var(--radius-kartu);
     padding: 20px;
-    transition: border-color 150ms;
+    transition: border-color var(--transisi-cepat);
 }
 .service-card:hover { border-color: var(--hijau-utama); }
 .service-card .svc-icon {
     width: 40px;
     height: 40px;
     background: var(--hijau-muda);
-    border-radius: 10px;
+    border-radius: var(--radius-kartu);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -194,13 +225,13 @@ ul, ol { list-style: none; }
     color: var(--hijau-utama);
 }
 .service-card h3 {
-    font-size: 14px;
+    font-size: var(--ukuran-teks-isi);
     font-weight: 600;
     color: var(--teks-utama);
     margin-bottom: 4px;
 }
 .service-card p {
-    font-size: 13px;
+    font-size: var(--ukuran-teks-kecil);
     color: var(--teks-sekunder);
     line-height: 1.5;
 }
@@ -219,7 +250,7 @@ ul, ol { list-style: none; }
 .info-card {
     background: #fff;
     border: 1px solid var(--garis);
-    border-radius: 10px;
+    border-radius: var(--radius-kartu);
     padding: 18px 20px;
     display: flex;
     align-items: flex-start;
@@ -230,20 +261,20 @@ ul, ol { list-style: none; }
     width: 36px;
     height: 36px;
     background: var(--hijau-muda);
-    border-radius: 8px;
+    border-radius: var(--radius-sedang);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--hijau-utama);
 }
 .info-card h3 {
-    font-size: 13px;
+    font-size: var(--ukuran-teks-kecil);
     font-weight: 600;
     color: var(--teks-utama);
     margin-bottom: 2px;
 }
 .info-card p {
-    font-size: 13px;
+    font-size: var(--ukuran-teks-kecil);
     color: var(--teks-sekunder);
 }
 
@@ -257,7 +288,7 @@ ul, ol { list-style: none; }
     text-align: center;
 }
 .site-footer p {
-    font-size: 12px;
+    font-size: var(--ukuran-teks-mungil);
     color: var(--teks-kaki);
     margin: 0;
 }
@@ -281,11 +312,11 @@ body.login-page .site-header {
 }
 .login-card {
     width: 100%;
-    max-width: 380px;
+    max-width: var(--lebar-login);
     background: #fff;
     border: 1px solid var(--garis);
-    border-radius: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border-radius: var(--radius-besar);
+    box-shadow: var(--bayangan-kartu-login);
     padding: 28px 24px;
     text-align: center;
 }
@@ -297,13 +328,13 @@ body.login-page .site-header {
     margin: 0 auto;
 }
 .login-card .lc-title {
-    font-size: 18px;
+    font-size: var(--ukuran-judul-login);
     font-weight: 700;
     color: var(--hijau-utama);
     margin-bottom: 2px;
 }
 .login-card .lc-sub {
-    font-size: 13px;
+    font-size: var(--ukuran-teks-kecil);
     color: var(--teks-sekunder);
     margin-bottom: 20px;
 }
@@ -312,7 +343,7 @@ body.login-page .site-header {
 .lc-form label {
     display: block;
     text-align: left;
-    font-size: 12px;
+    font-size: var(--ukuran-teks-mungil);
     font-weight: 600;
     color: var(--teks-utama);
     margin-bottom: 4px;
@@ -322,16 +353,16 @@ body.login-page .site-header {
     width: 100%;
     padding: 9px 12px;
     border: 1px solid var(--garis-input);
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: var(--radius-kecil);
+    font-size: var(--ukuran-teks-isi);
     color: var(--teks-utama);
     background: #fff;
     outline: none;
-    transition: border-color 150ms;
+    transition: border-color var(--transisi-cepat);
 }
 .lc-form input:focus {
     border-color: var(--hijau-utama);
-    box-shadow: 0 0 0 3px rgba(25,135,84,0.1);
+    box-shadow: var(--bayangan-fokus-input);
 }
 .lc-form .lc-field { margin-bottom: 14px; text-align: left; }
 .lc-form .lc-btn {
@@ -340,19 +371,19 @@ body.login-page .site-header {
     background: var(--hijau-utama);
     color: #fff;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: var(--radius-kecil);
+    font-size: var(--ukuran-teks-isi);
     font-weight: 600;
     cursor: pointer;
     margin-top: 4px;
-    transition: background 150ms;
+    transition: background var(--transisi-cepat);
 }
 .lc-form .lc-btn:hover { background: var(--hijau-gelap); }
 .lc-back {
     display: block;
     text-align: center;
     margin-top: 14px;
-    font-size: 12px;
+    font-size: var(--ukuran-teks-mungil);
     color: var(--teks-sekunder);
 }
 .lc-back a { color: var(--hijau-utama); font-weight: 500; }
@@ -362,10 +393,10 @@ body.login-page .site-header {
 .lc-alert {
     background: var(--merah-latar);
     border: 1px solid var(--merah-garis);
-    border-radius: 6px;
+    border-radius: var(--radius-kecil);
     padding: 8px 12px;
     margin-bottom: 14px;
-    font-size: 12px;
+    font-size: var(--ukuran-teks-mungil);
     color: var(--merah-teks);
     text-align: left;
 }
@@ -375,14 +406,14 @@ body.login-page .site-header {
    ============================================ */
 @media (max-width: 768px) {
     .hero-inner { padding: 44px 20px 48px; }
-    .hero h1 { font-size: 22px; }
+    .hero h1 { font-size: var(--ukuran-judul-hero-tablet); }
     .services-grid { grid-template-columns: repeat(2, 1fr); }
     .info-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
-    .hero h1 { font-size: 20px; }
-    .hero-desc { font-size: 14px; }
+    .hero h1 { font-size: var(--ukuran-judul-hero-hp); }
+    .hero-desc { font-size: var(--ukuran-teks-deskripsi-hp); }
     .services-grid { grid-template-columns: 1fr; }
-    .site-header .logo-text { font-size: 13px; }
+    .site-header .logo-text { font-size: var(--ukuran-teks-logo-hp); }
     .login-card { padding: 24px 18px; }
 }

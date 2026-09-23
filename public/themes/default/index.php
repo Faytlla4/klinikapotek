@@ -22,7 +22,7 @@
         ]);
         echo Assets::css();
     ?>
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/landing.css?v=3" media="screen">
+    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/landing.css?v=4" media="screen">
 </head>
 <body>
     <?php echo theme_view('header'); ?>
