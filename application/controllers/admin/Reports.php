@@ -16,16 +16,8 @@
 // ------------------------------------------------------------------------
 
 /**
- * Admin Reports controller
- *
- * The base controller which displays the homepage of the Admin Reports context in the Bonfire app.
- *
- * @package    Bonfire
- * @subpackage Controllers
- * @category   Controllers
- * @author     Bonfire Dev Team
- * @link       http://guides.cibonfire.com/helpers/file_helpers.html
- *
+ * Gerbang context Reports (butuh izin Site.Reports.View).
+ * Laporan asli ada di modul laporan; ini hanya pintu context-nya.
  */
 class Reports extends Admin_Controller
 {

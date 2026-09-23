@@ -16,16 +16,8 @@
 // ------------------------------------------------------------------------
 
 /**
- * Admin Home controller
- *
- * The base controller which handles visits to the admin area homepage in the Bonfire app.
- *
- * @package    Bonfire
- * @subpackage Controllers
- * @category   Controllers
- * @author     Bonfire Dev Team
- * @link       http://guides.cibonfire.com/helpers/file_helpers.html
- *
+ * Gerbang area admin: login dulu, lalu lempar ke context default sesuai role user.
+ * (Bukan dashboard; tiap role punya dashboard sendiri di Dashboard.php.)
  */
 class Home extends Admin_Controller
 {

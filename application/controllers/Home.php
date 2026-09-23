@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+// Homepage publik (default_controller): render tema default (hero + layanan).
+// Belum install = redirect ke /install; isi halamannya di application/views/home/index.php.
+
 /**
  * Bonfire
  *

@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+/** Seed permission backup (Backup.Settings.View) ke pemilik Site.Settings.View. */
+
 /** Permission menu BACKUP DATABASE (context MANAJEMEN SISTEM). */
 class Migration_backup extends Migration
 {

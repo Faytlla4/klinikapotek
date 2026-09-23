@@ -19,16 +19,8 @@
 // ------------------------------------------------------------------------
 
 /**
- * Content context controller
- *
- * The controller which displays the homepage of the Content context in Bonfire site.
- *
- * @package    Bonfire
- * @subpackage Controllers
- * @category   Controllers
- * @author     Bonfire Dev Team
- * @link       http://guides.cibonfire.com/helpers/file_helpers.html
- *
+ * Gerbang context Content (butuh izin Site.Content.View).
+ * Modul-modul menumpang pola ini: class Content + child per context (Pelayanan/Apotek/dll).
  */
 class Content extends App_Controller
 {

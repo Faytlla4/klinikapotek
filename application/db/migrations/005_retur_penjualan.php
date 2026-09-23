@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+/** Retur kasir: satu penjualan hanya bisa diretur sekali; stok kembali via Stok_model. */
+
 /** Histori retur penjualan; satu penjualan hanya dapat diretur sekali. */
 class Migration_retur_penjualan extends Migration
 {

@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
+/** Seed permission cetak (Laporan.Cetak.View, Site.Cetak.View) ke pemilik lihat_laporan. */
+
 /** Permission menu context LAPORAN CETAK (terpisah dari LAPORAN). */
 class Migration_laporan_cetak extends Migration
 {

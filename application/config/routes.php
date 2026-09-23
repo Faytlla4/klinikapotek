@@ -1,6 +1,9 @@
 <?php
 defined('BASEPATH') || exit('No direct script access allowed');
 
+// Klinik-Apotek: pola URL admin/{context}/{modul}/{method} dipetakan ke modul HMVC.
+// Tambah fitur baru = tambah baris $route di sini + method controller + link menu.
+
 /*
 | -------------------------------------------------------------------------
 | URI ROUTING
