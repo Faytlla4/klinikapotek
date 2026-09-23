@@ -82,6 +82,14 @@
         <?php endforeach; ?>
         <div class="nota-sep"></div>
         <div class="nota-row nota-total"><span>TOTAL</span><span>Rp <?php echo number_format((float) $pesanan->total, 0, ',', '.'); ?></span></div>
+        <?php if (! empty($retur)): ?>
+        <div class="nota-sep"></div>
+        <div class="nota-row"><span>Retur <?php echo html_escape($retur->nomor_retur); ?></span><strong><?php echo html_escape($retur->status); ?></strong></div>
+        <div class="nota-row"><span class="text-muted">Alasan: <?php echo html_escape(mb_substr($retur->alasan, 0, 100)); ?></span><span></span></div>
+        <?php if ($retur->status === 'SELESAI'): ?>
+        <div class="nota-row"><span>Refund (<?php echo html_escape($retur->metode_refund); ?>)</span><span>Rp <?php echo number_format((float) $retur->nominal_refund, 0, ',', '.'); ?></span></div>
+        <?php endif; ?>
+        <?php endif; ?>
         <div class="nota-foot">Terima kasih atas kunjungan Anda.<br>Semoga lekas sembuh.</div>
     </div>
 </div>

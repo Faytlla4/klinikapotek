@@ -1,3 +1,5 @@
+<?php $this->load->view('transaksi/partials/_nota'); ?>
+<div class="nota-screen">
 <div class="row"><div class="col-md-12"><div class="card <?php echo $retur->status === 'SELESAI' ? 'card-success' : ($retur->status === 'DITOLAK' ? 'card-danger' : 'card-warning'); ?>">
     <div class="card-header"><h3 class="card-title"><i class="fas fa-undo"></i> Retur <?php echo html_escape($retur->nomor_retur); ?></h3>
         <div class="card-tools"><span class="badge <?php echo $retur->status === 'DIMINTA' ? 'badge-dark' : 'badge-light'; ?>"><?php echo html_escape($retur->status); ?></span></div>
@@ -18,7 +20,11 @@
             <thead><tr><th>Obat</th><th>Jumlah</th><th>Subtotal</th><th style="width:220px">Disposisi</th></tr></thead>
             <tbody>
             <?php foreach ($retur->items as $it): ?><tr>
-                <td><?php echo html_escape($it->nama_obat); ?><br><small class="text-muted"><?php echo html_escape($it->satuan); ?> &times; Rp <?php echo number_format((float) $it->harga, 0, ',', '.'); ?></small></td>
+                <td><?php echo html_escape($it->nama_obat); ?><br><small class="text-muted"><?php echo html_escape($it->satuan); ?> &times; Rp <?php echo number_format((float) $it->harga, 0, ',', '.'); ?></small>
+                    <?php if (! empty($it->kadaluarsa_terdekat)): ?><br><small class="text-muted">Exp: <?php echo date('d-m-Y', strtotime($it->kadaluarsa_terdekat)); ?><?php echo $it->datang_terakhir ? ' &bull; Datang: ' . date('d-m-Y', strtotime($it->datang_terakhir)) : ''; ?></small>
+                    <?php if ($it->sisa_hari < 0): ?> <span class="badge badge-danger">KEDALUWARSA</span>
+                    <?php elseif ($it->sisa_hari <= 30): ?> <span class="badge badge-warning"><?php echo (int) $it->sisa_hari; ?> hari lagi</span><?php endif; ?>
+                    <?php endif; ?></td>
                 <td><?php echo (int) $it->jumlah; ?></td>
                 <td>Rp <?php echo number_format((float) $it->jumlah * (float) $it->harga, 0, ',', '.'); ?></td>
                 <td>
@@ -69,6 +75,7 @@
     </div>
     <div class="card-footer">
         <a href="<?php echo site_url(SITE_AREA . '/apotek/retur'); ?>" class="btn btn-default">Kembali</a>
+        <button onclick="window.print()" class="btn btn-secondary"><i class="fas fa-print"></i> Cetak Nota</button>
         <?php if ($retur->status === 'DIMINTA'): ?>
         <span class="float-right">
             <button type="submit" name="aksi" value="tolak" class="btn btn-lg btn-danger" onclick="return confirm('Tolak pengajuan retur ini? Catatan wajib terisi.')"><i class="fas fa-times"></i> Tolak</button>
@@ -78,3 +85,27 @@
     </div>
     <?php if ($retur->status === 'DIMINTA') echo form_close(); ?>
 </div></div></div>
+</div>
+<div class="nota-print">
+    <div class="nota">
+        <div class="nota-head"><h4>Klinik &amp; Apotek</h4><p>Bukti Retur Online</p></div>
+        <div class="nota-row"><span>Nomor Retur</span><strong><?php echo html_escape($retur->nomor_retur); ?></strong></div>
+        <div class="nota-row"><span>Pesanan</span><span><?php echo html_escape($retur->pesanan->nomor_pesanan); ?></span></div>
+        <div class="nota-row"><span>Tanggal</span><span><?php echo html_escape($retur->tanggal_pengajuan); ?></span></div>
+        <div class="nota-row"><span>Pasien</span><span><?php echo html_escape($retur->pasien ? $retur->pasien->nama : '-'); ?></span></div>
+        <div class="nota-row"><span>Status</span><strong><?php echo html_escape($retur->status); ?></strong></div>
+        <div class="nota-sep"></div>
+        <div class="nota-row"><span>Alasan</span><span></span></div>
+        <div class="nota-row"><span class="text-muted"><?php echo html_escape(mb_substr($retur->alasan, 0, 120)); ?></span><span></span></div>
+        <div class="nota-sep"></div>
+        <?php foreach ($retur->items as $it): ?>
+        <div class="nota-row"><span><?php echo html_escape($it->nama_obat); ?></span><span><?php echo html_escape($it->disposisi ?: '-'); ?></span></div>
+        <div class="nota-row"><span class="text-muted"><?php echo (int) $it->jumlah; ?> &times; Rp <?php echo number_format((float) $it->harga, 0, ',', '.'); ?></span><span>Rp <?php echo number_format((float) $it->jumlah * (float) $it->harga, 0, ',', '.'); ?></span></div>
+        <?php endforeach; ?>
+        <div class="nota-sep"></div>
+        <?php if ($retur->status === 'SELESAI'): ?>
+        <div class="nota-row nota-total"><span>REFUND (<?php echo html_escape($retur->metode_refund); ?>)</span><span>Rp <?php echo number_format((float) $retur->nominal_refund, 0, ',', '.'); ?></span></div>
+        <?php endif; ?>
+        <div class="nota-foot">Simpan bukti ini sebagai arsip retur.<br>Terima kasih.</div>
+    </div>
+</div>

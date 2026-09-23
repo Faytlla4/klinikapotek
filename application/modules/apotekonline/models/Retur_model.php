@@ -54,6 +54,31 @@ class Retur_model extends BF_Model
             ->where('id_retur', $id_retur)
             ->order_by('obat.nama_obat', 'ASC')
             ->get('retur_online_detail')->result();
+        // ponytail: kadaluarsa terdekat + kedatangan terakhir per obat (satu query, bukan N+1).
+        $exp_map = array();
+        if (! empty($row->items) && $this->db->field_exists('tanggal_kadaluarsa', 'penerimaan_obat_detail')) {
+            $ids = array();
+            foreach ($row->items as $it) {
+                $ids[(int) $it->id_obat] = true;
+            }
+            $exp = $this->db->select("penerimaan_obat_detail.id_obat,
+                    MIN(penerimaan_obat_detail.tanggal_kadaluarsa)::date AS kadaluarsa_terdekat,
+                    (MIN(penerimaan_obat_detail.tanggal_kadaluarsa)::date - CURRENT_DATE) AS sisa_hari,
+                    MAX(penerimaan_obat.tanggal_terima) AS datang_terakhir", false)
+                ->join('penerimaan_obat', 'penerimaan_obat.id_penerimaan = penerimaan_obat_detail.id_penerimaan')
+                ->where_in('penerimaan_obat_detail.id_obat', array_keys($ids))
+                ->group_by('penerimaan_obat_detail.id_obat')
+                ->get('penerimaan_obat_detail')->result();
+            foreach ($exp as $e) {
+                $exp_map[(int) $e->id_obat] = $e;
+            }
+        }
+        foreach ($row->items as $it) {
+            $e = isset($exp_map[(int) $it->id_obat]) ? $exp_map[(int) $it->id_obat] : null;
+            $it->kadaluarsa_terdekat = $e ? $e->kadaluarsa_terdekat : null;
+            $it->sisa_hari = $e && $e->kadaluarsa_terdekat ? (int) $e->sisa_hari : null;
+            $it->datang_terakhir = $e ? $e->datang_terakhir : null;
+        }
         $row->pesanan = $this->db->where('id_pesanan', $row->id_pesanan)->get('pesanan_online')->row();
         $row->pasien = $row->pesanan
             ? $this->db->select('nama, no_hp')->where('id_pasien', $row->pesanan->id_pasien)->get('pasien')->row()
