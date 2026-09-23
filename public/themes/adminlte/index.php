@@ -10,7 +10,7 @@
         	if (isset($this->settings_lib)) {
         		$title_text .= $this->settings_lib->item('site.title');
         	} else {
-        		$title_text .= 'Bonfire';
+        		$title_text .= 'Apotek';
         	}
         	echo $title_text;
         ?>
