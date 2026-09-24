@@ -149,7 +149,7 @@ class Penjualan_model extends BF_Model
             'status'           => 'SELESAI',
         ));
         if (! $id_penjualan) {
-            $this->db->trans_complete();
+            $this->db->trans_rollback();
             $this->error = 'Gagal menyimpan penjualan.';
             return false;
         }
@@ -160,7 +160,7 @@ class Penjualan_model extends BF_Model
 
         foreach ($rows as $r) {
             if (! $this->stok_model->keluar($r['id_obat'], $r['jumlah'], 'PENJUALAN', $id_penjualan)) {
-                $this->db->trans_complete();
+                $this->db->trans_rollback();
                 $this->error = $this->stok_model->error ?: 'Stok tidak cukup.';
                 return false;
             }

@@ -57,7 +57,7 @@ class Content extends App_Controller
             Template::set_message($this->penjualan_model->error ?: 'Penjualan gagal.', 'error');
         }
         Template::set('resep_list', $this->resep_model->menunggu());
-        Template::set('obat_list', $this->obat_model->aktif());
+        Template::set('obat_list', $this->obat_model->dengan_stok());
         Template::set('pasien_list', $this->db->where('status', 'AKTIF')->order_by('nama', 'ASC')->get('pasien')->result());
         Template::set('toolbar_title', 'Jual Obat'); Template::render();
     }
