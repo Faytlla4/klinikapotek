@@ -88,7 +88,6 @@ class Dashboard extends App_Controller
             'tagihan_belum' => $this->db->where('status', 'BELUM_DIBAYAR')->count_all_results('tagihan'),
             'antrian' => $antrian,
         ));
-        Template::set('toolbar_title', 'Dashboard Pelayanan');
         Template::render();
     }
 
