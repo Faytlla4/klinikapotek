@@ -107,15 +107,11 @@
                                             <input type="hidden" name="items[<?php echo $d->id_obat; ?>][kondisi]" value="Baik">
                                         </div>
                                         <input type="text" name="items[<?php echo $d->id_obat; ?>][nomor_batch]" class="form-control form-control-sm mt-1" placeholder="No. batch (opsional)" maxlength="100">
-                                        <div class="input-group input-group-sm mt-1">
-                                            <input type="number" name="items[<?php echo $d->id_obat; ?>][masa_simpan]" class="form-control" min="1" max="1200" placeholder="Masa simpan" required>
-                                            <select name="items[<?php echo $d->id_obat; ?>][satuan_masa_simpan]" class="form-control" required>
-                                                <option value="HARI">Hari</option>
-                                                <option value="BULAN">Bulan</option>
-                                                <option value="TAHUN">Tahun</option>
-                                            </select>
+                                        <div class="mt-1">
+                                            <label class="small text-muted mb-0"><i class="far fa-calendar-alt mr-1"></i> Expired Date (ED) <span class="text-danger">*</span></label>
+                                            <input type="date" name="items[<?php echo $d->id_obat; ?>][tanggal_kadaluarsa]" class="form-control form-control-sm" min="<?php echo date('Y-m-d'); ?>" required>
                                         </div>
-                                        <small class="form-text text-muted">Tanggal kedaluwarsa dihitung dari tanggal penerimaan.</small>
+                                        <small class="form-text text-muted">Tanggal ED yang tertera pada kemasan fisik obat.</small>
                                     <?php endif; ?>
                                 </td>
                             </tr>

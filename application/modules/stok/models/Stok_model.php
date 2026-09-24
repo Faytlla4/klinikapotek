@@ -195,7 +195,10 @@ class Stok_model extends BF_Model
         $batas = date('Y-m-d', strtotime($today . ' +' . $hari . ' days'));
         $escaped_today = $this->db->escape($today);
         $escaped_batas = $this->db->escape($batas);
-        $rows = $this->db->select("obat.nama_obat, obat.kode_obat,
+        $rows = $this->db->select("obat.nama_obat, obat.kode_obat, obat.satuan,
+                penerimaan_obat_detail.id_detail,
+                penerimaan_obat_detail.id_penerimaan,
+                penerimaan_obat_detail.id_obat,
                 penerimaan_obat_detail.nomor_batch,
                 penerimaan_obat_detail.tanggal_kadaluarsa,
                 penerimaan_obat_detail.jumlah_terima AS stok,
@@ -210,12 +213,86 @@ class Stok_model extends BF_Model
             ->where('obat.status', 'AKTIF')
             ->where('penerimaan_obat_detail.tanggal_kadaluarsa IS NOT NULL', null, false)
             ->where('penerimaan_obat_detail.tanggal_kadaluarsa <=', $batas)
+            ->where('penerimaan_obat_detail.jumlah_terima >', 0)
             ->order_by('penerimaan_obat_detail.tanggal_kadaluarsa', 'ASC')
             ->order_by('obat.nama_obat', 'ASC')
             ->get('penerimaan_obat_detail')
             ->result();
 
         return $rows ?: array();
+    }
+
+    /**
+     * Proses tindakan apoteker terhadap obat kedaluwarsa (RETUR, PEMUSNAHAN, TUNDA).
+     *
+     * @param int $id_detail ID detail penerimaan obat
+     * @param string $jenis_tindakan RETUR | PEMUSNAHAN | TUNDA
+     * @param int $jumlah Jumlah yang ditindak
+     * @param string $keterangan Keterangan tambahan
+     * @param int $user_id ID user yang melakukan tindakan
+     * @return bool
+     */
+    public function proses_tindakan_expired($id_detail, $jenis_tindakan, $jumlah = 0, $keterangan = '', $user_id = 0)
+    {
+        $id_detail = (int) $id_detail;
+        $jenis_tindakan = strtoupper(trim($jenis_tindakan));
+        $jumlah = (int) $jumlah;
+
+        if ($id_detail <= 0) {
+            $this->error = 'ID penerimaan detail tidak valid.';
+            return false;
+        }
+
+        if (! in_array($jenis_tindakan, array('RETUR', 'PEMUSNAHAN', 'TUNDA'), true)) {
+            $this->error = 'Jenis tindakan tidak valid. Pilih RETUR, PEMUSNAHAN, atau TUNDA.';
+            return false;
+        }
+
+        $detail = $this->db->select('penerimaan_obat_detail.*, obat.nama_obat')
+            ->join('obat', 'obat.id_obat = penerimaan_obat_detail.id_obat')
+            ->where('id_detail', $id_detail)
+            ->get('penerimaan_obat_detail')
+            ->row();
+
+        if (! $detail) {
+            $this->error = 'Data detail penerimaan obat tidak ditemukan.';
+            return false;
+        }
+
+        if ($jenis_tindakan === 'TUNDA') {
+            $this->load->model('audit/audit_log_model');
+            $this->audit_log_model->catat($user_id, 'update', 'stok_obat', $detail->id_obat, "Tunda tindakan obat expired batch " . ($detail->nomor_batch ?: '-'));
+            return true;
+        }
+
+        if ($jumlah <= 0) {
+            $this->error = 'Jumlah obat yang ditindak harus lebih besar dari 0.';
+            return false;
+        }
+
+        if ($jumlah > (int) $detail->jumlah_terima) {
+            $this->error = "Jumlah ditindak ({$jumlah}) melebihi stok batch ({$detail->jumlah_terima}).";
+            return false;
+        }
+
+        $this->db->trans_start();
+
+        $tipe_mutasi = ($jenis_tindakan === 'RETUR') ? 'RETUR' : 'PEMUSNAHAN';
+        $catatan = "Tindakan {$jenis_tindakan} obat expired (Batch: " . ($detail->nomor_batch ?: '-') . "). " . $keterangan;
+        
+        if (! $this->keluar($detail->id_obat, $jumlah, $tipe_mutasi, $id_detail, $catatan)) {
+            $this->db->trans_rollback();
+            return false;
+        }
+
+        $sisa_batch = max(0, (int) $detail->jumlah_terima - $jumlah);
+        $this->db->where('id_detail', $id_detail)->update('penerimaan_obat_detail', array('jumlah_terima' => $sisa_batch));
+
+        $this->load->model('audit/audit_log_model');
+        $this->audit_log_model->catat($user_id, 'update', 'stok_obat', $detail->id_obat, "Tindakan {$jenis_tindakan} sebanyak {$jumlah} item obat {$detail->nama_obat}");
+
+        $this->db->trans_complete();
+        return $this->db->trans_status();
     }
 
     /** Apakah database sudah memiliki sumber data batch/kedaluwarsa. */

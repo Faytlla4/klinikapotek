@@ -100,11 +100,27 @@ class Penjualan_model extends BF_Model
                     $this->error = 'Jumlah obat melebihi detail resep.';
                     return false;
                 }
-            } elseif (in_array($obat->wajib_resep, array(true, 1, '1', 't', 'T'), true)) {
-                $this->db->trans_complete();
-                $this->error = 'Obat wajib resep.';
-                return false;
             }
+
+            // Validasi backend: Blokir obat dengan status KEDALUWARSA
+            if ($this->db->field_exists('tanggal_kadaluarsa', 'penerimaan_obat_detail')) {
+                $today = date('Y-m-d');
+                $expired_batch = $this->db->select('tanggal_kadaluarsa, nomor_batch')
+                    ->from('penerimaan_obat_detail')
+                    ->where('id_obat', $item['id_obat'])
+                    ->where('tanggal_kadaluarsa IS NOT NULL', null, false)
+                    ->where('tanggal_kadaluarsa <', $today)
+                    ->where('jumlah_terima >', 0)
+                    ->order_by('tanggal_kadaluarsa', 'ASC')
+                    ->get()->row();
+
+                if ($expired_batch) {
+                    $this->db->trans_complete();
+                    $this->error = "Obat '" . $obat->nama_obat . "' berstatus KEDALUWARSA (ED: " . date('d-m-Y', strtotime($expired_batch->tanggal_kadaluarsa)) . ") dan tidak dapat digunakan.";
+                    return false;
+                }
+            }
+
             $stok_row = $this->db->query('SELECT jumlah_stok FROM stok_obat WHERE id_obat = ? FOR UPDATE', array($item['id_obat']))->row();
             $stok_tersedia = $stok_row ? (int) $stok_row->jumlah_stok : 0;
             if ($stok_tersedia < (int) $item['jumlah']) {

@@ -157,14 +157,30 @@ class Dashboard extends App_Controller
         $this->require_role('APOTEKER');
         $this->load->model('resep/resep_model');
         $this->load->model('stok/stok_model');
-        if ($this->input->method(true) === 'POST' && $this->input->post('simpan_peringatan_expired')) {
-            $hari = filter_var($this->input->post('expiry_warning_days'), FILTER_VALIDATE_INT);
-            if ($hari === false || $hari < 1 || $hari > 3650) {
-                Template::set_message('Periode peringatan harus berupa bilangan bulat antara 1 dan 3650 hari.', 'error');
-            } elseif (! $this->settings_lib->set('apotek.expiry_warning_days', (string) $hari, 'apotek')) {
-                Template::set_message('Periode peringatan gagal disimpan.', 'error');
-            } else {
-                Template::set_message('Periode peringatan kedaluwarsa berhasil disimpan.', 'success');
+        if ($this->input->method(true) === 'POST') {
+            if ($this->input->post('simpan_peringatan_expired')) {
+                $hari = filter_var($this->input->post('expiry_warning_days'), FILTER_VALIDATE_INT);
+                if ($hari === false || $hari < 1 || $hari > 3650) {
+                    Template::set_message('Periode peringatan harus berupa bilangan bulat antara 1 dan 3650 hari.', 'error');
+                } elseif (! $this->settings_lib->set('apotek.expiry_warning_days', (string) $hari, 'apotek')) {
+                    Template::set_message('Periode peringatan gagal disimpan.', 'error');
+                } else {
+                    Template::set_message('Periode peringatan kedaluwarsa berhasil disimpan.', 'success');
+                    redirect('dashboard/apoteker');
+                    return;
+                }
+            } elseif ($this->input->post('proses_tindakan_expired')) {
+                $id_detail = (int) $this->input->post('id_detail');
+                $jenis_tindakan = $this->input->post('jenis_tindakan');
+                $jumlah = (int) $this->input->post('jumlah_tindakan');
+                $keterangan = trim($this->input->post('keterangan') ?: '');
+
+                $res = $this->stok_model->proses_tindakan_expired($id_detail, $jenis_tindakan, $jumlah, $keterangan, $this->auth->user_id());
+                if ($res) {
+                    Template::set_message("Tindakan obat ({$jenis_tindakan}) berhasil diproses dan disesuaikan.", 'success');
+                } else {
+                    Template::set_message($this->stok_model->error ?: 'Gagal memproses tindakan obat.', 'error');
+                }
                 redirect('dashboard/apoteker');
                 return;
             }

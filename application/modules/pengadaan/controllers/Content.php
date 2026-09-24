@@ -132,23 +132,13 @@ class Content extends App_Controller
                 foreach ($items_input as $id_obat => $row) {
                     $qty = isset($row['jumlah_terima']) ? trim($row['jumlah_terima']) : 0;
                     if ($qty !== '' && (int)$qty > 0) {
-                        $masa_simpan = isset($row['masa_simpan']) ? trim($row['masa_simpan']) : '';
-                        $satuan_masa_simpan = isset($row['satuan_masa_simpan']) ? strtoupper(trim($row['satuan_masa_simpan'])) : '';
-                        $tanggal_kadaluarsa = null;
-                        if ($satuan_masa_simpan !== '' && preg_match('/^\d+$/', $masa_simpan)
-                            && (int) $masa_simpan > 0 && in_array($satuan_masa_simpan, array('HARI', 'BULAN', 'TAHUN'), true)) {
-                            $interval_unit = ' days';
-                            if ($satuan_masa_simpan === 'BULAN') {
-                                $interval_unit = ' months';
-                            } elseif ($satuan_masa_simpan === 'TAHUN') {
-                                $interval_unit = ' years';
-                            }
-                            $interval = (int) $masa_simpan . $interval_unit;
-                            $tanggal_kadaluarsa = (new DateTimeImmutable(date('Y-m-d')))->modify('+' . $interval)->format('Y-m-d');
+                        $tanggal_kadaluarsa = isset($row['tanggal_kadaluarsa']) ? trim($row['tanggal_kadaluarsa']) : '';
+                        if (empty($tanggal_kadaluarsa) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_kadaluarsa)) {
+                            Template::set_message('Expired Date (ED) obat wajib diisi dengan tanggal yang valid.', 'error');
+                            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
                         }
-                        if ($tanggal_kadaluarsa === null
-                            && (! isset($row['kondisi']) || strtoupper($row['kondisi']) === 'BAIK')) {
-                            Template::set_message('Masa simpan obat harus diisi dalam hari, bulan, atau tahun.', 'error');
+                        if ($tanggal_kadaluarsa < date('Y-m-d')) {
+                            Template::set_message('Expired Date (ED) tidak boleh lebih kecil dari tanggal penerimaan.', 'error');
                             redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
                         }
                         $items[] = array(
