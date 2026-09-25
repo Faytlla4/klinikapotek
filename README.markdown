@@ -66,4 +66,8 @@ We strive to make Bonfire a solid base to work with. In doing so your Bug Report
 
 The Bonfire Team is made up of developers from around the world interested in making Bonfire a better kickstart for your [CodeIgniter](http://codeigniter.com) projects.
 
-- [Faytlla4]
+- [Faytlla4] "https://github.com/Faytlla4"
+- [Evantebelhash] "https://github.com/evantebel-hash"
+- [Hazkel] "https://github.com/Hazkel"
+- [Fabia00000] "https://github.com/fabia0000"
+
