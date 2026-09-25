@@ -130,13 +130,14 @@ class Resep_model extends BF_Model
         return $row;
     }
 
-    /** Resep menunggu diproses apoteker (+ info pasien/dokter). */
+    /** Resep menunggu diproses apoteker (+ info pasien/dokter). Excludes resep with completed sale. */
     public function menunggu($id_dokter = null)
     {
         $this->db->select('resep.*, pasien.nama AS nama_pasien, dokter.nama_dokter')
             ->join('pasien', 'pasien.id_pasien = resep.id_pasien')
             ->join('dokter', 'dokter.id_dokter = resep.id_dokter')
             ->where_in('resep.status', array('DIBUAT', 'DIPROSES', 'SIAP'))
+            ->where("NOT EXISTS (SELECT 1 FROM penjualan_obat WHERE penjualan_obat.id_resep = resep.id_resep AND penjualan_obat.status = 'SELESAI')", null, false)
             ->order_by('resep.tanggal_resep', 'ASC');
         if ($id_dokter) {
             $this->db->where('resep.id_dokter', $id_dokter);
