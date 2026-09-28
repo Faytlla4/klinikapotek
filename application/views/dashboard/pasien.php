@@ -36,7 +36,6 @@ $jml_kunjungan = is_array($kunjungan) ? count($kunjungan) : 0;
 $tiket = ($jml_antrean > 0) ? $antrian[0] : null;
 ?>
 <div class="dash-container">
-    <div class="mb-4"><h3 class="dash-title">Dashboard Pasien</h3></div>
 
     <div class="mb-4">
         <div class="dash-section-title"><i class="fas fa-chart-line"></i> Ringkasan</div>
