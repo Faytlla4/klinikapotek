@@ -348,9 +348,7 @@
 <div class="dash-container">
     <!-- PAGE TITLE -->
     <div class="mb-3">
-        <h3 class="dash-title">Dashboard Dokter</h3>
-    </div>
-
+    </div
     <!-- WELCOME SECTION -->
     <div class="mb-4">
         <div class="dash-welcome-card">
