@@ -5,7 +5,7 @@
 
 $config['module_config'] = array(
 	'description' => 'Apotek Online Pasien',
-	'name'        => 'Apotek Online',
+	'name'        => 'APOTEK ONLINE',
 	'version'     => '1.0.0',
 	'author'      => 'Klinik Apotek Team',
 	'menu_topic'  => array('online' => 'APOTEK ONLINE'),

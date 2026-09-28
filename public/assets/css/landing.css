@@ -23,7 +23,7 @@
     --lebar-konten: 960px;       /* lebar maksimum isi halaman */
     --lebar-hero: 640px;         /* lebar maksimum teks hero */
     --lebar-login: 380px;        /* lebar kartu login */
-    --tinggi-header: 56px;       /* tinggi header atas */
+    --tinggi-header: 54px;       /* tinggi header atas */
 
     /* === LENGKUNG SUDUT === */
     --radius-kecil: 6px;         /* tombol, input, alert */

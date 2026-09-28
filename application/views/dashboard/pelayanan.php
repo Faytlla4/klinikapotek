@@ -44,12 +44,6 @@
     transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
-.dashboard-pelayanan .stat-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--hijau);
-    box-shadow: 0 8px 18px rgba(17, 107, 56, .10);
-}
-
 .dashboard-pelayanan .stat-label {
     color: #668070;
     font-size: .88rem;
@@ -94,12 +88,6 @@
     transition: all .2s ease;
 }
 
-.dashboard-pelayanan .quick-link:hover {
-    color: var(--hijau-gelap);
-    border-color: var(--hijau);
-    background: #f7fcf8;
-    text-decoration: none;
-}
 
 .dashboard-pelayanan .quick-link i {
     color: var(--hijau);
@@ -119,11 +107,6 @@
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(17, 107, 56, .04);
     transition: border-color .2s ease, box-shadow .2s ease;
-}
-
-.dashboard-pelayanan .content-card:hover {
-    border-color: var(--hijau);
-    box-shadow: 0 5px 14px rgba(17, 107, 56, .07);
 }
 
 .dashboard-pelayanan .content-card-header {
@@ -234,11 +217,6 @@
     border-radius: 7px;
 }
 
-.dashboard-pelayanan .btn-green:hover {
-    background: var(--hijau-gelap);
-    border-color: var(--hijau-gelap);
-    color: #fff;
-}
 
 /* =========================================================
    RESPONSIVE

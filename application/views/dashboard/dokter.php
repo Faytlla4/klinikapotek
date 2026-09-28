@@ -59,11 +59,6 @@
     align-items: center;
 }
 
-.dash-btn-ganti-dokter:hover {
-    background: #087F6C;
-    color: #FFFFFF;
-    border-color: #087F6C;
-}
 
 /* Section Title */
 .dash-section-title {
@@ -92,10 +87,6 @@
     height: 100%;
     position: relative;
     overflow: hidden;
-}
-
-.dash-card:hover {
-    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
 }
 
 .dash-op-card {

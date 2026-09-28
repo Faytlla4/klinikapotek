@@ -46,9 +46,6 @@
     overflow: hidden;
 }
 
-.dash-card:hover {
-    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-}
 
 /* Operational Summary Cards */
 .dash-op-card {
@@ -96,10 +93,6 @@
     font-weight: 600;
     color: #087F6C;
     text-decoration: none !important;
-}
-
-.dash-op-footer:hover {
-    color: #055C4E;
 }
 
 /* Warning Cards Styling - Soft Muted Accents */

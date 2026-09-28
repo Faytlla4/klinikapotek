@@ -5,7 +5,7 @@
 
 $config['module_config'] = array(
 	'description' => 'Pendaftaran Kunjungan',
-	'name'        => 'Kunjungan',
+	'name'        => 'KUNJUNGAN',
 	'version'     => '1.0.0',
 	'author'      => 'Klinik Apotek Team',
 );

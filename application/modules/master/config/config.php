@@ -5,7 +5,7 @@
 
 $config['module_config'] = array(
 	'description' => 'Modul Master Data Klinik & Apotek',
-	'name'        => 'Master Data',
+	'name'        => 'MASTER',
 	'version'     => '1.0.0',
 	'author'      => 'Klinik Apotek Team',
 	'menus'       => array(
