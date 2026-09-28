@@ -329,7 +329,6 @@
 <div class="dash-container">
     <!-- JUDUL DASHBOARD -->
     <div class="mb-4">
-        <h3 class="dash-title">Dashboard Apoteker</h3>
     </div>
 
     <!-- 1. RINGKASAN OPERASIONAL -->
