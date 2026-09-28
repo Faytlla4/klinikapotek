@@ -12,6 +12,9 @@ $(document).ready(function () {
                 data.search.value = $('#tagihan_table_filter input').val();
                 data.dari = $('#filter-dari').val();
                 data.sampai = $('#filter-sampai').val();
+            },
+            error: function (xhr, error, thrown) {
+                console.error('DataTables Tagihan AJAX Error:', error, thrown, xhr.responseText);
             }
         },
         filterCols: [0, 1, 2, 3, 4, 5],
