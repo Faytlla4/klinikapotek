@@ -42,6 +42,11 @@
                         <span class="badge badge-info"><i class="fas fa-clock mr-1"></i> <?php echo html_escape($pengadaan->status); ?></span>
                     <?php endif; ?>
                 </p>
+                <?php if (! empty($pengadaan->id_permintaan)): ?>
+                <hr>
+                <strong>Referensi Permintaan</strong>
+                <p class="text-muted"><?php echo html_escape($pengadaan->nomor_permintaan ?: ('#' . (int) $pengadaan->id_permintaan)); ?></p>
+                <?php endif; ?>
             </div>
             <div class="card-footer">
                 <a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/pengadaan'); ?>" class="btn btn-default btn-block">
@@ -121,10 +126,20 @@
                 </table>
             </div>
             <?php if (!$is_selesai): ?>
+                <div class="card-body border-top">
+                    <div class="row">
+                        <div class="col-md-4"><div class="form-group mb-0"><label class="small text-muted">No. Surat Jalan</label><input type="text" name="no_surat_jalan" class="form-control form-control-sm" maxlength="100"></div></div>
+                        <div class="col-md-4"><div class="form-group mb-0"><label class="small text-muted">No. Faktur</label><input type="text" name="no_faktur" class="form-control form-control-sm" maxlength="100"></div></div>
+                        <div class="col-md-4"><div class="form-group mb-0"><label class="small text-muted">Catatan Terima</label><input type="text" name="catatan_terima" class="form-control form-control-sm" maxlength="255"></div></div>
+                    </div>
+                </div>
                 <div class="card-footer text-right">
                     <a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/pengadaan'); ?>" class="btn btn-default mr-2">
                         Batal
                     </a>
+                    <button type="submit" name="save_draft" value="1" class="btn btn-warning mr-2">
+                        <i class="fas fa-save mr-1"></i> Simpan Draft
+                    </button>
                     <button type="submit" name="save_terima" value="1" class="btn btn-success btn-lg">
                         <i class="fas fa-check mr-1"></i> Simpan Penerimaan
                     </button>
@@ -145,18 +160,18 @@
                 <div class="card-body table-responsive p-0">
                     <table class="table table-hover text-nowrap">
                         <thead>
-                            <tr>
-                                <th>No. Penerimaan</th>
-                                <th>Tanggal</th>
-                                <th>Obat</th>
-                                <th>Jumlah Terima</th>
-                                <th>Kondisi</th><th>Batch</th><th>Kedaluwarsa</th>
-                            </tr>
+                                <tr>
+                                    <th>No. Penerimaan</th>
+                                    <th>Tanggal</th>
+                                    <th>Obat</th>
+                                    <th>Jumlah Terima</th>
+                                    <th>Kondisi</th><th>Batch</th><th>Kedaluwarsa</th><th>Konfirmasi</th>
+                                </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($riwayat_penerimaan as $r): ?>
                                 <tr>
-                                    <td><?php echo html_escape($r->nomor_penerimaan); ?></td>
+                                    <td><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/pengadaan/penerimaan_detail/' . (int) $r->id_penerimaan); ?>"><?php echo html_escape($r->nomor_penerimaan); ?></a></td>
                                     <td><?php echo date('d-m-Y H:i', strtotime($r->tanggal_terima)); ?></td>
                                     <td><?php echo html_escape($r->nama_obat); ?></td>
                                     <td><strong>+<?php echo (int) $r->jumlah_terima; ?></strong></td>
@@ -167,6 +182,7 @@
                                     </td>
                                     <td><?php echo html_escape($r->nomor_batch ?: '-'); ?></td>
                                     <td><?php echo $r->tanggal_kadaluarsa ? date('d-m-Y', strtotime($r->tanggal_kadaluarsa)) : '-'; ?></td>
+                                    <td><span class="badge badge-<?php echo $r->status_konfirmasi === 'DIKONFIRMASI' ? 'success' : ($r->status_konfirmasi === 'DIBATALKAN' ? 'danger' : 'warning'); ?>"><?php echo html_escape($r->status_konfirmasi); ?></span></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

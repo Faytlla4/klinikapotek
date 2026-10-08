@@ -53,8 +53,9 @@ class Content extends App_Controller
             redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan');
         }
 
-        $pengadaan = $this->db->select('pengadaan_obat.*, supplier.nama_supplier, supplier.kode_supplier, supplier.alamat, supplier.no_hp')
+        $pengadaan = $this->db->select('pengadaan_obat.*, supplier.nama_supplier, supplier.kode_supplier, supplier.alamat, supplier.no_hp, permintaan_pengadaan.nomor_permintaan')
             ->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')
+            ->join('permintaan_pengadaan', 'permintaan_pengadaan.id_permintaan = pengadaan_obat.id_permintaan', 'left')
             ->where('pengadaan_obat.id_pengadaan', $id)
             ->get('pengadaan_obat')
             ->row();
@@ -71,11 +72,12 @@ class Content extends App_Controller
             ->get('pengadaan_obat_detail')
             ->result();
 
-        // Ambil akumulasi penerimaan per item obat
+        // Ambil akumulasi penerimaan DIKONFIRMASI per item (draft tidak dihitung).
         $terima_map = array();
         $terima_rows = $this->db->select('penerimaan_obat_detail.id_obat, SUM(penerimaan_obat_detail.jumlah_terima) AS total_terima')
             ->join('penerimaan_obat', 'penerimaan_obat.id_penerimaan = penerimaan_obat_detail.id_penerimaan')
             ->where('penerimaan_obat.id_pengadaan', $id)
+            ->where('penerimaan_obat.status_konfirmasi', 'DIKONFIRMASI')
             ->group_by('penerimaan_obat_detail.id_obat')
             ->get('penerimaan_obat_detail')
             ->result();
@@ -127,7 +129,7 @@ class Content extends App_Controller
             redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan');
         }
 
-        if ($this->input->post('save_terima')) {
+        if ($this->input->post('save_terima') || $this->input->post('save_draft')) {
             $items_input = $this->input->post('items');
             $items = array();
 
@@ -160,6 +162,23 @@ class Content extends App_Controller
                 redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
             }
 
+            // ponytail: satu form, dua tombol — draft (tanpa stok) atau langsung konfirmasi.
+            if ($this->input->post('save_draft')) {
+                $hasil = $this->pengadaan_model->terima_draft($id, $items, array(
+                    'no_surat_jalan' => $this->input->post('no_surat_jalan'),
+                    'no_faktur' => $this->input->post('no_faktur'),
+                    'catatan' => $this->input->post('catatan_terima'),
+                    'id_penerima' => $this->auth->user_id(),
+                ));
+                if ($hasil) {
+                    $this->catat_audit('create', 'penerimaan_obat', $hasil['id_penerimaan'], 'Draft ' . $hasil['nomor_penerimaan']);
+                    Template::set_message('Draft ' . $hasil['nomor_penerimaan'] . ' tersimpan, periksa lalu konfirmasi.', 'success');
+                    redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/penerimaan_detail/' . $hasil['id_penerimaan']);
+                }
+                Template::set_message($this->pengadaan_model->error ?: 'Gagal menyimpan draft.', 'error');
+                redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+            }
+
             $result = $this->pengadaan_model->terima($id, $items);
             if ($result) {
                 $this->load->model('audit/audit_log_model');
@@ -173,6 +192,322 @@ class Content extends App_Controller
         }
 
         redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+    }
+
+    /** Daftar permintaan pengadaan (filter ?status=). */
+    public function permintaan()
+    {
+        $this->load->model('pengadaan/permintaan_model');
+        $status = $this->input->get('status');
+        $valid = array('DRAFT', 'DIAJUKAN', 'DISETUJUI', 'DIPROSES', 'SELESAI', 'DITOLAK', 'DIBATALKAN');
+        Template::set(array(
+            'minta_list' => $this->permintaan_model->daftar(in_array($status, $valid) ? $status : null),
+            'f_status' => $status,
+        ));
+        Template::set('toolbar_title', 'Permintaan Pengadaan');
+        Template::set_view('content/permintaan');
+        Template::render();
+    }
+
+    /** Form permintaan baru (POST -> DRAFT). */
+    public function permintaan_buat()
+    {
+        $this->load->model('pengadaan/permintaan_model');
+        if ($this->input->post('save')) {
+            $items = $this->baca_item_minta();
+            $id = $items !== false
+                ? $this->permintaan_model->buat($this->auth->user_id(), $items, $this->input->post('catatan'), $this->input->post('unit'))
+                : false;
+            if ($id) {
+                $this->catat_audit('create', 'permintaan_pengadaan', $id, '');
+                Template::set_message('Permintaan tersimpan sebagai draft.', 'success');
+                redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/permintaan_detail/' . $id);
+            }
+            Template::set_message($this->permintaan_model->error ?: 'Gagal menyimpan.', 'error');
+        }
+        Template::set('obat_list', $this->obat_model->aktif());
+        Template::set('toolbar_title', 'Buat Permintaan');
+        Template::set_view('content/permintaan_buat');
+        Template::render();
+    }
+
+    /** Baca item permintaan dari POST: items[id_obat][jumlah_minta,catatan]. */
+    private function baca_item_minta()
+    {
+        $in = $this->input->post('items');
+        if (! is_array($in)) {
+            return false;
+        }
+        $items = array();
+        foreach ($in as $id_obat => $r) {
+            $jml = isset($r['jumlah_minta']) ? trim($r['jumlah_minta']) : '';
+            if ($jml === '' || (int) $jml <= 0) {
+                continue;
+            }
+            $items[] = array(
+                'id_obat' => (int) $id_obat,
+                'jumlah_minta' => (int) $jml,
+                'catatan' => isset($r['catatan']) ? trim($r['catatan']) : '',
+            );
+        }
+        return $items;
+    }
+
+    /** Detail + alur permintaan (ajukan/setujui/tolak/batal/ubah/PO). */
+    public function permintaan_detail($id = null)
+    {
+        $this->load->model('pengadaan/permintaan_model');
+        $id = (int) $id;
+        $aksi = $this->input->post('aksi');
+        $uid = $this->auth->user_id();
+        if ($aksi === 'simpan_draft') {
+            $items = $this->baca_item_minta();
+            $ok = $items !== false
+                ? $this->permintaan_model->ubah_draft($id, $items, $this->input->post('catatan'), $uid)
+                : false;
+            if ($items === false) {
+                $this->permintaan_model->error = 'Item permintaan kosong.';
+            }
+            $this->pesan_hasil($ok, $this->permintaan_model, 'Draft diperbarui.', 'update', 'permintaan_pengadaan', $id, 'Ubah draft');
+        } elseif ($aksi === 'ajukan') {
+            $ok = $this->permintaan_model->ubah_status($id, 'DIAJUKAN', $uid, $this->input->post('catatan'));
+            $this->pesan_hasil($ok, $this->permintaan_model, 'Permintaan diajukan.', 'update', 'permintaan_pengadaan', $id, 'Ajukan');
+        } elseif ($aksi === 'setujui') {
+            $this->auth->restrict('setujui_permintaan');
+            $ok = $this->permintaan_model->ubah_status($id, 'DISETUJUI', $uid, $this->input->post('catatan'));
+            $this->pesan_hasil($ok, $this->permintaan_model, 'Permintaan disetujui.', 'update', 'permintaan_pengadaan', $id, 'Setujui');
+        } elseif ($aksi === 'tolak') {
+            $this->auth->restrict('setujui_permintaan');
+            $ok = $this->permintaan_model->ubah_status($id, 'DITOLAK', $uid, $this->input->post('catatan'));
+            $this->pesan_hasil($ok, $this->permintaan_model, 'Permintaan ditolak.', 'update', 'permintaan_pengadaan', $id, 'Tolak');
+        } elseif ($aksi === 'batalkan') {
+            $ok = $this->permintaan_model->ubah_status($id, 'DIBATALKAN', $uid, $this->input->post('catatan'));
+            $this->pesan_hasil($ok, $this->permintaan_model, 'Permintaan dibatalkan.', 'update', 'permintaan_pengadaan', $id, 'Batalkan');
+        } elseif ($aksi === 'buat_po') {
+            $over = array();
+            foreach ((array) $this->input->post('harga') as $id_obat => $h) {
+                if (is_numeric($h) && (float) $h >= 0) {
+                    $over[(int) $id_obat] = (float) $h;
+                }
+            }
+            $po = $this->permintaan_model->buat_po($id, $this->input->post('id_supplier'), $over, $uid);
+            if ($po) {
+                $this->catat_audit('create', 'pengadaan_obat', $po['id_pengadaan'], 'PO dari permintaan ' . $id);
+                Template::set_message('PO ' . $po['nomor_pengadaan'] . ' dibuat.', 'success');
+                redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $po['id_pengadaan']);
+            }
+            Template::set_message($this->permintaan_model->error ?: 'Gagal membuat PO.', 'error');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/permintaan_detail/' . $id);
+        }
+        if ($aksi) {
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/permintaan_detail/' . $id);
+        }
+        $row = $this->permintaan_model->detail($id);
+        if (! $row) {
+            show_404();
+        }
+        Template::set('minta', $row);
+        Template::set('supplier_list', $this->supplier_model->aktif());
+        Template::set('obat_list', $this->obat_model->aktif());
+        Template::set('toolbar_title', 'Permintaan ' . $row->nomor_permintaan);
+        Template::set_view('content/permintaan_detail');
+        Template::render();
+    }
+
+    /** Simpan penerimaan sebagai DRAFT (POST dari detail PO, tanpa gerak stok). */
+    public function terima_draft($id = null)
+    {
+        $id = (int) $id;
+        $items = $this->baca_item_terima();
+        if (! is_array($items) || empty($items)) {
+            Template::set_message($this->pengadaan_model->error ?: 'Masukkan setidaknya satu jumlah penerimaan yang valid.', 'error');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+        }
+        $hasil = $this->pengadaan_model->terima_draft($id, $items, array(
+            'no_surat_jalan' => $this->input->post('no_surat_jalan'),
+            'no_faktur' => $this->input->post('no_faktur'),
+            'catatan' => $this->input->post('catatan_terima'),
+            'id_penerima' => $this->auth->user_id(),
+        ));
+        if ($hasil) {
+            $this->catat_audit('create', 'penerimaan_obat', $hasil['id_penerimaan'], 'Draft ' . $hasil['nomor_penerimaan']);
+            Template::set_message('Draft penerimaan ' . $hasil['nomor_penerimaan'] . ' tersimpan (stok belum berubah).', 'success');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/penerimaan_detail/' . $hasil['id_penerimaan']);
+        }
+        Template::set_message($this->pengadaan_model->error ?: 'Gagal menyimpan draft.', 'error');
+        redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/detail/' . $id);
+    }
+
+    /** Baca item terima dari POST detail PO (format sama dengan terima langsung). */
+    private function baca_item_terima()
+    {
+        $in = $this->input->post('items');
+        if (! is_array($in)) {
+            return false;
+        }
+        $items = array();
+        foreach ($in as $id_obat => $r) {
+            $qty = isset($r['jumlah_terima']) ? trim($r['jumlah_terima']) : '';
+            if ($qty === '' || (int) $qty <= 0) {
+                continue;
+            }
+            $ed = isset($r['tanggal_kadaluarsa']) ? trim($r['tanggal_kadaluarsa']) : '';
+            if ($ed === '' || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $ed) || $ed < date('Y-m-d')) {
+                $this->pengadaan_model->error = 'Expired Date wajib valid dan tidak boleh lewat hari ini.';
+                return 'ED_INVALID';
+            }
+            $items[] = array(
+                'id_obat' => (int) $id_obat,
+                'jumlah_terima' => (int) $qty,
+                'kondisi' => isset($r['kondisi']) ? $r['kondisi'] : 'Baik',
+                'nomor_batch' => isset($r['nomor_batch']) ? trim($r['nomor_batch']) : '',
+                'tanggal_kadaluarsa' => $ed,
+            );
+        }
+        return empty($items) ? false : $items;
+    }
+
+    /** Detail penerimaan + periksa/konfirmasi. */
+    public function penerimaan_detail($id = null)
+    {
+        $id = (int) $id;
+        $aksi = $this->input->post('aksi');
+        $uid = $this->auth->user_id();
+        if ($aksi === 'periksa') {
+            $ok = $this->pengadaan_model->periksa_penerimaan($id, $uid, $this->input->post('catatan'));
+            $this->pesan_hasil($ok, $this->pengadaan_model, 'Penerimaan ditandai DIPERIKSA.', 'update', 'penerimaan_obat', $id, 'Periksa');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/penerimaan_detail/' . $id);
+        } elseif ($aksi === 'konfirmasi') {
+            $this->auth->restrict('konfirmasi_penerimaan');
+            $ok = $this->pengadaan_model->konfirmasi_penerimaan($id, $uid, $this->input->post('catatan'));
+            $this->pesan_hasil($ok, $this->pengadaan_model, 'Penerimaan dikonfirmasi, stok bertambah.', 'stok', 'penerimaan_obat', $id, 'Konfirmasi');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/penerimaan_detail/' . $id);
+        }
+        $row = $this->db->select('penerimaan_obat.*, pengadaan_obat.nomor_pengadaan, supplier.nama_supplier')
+            ->join('pengadaan_obat', 'pengadaan_obat.id_pengadaan = penerimaan_obat.id_pengadaan')
+            ->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')
+            ->where('penerimaan_obat.id_penerimaan', $id)->get('penerimaan_obat')->row();
+        if (! $row) {
+            show_404();
+        }
+        $row->items = $this->db->select('penerimaan_obat_detail.*, obat.nama_obat, obat.satuan')
+            ->join('obat', 'obat.id_obat = penerimaan_obat_detail.id_obat')
+            ->where('id_penerimaan', $id)->get('penerimaan_obat_detail')->result();
+        Template::set('terima', $row);
+        Template::set('toolbar_title', 'Penerimaan ' . $row->nomor_penerimaan);
+        Template::set_view('content/penerimaan_detail');
+        Template::render();
+    }
+
+    /** Daftar retur pembelian (filter ?status=). */
+    public function retur()
+    {
+        $status = $this->input->get('status');
+        $this->db->select('retur_pengadaan.*, penerimaan_obat.nomor_penerimaan, pengadaan_obat.nomor_pengadaan, supplier.nama_supplier')
+            ->join('penerimaan_obat', 'penerimaan_obat.id_penerimaan = retur_pengadaan.id_penerimaan')
+            ->join('pengadaan_obat', 'pengadaan_obat.id_pengadaan = penerimaan_obat.id_pengadaan')
+            ->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')
+            ->order_by('retur_pengadaan.id_retur', 'DESC');
+        if ($status) {
+            $this->db->where('retur_pengadaan.status', $status);
+        }
+        Template::set(array('retur_list' => $this->db->get('retur_pengadaan')->result(), 'f_status' => $status));
+        Template::set('toolbar_title', 'Retur Pembelian');
+        Template::set_view('content/retur');
+        Template::render();
+    }
+
+    /** Form retur manual atas satu penerimaan. */
+    public function retur_buat($id_penerimaan = null)
+    {
+        $this->auth->restrict('kelola_retur_pembelian');
+        $id_penerimaan = (int) $id_penerimaan;
+        if ($this->input->post('save')) {
+            $items = array();
+            foreach ((array) $this->input->post('items') as $id_obat => $r) {
+                $jml = isset($r['jumlah']) ? trim($r['jumlah']) : '';
+                if ($jml === '' || (int) $jml <= 0) {
+                    continue;
+                }
+                $items[] = array(
+                    'id_obat' => (int) $id_obat, 'jumlah' => (int) $jml,
+                    'alasan' => isset($r['alasan']) ? trim($r['alasan']) : '',
+                    'nomor_batch' => isset($r['nomor_batch']) ? trim($r['nomor_batch']) : '',
+                    'tanggal_kadaluarsa' => isset($r['tanggal_kadaluarsa']) ? trim($r['tanggal_kadaluarsa']) : '',
+                );
+            }
+            $id_retur = empty($items) ? false : $this->pengadaan_model->buat_retur_manual(
+                $id_penerimaan, $items, $this->input->post('keterangan'), $this->auth->user_id());
+            if ($id_retur) {
+                $this->catat_audit('create', 'retur_pengadaan', $id_retur, '');
+                Template::set_message('Retur diajukan, menunggu konfirmasi.', 'success');
+                redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/retur_detail/' . $id_retur);
+            }
+            Template::set_message($this->pengadaan_model->error ?: 'Gagal menyimpan retur.', 'error');
+        }
+        $penerimaan = $this->db->select('penerimaan_obat.*, pengadaan_obat.nomor_pengadaan, supplier.nama_supplier')
+            ->join('pengadaan_obat', 'pengadaan_obat.id_pengadaan = penerimaan_obat.id_pengadaan')
+            ->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')
+            ->where('penerimaan_obat.id_penerimaan', $id_penerimaan)->get('penerimaan_obat')->row();
+        if (! $penerimaan) {
+            show_404();
+        }
+        $penerimaan->items = $this->db->select('penerimaan_obat_detail.*, obat.nama_obat, obat.satuan')
+            ->join('obat', 'obat.id_obat = penerimaan_obat_detail.id_obat')
+            ->where('id_penerimaan', $id_penerimaan)->get('penerimaan_obat_detail')->result();
+        Template::set('penerimaan', $penerimaan);
+        Template::set('toolbar_title', 'Buat Retur');
+        Template::set_view('content/retur_buat');
+        Template::render();
+    }
+
+    /** Detail retur + konfirmasi/tolak. */
+    public function retur_detail($id = null)
+    {
+        $id = (int) $id;
+        $aksi = $this->input->post('aksi');
+        if ($aksi === 'setujui' || $aksi === 'tolak') {
+            $this->auth->restrict('kelola_retur_pembelian');
+            $ok = $this->pengadaan_model->konfirmasi_retur($id, $this->auth->user_id(), $aksi === 'setujui', $this->input->post('catatan'));
+            $this->pesan_hasil($ok, $this->pengadaan_model,
+                $aksi === 'setujui' ? 'Retur dikonfirmasi, stok berkurang.' : 'Retur ditolak.',
+                'stok', 'retur_pengadaan', $id, $aksi === 'setujui' ? 'Konfirmasi' : 'Tolak');
+            redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/retur_detail/' . $id);
+        }
+        $row = $this->db->select('retur_pengadaan.*, penerimaan_obat.nomor_penerimaan, pengadaan_obat.nomor_pengadaan, supplier.nama_supplier')
+            ->join('penerimaan_obat', 'penerimaan_obat.id_penerimaan = retur_pengadaan.id_penerimaan')
+            ->join('pengadaan_obat', 'pengadaan_obat.id_pengadaan = penerimaan_obat.id_pengadaan')
+            ->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')
+            ->where('retur_pengadaan.id_retur', $id)->get('retur_pengadaan')->row();
+        if (! $row) {
+            show_404();
+        }
+        $row->items = $this->db->select('retur_pengadaan_detail.*, obat.nama_obat, obat.satuan')
+            ->join('obat', 'obat.id_obat = retur_pengadaan_detail.id_obat')
+            ->where('id_retur', $id)->get('retur_pengadaan_detail')->result();
+        Template::set('retur', $row);
+        Template::set('toolbar_title', 'Retur ' . $row->nomor_retur);
+        Template::set_view('content/retur_detail');
+        Template::render();
+    }
+
+    /** Pesan + audit log + redirect kembali (pola aksi satu baris). */
+    private function pesan_hasil($ok, $model, $pesan_ok, $aksi_audit, $tabel_audit, $id_audit, $catatan_audit)
+    {
+        if ($ok) {
+            $this->load->model('audit/audit_log_model');
+            $this->audit_log_model->catat($this->auth->user_id(), $aksi_audit, $tabel_audit, $id_audit, $catatan_audit);
+            Template::set_message($pesan_ok, 'success');
+        } else {
+            Template::set_message($model->error ?: 'Gagal.', 'error');
+        }
+    }
+
+    /** Catat audit tanpa pesan (untuk create). */
+    private function catat_audit($aksi_audit, $tabel_audit, $id_audit, $catatan_audit)
+    {
+        $this->load->model('audit/audit_log_model');
+        $this->audit_log_model->catat($this->auth->user_id(), $aksi_audit, $tabel_audit, $id_audit, $catatan_audit);
     }
 
     public function delete($id = null)

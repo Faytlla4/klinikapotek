@@ -16,6 +16,7 @@ class Obat extends App_Controller
 			Template::redirect('dashboard');
 		}
 		$this->load->model('master/obat_model');
+		$this->load->model('pengadaan/supplier_model');
 		$this->form_validation->set_error_delimiters("<span class='error text-danger'>", "</span>");
 		Template::set_block('sub_nav', 'obat/_sub_nav');
 		Assets::add_module_js('master', 'obat.js');
@@ -34,6 +35,7 @@ class Obat extends App_Controller
 			redirect(SITE_AREA . '/master/obat');
 		}
 		Template::set('kode_obat_baru', $this->obat_model->generate_kode());
+		Template::set('supplier_list', $this->supplier_model->aktif());
 		Template::set('toolbar_title', 'Tambah Obat');
 		Template::render();
 	}
@@ -50,6 +52,7 @@ class Obat extends App_Controller
 			redirect(SITE_AREA . '/master/obat');
 		}
 		Template::set('obat', $this->obat_model->find($id));
+		Template::set('supplier_list', $this->supplier_model->aktif());
 		Template::set('toolbar_title', 'Edit Obat');
 		Template::render();
 	}
@@ -68,7 +71,19 @@ class Obat extends App_Controller
 			'stok_minimum' => $this->input->post('stok_minimum') ?: 0,
 			'wajib_resep'  => $this->input->post('wajib_resep') === 'true' ? 'true' : 'false',
 			'status'       => $this->input->post('status') ?: 'AKTIF',
+			// ponytail: kolom deskriptif + harga; harga_satuan kosong = ikut harga.
+			'kategori'        => $this->input->post('kategori') ?: null,
+			'bentuk_sediaan'  => $this->input->post('bentuk_sediaan') ?: null,
+			'kandungan'       => $this->input->post('kandungan') ?: null,
+			'produsen'        => $this->input->post('produsen') ?: null,
+			'id_supplier_utama' => $this->input->post('id_supplier_utama') ?: null,
+			'harga_satuan'    => $this->input->post('harga_satuan') !== '' && is_numeric($this->input->post('harga_satuan'))
+				? $this->input->post('harga_satuan') : $this->input->post('harga'),
+			'harga_jual'      => $this->input->post('harga_jual') !== '' && is_numeric($this->input->post('harga_jual'))
+				? $this->input->post('harga_jual') : $this->input->post('harga'),
 		);
+		// ponytail: harga lama tetap cerminan harga_satuan agar transaksi existing konsisten.
+		$data['harga'] = $data['harga_satuan'];
 		if ($type === 'insert') {
 			$data['kode_obat'] = $this->obat_model->generate_kode();
 			return $this->obat_model->insert($data);

@@ -17,6 +17,12 @@ class Obat_model extends BF_Model
         array('field' => 'nama_obat', 'label' => 'Nama Obat', 'rules' => 'max_length[150]'),
         array('field' => 'satuan', 'label' => 'Satuan', 'rules' => 'max_length[30]'),
         array('field' => 'harga', 'label' => 'Harga', 'rules' => 'numeric'),
+        array('field' => 'kategori', 'label' => 'Kategori', 'rules' => 'max_length[100]'),
+        array('field' => 'bentuk_sediaan', 'label' => 'Bentuk Sediaan', 'rules' => 'max_length[100]'),
+        array('field' => 'kandungan', 'label' => 'Kandungan', 'rules' => 'max_length[200]'),
+        array('field' => 'produsen', 'label' => 'Produsen', 'rules' => 'max_length[150]'),
+        array('field' => 'harga_satuan', 'label' => 'Harga Satuan', 'rules' => 'numeric'),
+        array('field' => 'harga_jual', 'label' => 'Harga Jual', 'rules' => 'numeric'),
     );
     protected $insert_validation_rules = array(
         array('field' => 'nama_obat', 'label' => 'Nama Obat', 'rules' => 'required'),
