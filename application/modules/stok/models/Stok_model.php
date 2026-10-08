@@ -1,12 +1,14 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
 /**
- * Stok Model (§14).
+ * Stok Model (§14) + batch.
  *
  * Mesin mutasi stok: setiap perubahan jumlah_stok WAJIB mencatat mutasi_stok.
- * - keluar(): cek stok cukup -> kurangi -> mutasi KELUAR (sumber: RESEP/PENJUALAN).
- * - masuk(): tambah (upsert baris stok) -> mutasi MASUK (sumber: PENGADAAN/RETUR?).
- * Semua dalam transaksi.
+ * - keluar(): cek stok cukup -> kurangi total -> ambil per batch FEFO
+ *   (ED terdekat dulu, tanpa-ED terakhir) -> mutasi KELUAR per batch.
+ * - masuk(): tambah total -> upsert baris stok_batch bila batch/ED disebut.
+ * Obat lama tanpa baris batch tetap jalan (mutasi tanpa batch).
+ * Semua dalam transaksi; saldo = total obat sesudah operasi.
  */
 class Stok_model extends BF_Model
 {
@@ -43,12 +45,22 @@ class Stok_model extends BF_Model
      * @param int    $id_referensi id_resep / id_penjualan
      * @return bool
      */
-    public function keluar($id_obat, $jumlah, $sumber, $id_referensi = null)
+    /**
+     * Obat keluar. $batch/$ed opsional: bila disebut, ambil dari batch itu
+     * (gagal bila kurang); sonst FEFO otomatis. $id_user dicatat di mutasi.
+     */
+    public function keluar($id_obat, $jumlah, $sumber, $id_referensi = null, $keterangan = '', $batch = null, $ed = null, $id_user = null)
     {
         if ($jumlah <= 0) {
             $this->error = 'Jumlah harus positif.';
             return false;
         }
+        if ($ed !== null && $ed !== '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $ed)) {
+            $this->error = 'Tanggal kadaluarsa tidak valid (YYYY-MM-DD).';
+            return false;
+        }
+        $batch = ($batch !== null && trim((string) $batch) !== '') ? trim((string) $batch) : null;
+        $ed = ($ed !== null && $ed !== '') ? $ed : null;
         $this->db->trans_start();
         $row = $this->db->query('SELECT * FROM stok_obat WHERE id_obat = ? FOR UPDATE', array($id_obat))->row();
         $stok = $row ? (int) $row->jumlah_stok : 0;
@@ -57,47 +69,108 @@ class Stok_model extends BF_Model
             $this->error = "Stok tidak cukup (tersedia {$stok}, diminta {$jumlah}).";
             return false;
         }
+        $baru = $stok - $jumlah;
         $this->db->where('id_obat', $id_obat)->update('stok_obat', array(
-            'jumlah_stok' => $stok - $jumlah,
+            'jumlah_stok' => $baru,
             'updated_at'  => date('Y-m-d H:i:s'),
         ));
-        $this->catat($id_obat, 'KELUAR', $jumlah, $sumber, $id_referensi);
+        // Tentukan pengambilan per batch (kunci baris batch).
+        $ambil = array();
+        if ($batch !== null || $ed !== null) {
+            $b = $this->db->query('SELECT * FROM stok_batch WHERE id_obat = ?
+                AND nomor_batch IS NOT DISTINCT FROM ? AND tanggal_kadaluarsa IS NOT DISTINCT FROM ? FOR UPDATE',
+                array($id_obat, $batch, $ed))->row();
+            if (! $b || (int) $b->jumlah < $jumlah) {
+                $this->db->trans_complete();
+                $this->error = 'Stok batch yang diminta tidak cukup.';
+                return false;
+            }
+            $ambil[] = array('id_batch' => (int) $b->id_batch, 'jumlah' => (int) $jumlah);
+        } else {
+            $sisa = (int) $jumlah;
+            $batches = $this->db->query('SELECT * FROM stok_batch WHERE id_obat = ? AND jumlah > 0
+                ORDER BY tanggal_kadaluarsa ASC NULLS LAST, id_batch ASC FOR UPDATE', array($id_obat))->result();
+            foreach ($batches as $b) {
+                if ($sisa <= 0) {
+                    break;
+                }
+                $pakai = min($sisa, (int) $b->jumlah);
+                $ambil[] = array('id_batch' => (int) $b->id_batch, 'jumlah' => $pakai);
+                $sisa -= $pakai;
+            }
+            if ($sisa > 0) {
+                // Stok lama tanpa rincian batch: catat tanpa batch (kompatibilitas).
+                $ambil[] = array('id_batch' => null, 'jumlah' => $sisa);
+            }
+        }
+        foreach ($ambil as $a) {
+            if ($a['id_batch'] !== null) {
+                $this->db->query('UPDATE stok_batch SET jumlah = jumlah - ?, updated_at = NOW() WHERE id_batch = ?',
+                    array($a['jumlah'], $a['id_batch']));
+            }
+            $this->catat($id_obat, 'KELUAR', $a['jumlah'], $sumber, $id_referensi, $keterangan, $a['id_batch'], $baru, $id_user);
+        }
         $this->db->trans_complete();
         return $this->db->trans_status();
     }
 
     /**
      * Obat masuk (penerimaan pengadaan). Baris stok dibuat bila belum ada.
-     *
-     * @return bool
+     * Bila batch/ED disebut, baris stok_batch ikut bertambah (upsert).
      */
-    public function masuk($id_obat, $jumlah, $sumber, $id_referensi = null, $keterangan = '')
+    public function masuk($id_obat, $jumlah, $sumber, $id_referensi = null, $keterangan = '', $batch = null, $ed = null, $id_user = null)
     {
         if ($jumlah <= 0) {
             $this->error = 'Jumlah harus positif.';
             return false;
         }
+        if ($ed !== null && $ed !== '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $ed)) {
+            $this->error = 'Tanggal kadaluarsa tidak valid (YYYY-MM-DD).';
+            return false;
+        }
+        $batch = ($batch !== null && trim((string) $batch) !== '') ? trim((string) $batch) : null;
+        $ed = ($ed !== null && $ed !== '') ? $ed : null;
         $this->db->trans_start();
         $row = $this->db->query('SELECT * FROM stok_obat WHERE id_obat = ? FOR UPDATE', array($id_obat))->row();
         if ($row) {
+            $baru = (int) $row->jumlah_stok + $jumlah;
             $this->db->where('id_obat', $id_obat)->update('stok_obat', array(
-                'jumlah_stok' => (int) $row->jumlah_stok + $jumlah,
+                'jumlah_stok' => $baru,
                 'updated_at'  => date('Y-m-d H:i:s'),
             ));
         } else {
+            $baru = $jumlah;
             $this->db->insert('stok_obat', array(
                 'id_obat'     => $id_obat,
                 'jumlah_stok' => $jumlah,
                 'updated_at'  => date('Y-m-d H:i:s'),
             ));
         }
-        $this->catat($id_obat, 'MASUK', $jumlah, $sumber, $id_referensi, $keterangan);
+        $id_batch = null;
+        if ($batch !== null || $ed !== null) {
+            $b = $this->db->query('SELECT * FROM stok_batch WHERE id_obat = ?
+                AND nomor_batch IS NOT DISTINCT FROM ? AND tanggal_kadaluarsa IS NOT DISTINCT FROM ? FOR UPDATE',
+                array($id_obat, $batch, $ed))->row();
+            if ($b) {
+                $this->db->query('UPDATE stok_batch SET jumlah = jumlah + ?, updated_at = NOW() WHERE id_batch = ?',
+                    array($jumlah, $b->id_batch));
+                $id_batch = (int) $b->id_batch;
+            } else {
+                $this->db->insert('stok_batch', array(
+                    'id_obat' => $id_obat, 'nomor_batch' => $batch, 'tanggal_kadaluarsa' => $ed,
+                    'jumlah' => $jumlah, 'dibuat_oleh' => $id_user ? (int) $id_user : null,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ));
+                $id_batch = $this->db->insert_id();
+            }
+        }
+        $this->catat($id_obat, 'MASUK', $jumlah, $sumber, $id_referensi, $keterangan, $id_batch, $baru, $id_user);
         $this->db->trans_complete();
         return $this->db->trans_status();
     }
 
     /** Tulis baris mutasi_stok (dipanggil di dalam transaksi). */
-    private function catat($id_obat, $jenis, $jumlah, $sumber, $id_referensi, $keterangan = '')
+    private function catat($id_obat, $jenis, $jumlah, $sumber, $id_referensi, $keterangan = '', $id_batch = null, $saldo = null, $id_user = null)
     {
         $this->db->insert('mutasi_stok', array(
             'id_obat'      => $id_obat,
@@ -107,13 +180,19 @@ class Stok_model extends BF_Model
             'sumber'       => $sumber,
             'id_referensi' => $id_referensi,
             'keterangan'   => $keterangan,
+            'id_batch'     => $id_batch,
+            'saldo'        => $saldo,
+            'id_user'      => $id_user ? (int) $id_user : null,
         ));
     }
 
     /** Riwayat mutasi sebuah obat (opsional saring jenis + rentang tanggal). */
     public function riwayat($id_obat, $limit = 50, $dari = null, $sampai = null, $jenis = null)
     {
-        $this->db->where('id_obat', $id_obat);
+        $this->db->select('mutasi_stok.*, stok_batch.nomor_batch, users.nama AS nama_user', false)
+            ->join('stok_batch', 'stok_batch.id_batch = mutasi_stok.id_batch', 'left')
+            ->join('users', 'users.id_user = mutasi_stok.id_user', 'left')
+            ->where('mutasi_stok.id_obat', $id_obat);
         if ($jenis === 'MASUK' || $jenis === 'KELUAR') {
             $this->db->where('jenis_mutasi', $jenis);
         }
