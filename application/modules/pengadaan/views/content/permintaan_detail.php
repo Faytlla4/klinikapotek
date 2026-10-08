@@ -6,7 +6,7 @@
             <div class="card-body">
                 <strong>Tanggal</strong><p class="text-muted"><?php echo date('d-m-Y H:i', strtotime($minta->tanggal_permintaan)); ?></p><hr>
                 <strong>Unit</strong><p class="text-muted"><?php echo html_escape($minta->unit); ?></p><hr>
-                <strong>Status</strong><p><span class="badge <?php echo $minta->status === 'SELESAI' ? 'badge-success' : (in_array($minta->status, array('DITOLAK','DIBATALKAN')) ? 'badge-danger' : ($minta->status === 'DISETUJUI' ? 'badge-primary' : 'badge-warning')); ?> badge-lg"><?php echo html_escape($minta->status); ?></span></p><hr>
+                <strong>Status</strong><p><span class="badge <?php echo $minta->status === 'SELESAI' ? 'badge-success' : (in_array($minta->status, array('DITOLAK','DIBATALKAN')) ? 'badge-danger' : ($minta->status === 'DISETUJUI' ? 'badge-primary' : 'badge-warning')); ?>"><?php echo html_escape($minta->status); ?></span></p><hr>
                 <strong>Catatan</strong><p class="text-muted"><?php echo nl2br(html_escape($minta->catatan ?: '-')); ?></p>
                 <?php if (! empty($minta->tanggal_persetujuan)): ?><hr>
                 <strong>Persetujuan</strong><p class="text-muted"><?php echo date('d-m-Y H:i', strtotime($minta->tanggal_persetujuan)); ?><br><?php echo nl2br(html_escape($minta->catatan_persetujuan ?: '-')); ?></p>

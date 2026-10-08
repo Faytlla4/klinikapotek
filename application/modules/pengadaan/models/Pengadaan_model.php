@@ -215,7 +215,9 @@ class Pengadaan_model extends BF_Model
             }
             $this->db->insert('penerimaan_obat_detail', $detail_penerimaan);
             if (strtoupper($kondisi) === 'BAIK') {
-                if (! $this->stok_model->masuk($item['id_obat'], (int) $item['jumlah_terima'], 'PENGADAAN', $id_penerimaan)) {
+                if (! $this->stok_model->masuk($item['id_obat'], (int) $item['jumlah_terima'], 'PENGADAAN', $id_penerimaan,
+                    'Penerimaan ' . $nomor, isset($item['nomor_batch']) ? $item['nomor_batch'] : null,
+                    isset($item['tanggal_kadaluarsa']) ? $item['tanggal_kadaluarsa'] : null, null)) {
                     $this->db->trans_complete();
                     $this->error = $this->stok_model->error;
                     return false;
