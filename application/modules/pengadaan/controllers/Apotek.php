@@ -41,6 +41,12 @@ class Apotek extends Content
         parent::permintaan();
     }
 
+    public function saran_restock()
+    {
+        Template::set_view('content/saran_restock');
+        parent::saran_restock();
+    }
+
     public function permintaan_buat()
     {
         Template::set_view('content/permintaan_buat');

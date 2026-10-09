@@ -273,6 +273,35 @@ class Permintaan_model extends BF_Model
         return $po;
     }
 
+    /**
+     * Saran restock: obat AKTIF yang stoknya di bawah minimum, kecuali yang
+     * sudah masuk permintaan aktif. Saran jumlah = tutup sampai batas minimum.
+     * Info saja — PO tidak pernah dibuat otomatis.
+     */
+    public function saran()
+    {
+        $diminta = array();
+        foreach ($this->db->select('DISTINCT permintaan_pengadaan_detail.id_obat', false)
+            ->join('permintaan_pengadaan', 'permintaan_pengadaan.id_permintaan = permintaan_pengadaan_detail.id_permintaan')
+            ->where_in('permintaan_pengadaan.status', array('DRAFT', 'DIAJUKAN', 'DISETUJUI', 'DIPROSES'))
+            ->get('permintaan_pengadaan_detail')->result() as $d) {
+            $diminta[] = (int) $d->id_obat;
+        }
+        $this->db->select('obat.id_obat, obat.nama_obat, obat.satuan, obat.stok_minimum, COALESCE(stok_obat.jumlah_stok, 0) AS stok', false)
+            ->join('stok_obat', 'stok_obat.id_obat = obat.id_obat', 'left')
+            ->where('obat.status', 'AKTIF')
+            ->where('COALESCE(stok_obat.jumlah_stok, 0) < obat.stok_minimum', null, false)
+            ->order_by('obat.nama_obat', 'ASC');
+        if (! empty($diminta)) {
+            $this->db->where_not_in('obat.id_obat', $diminta);
+        }
+        $rows = $this->db->get('obat')->result();
+        foreach ($rows as $r) {
+            $r->saran = max(1, (int) $r->stok_minimum - (int) $r->stok);
+        }
+        return $rows;
+    }
+
     private function catat_log($id_permintaan, $lama, $baru, $id_user, $catatan)
     {
         $this->db->insert('permintaan_status_log', array(

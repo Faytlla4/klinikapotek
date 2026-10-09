@@ -19,4 +19,10 @@
             <p>Retur Pembelian</p>
         </a>
     </li>
+    <li class="nav-item">
+        <a href="<?php echo site_url(SITE_AREA . '/apotek/pengadaan/saran_restock'); ?>" class="nav-link <?php echo $seg2 == 'apotek' && $seg3 == 'pengadaan' && $seg4 == 'saran_restock' ? 'active' : ''; ?>">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Saran Restock</p>
+        </a>
+    </li>
 </ul>

@@ -314,6 +314,20 @@ class Content extends App_Controller
         }
         Template::set('minta', $row);
         Template::set('supplier_list', $this->supplier_model->aktif());
+        // ponytail: supplier default = supplier utama terbanyak di item (boleh diganti).
+        $ids_obat = array();
+        foreach ($row->items as $it) {
+            $ids_obat[] = (int) $it->id_obat;
+        }
+        $sup_default = null;
+        if (! empty($ids_obat)) {
+            $sup = $this->db->select('id_supplier_utama, COUNT(*) AS c', false)
+                ->where_in('id_obat', $ids_obat)->where('id_supplier_utama IS NOT NULL', null, false)
+                ->group_by('id_supplier_utama')->order_by('c', 'DESC')->limit(1)
+                ->get('obat')->row();
+            $sup_default = $sup ? (int) $sup->id_supplier_utama : null;
+        }
+        Template::set('supplier_default', $sup_default);
         Template::set('obat_list', $this->obat_model->aktif());
         Template::set('toolbar_title', 'Permintaan ' . $row->nomor_permintaan);
         Template::set_view('content/permintaan_detail');
@@ -501,6 +515,33 @@ class Content extends App_Controller
         Template::set('retur', $row);
         Template::set('toolbar_title', 'Retur ' . $row->nomor_retur);
         Template::set_view('content/retur_detail');
+        Template::render();
+    }
+
+    /** Saran restock (info) + satu klik jadi draft permintaan. */
+    public function saran_restock()
+    {
+        $this->load->model('pengadaan/permintaan_model');
+        if ($this->input->post('save')) {
+            $items = array();
+            foreach ((array) $this->input->post('items') as $id_obat => $r) {
+                $jml = isset($r['jumlah']) ? (int) $r['jumlah'] : 0;
+                if ((int) $id_obat > 0 && $jml > 0) {
+                    $items[] = array('id_obat' => (int) $id_obat, 'jumlah_minta' => $jml);
+                }
+            }
+            $id = empty($items) ? false : $this->permintaan_model->buat(
+                $this->auth->user_id(), $items, 'Dari saran restock otomatis');
+            if ($id) {
+                $this->catat_audit('create', 'permintaan_pengadaan', $id, 'Dari saran restock');
+                Template::set_message('Draft permintaan dibuat dari saran restock.', 'success');
+                redirect(SITE_AREA . '/' . $this->ctx . '/pengadaan/permintaan_detail/' . $id);
+            }
+            Template::set_message($this->permintaan_model->error ?: 'Pilih minimal satu obat.', 'error');
+        }
+        Template::set('saran_list', $this->permintaan_model->saran());
+        Template::set('toolbar_title', 'Saran Restock');
+        Template::set_view('content/saran_restock');
         Template::render();
     }
 

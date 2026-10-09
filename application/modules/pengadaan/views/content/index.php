@@ -3,14 +3,30 @@
     <?php echo form_open($this->uri->uri_string()); ?><div class="card-body">
 <?php // Form pesan cepat: supplier + obat + jumlah + harga; riwayat pesanan di bawahnya. ?>
 <div class="row">
-            <div class="col-md-3"><div class="form-group"><label>Supplier</label><select name="id_supplier" class="form-control select2" required><option value="">-- Pilih --</option><?php foreach($supplier_list as $s): ?><option value="<?php echo $s->id_supplier; ?>"><?php echo html_escape($s->nama_supplier); ?></option><?php endforeach; ?></select></div></div>
-            <div class="col-md-3"><div class="form-group"><label>Obat</label><select name="id_obat" class="form-control select2" required><option value="">-- Pilih --</option><?php foreach($obat_list as $o): ?><option value="<?php echo $o->id_obat; ?>"><?php echo html_escape($o->nama_obat); ?></option><?php endforeach; ?></select></div></div>
+            <div class="col-md-3"><div class="form-group"><label>Supplier</label><select name="id_supplier" id="po_supplier" class="form-control select2" required><option value="">-- Pilih --</option><?php foreach($supplier_list as $s): ?><option value="<?php echo $s->id_supplier; ?>"><?php echo html_escape($s->nama_supplier); ?></option><?php endforeach; ?></select></div></div>
+            <div class="col-md-3"><div class="form-group"><label>Obat</label><select name="id_obat" id="po_obat" class="form-control select2" required><option value="">-- Pilih --</option><?php foreach($obat_list as $o): ?><option value="<?php echo $o->id_obat; ?>" data-supplier="<?php echo (int) ($o->id_supplier_utama ?: 0); ?>"><?php echo html_escape($o->nama_obat); ?></option><?php endforeach; ?></select><small class="form-text text-muted">Supplier otomatis dari Supplier Utama.</small></div></div>
             <div class="col-md-2"><div class="form-group"><label>Jumlah</label><input type="number" min="1" name="jumlah_pesan" class="form-control" required></div></div>
             <div class="col-md-2"><div class="form-group"><label>Harga</label><input type="number" min="0" name="harga" class="form-control" required></div></div>
             <div class="col-md-2"><div class="form-group"><label>&nbsp;</label><button name="save" type="submit" class="btn btn-primary btn-block">Simpan</button></div></div>
         </div>
     </div><?php echo form_close(); ?>
 </div></div></div>
+<script>
+// ponytail: supplier otomatis ikut Supplier Utama obat (tetap bisa diganti manual).
+(function () {
+    var obat = document.getElementById('po_obat');
+    var sup = document.getElementById('po_supplier');
+    if (!obat || !sup) { return; }
+    obat.addEventListener('change', function () {
+        var opt = obat.options[obat.selectedIndex];
+        var id = opt ? opt.getAttribute('data-supplier') : '';
+        if (id && id !== '0' && sup.querySelector('option[value="' + id + '"]')) {
+            sup.value = id;
+            if (window.jQuery) { jQuery(sup).trigger('change'); }
+        }
+    });
+})();
+</script>
 
 <div class="row"><div class="col-12"><div class="card">
     <div class="card-header"><h3 class="card-title">Daftar Pengadaan</h3></div>
