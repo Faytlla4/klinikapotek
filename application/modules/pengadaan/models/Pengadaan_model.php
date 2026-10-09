@@ -630,8 +630,21 @@ class Pengadaan_model extends BF_Model
         if ($setuju) {
             $details = $this->db->where('id_retur', $id_retur)->get('retur_pengadaan_detail')->result();
             foreach ($details as $d) {
+                // ponytail: batch yang ditulis user dicoba dulu (tepat); bila tak cocok,
+                // ambil FEFO otomatis agar retur tak buntu karena beda tulis batch/ED.
+                $batch = ($d->nomor_batch !== null && trim($d->nomor_batch) !== '') ? trim($d->nomor_batch) : null;
+                $ed = ($d->tanggal_kadaluarsa !== null && $d->tanggal_kadaluarsa !== '') ? $d->tanggal_kadaluarsa : null;
+                if ($batch !== null || $ed !== null) {
+                    $cocok = $this->db->query('SELECT jumlah FROM stok_batch WHERE id_obat = ?
+                        AND nomor_batch IS NOT DISTINCT FROM ? AND tanggal_kadaluarsa IS NOT DISTINCT FROM ?',
+                        array((int) $d->id_obat, $batch, $ed))->row();
+                    if (! $cocok || (int) $cocok->jumlah < (int) $d->jumlah) {
+                        $batch = null;
+                        $ed = null;
+                    }
+                }
                 if (! $this->stok_model->keluar((int) $d->id_obat, (int) $d->jumlah, 'RETUR_PEMBELIAN', (int) $id_retur,
-                    'Retur ' . $row->nomor_retur, $d->nomor_batch, $d->tanggal_kadaluarsa, $id_user)) {
+                    'Retur ' . $row->nomor_retur, $batch, $ed, $id_user)) {
                     $this->db->trans_complete();
                     $this->error = $this->stok_model->error ?: 'Stok tidak cukup untuk retur.';
                     return false;
