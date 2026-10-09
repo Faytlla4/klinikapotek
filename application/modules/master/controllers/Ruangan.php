@@ -4,7 +4,7 @@
 
 class Ruangan extends App_Controller
 {
-	protected $permission = 'kelola_master_data';
+	protected $permission = 'Master.Ruangan.Manage';
 
 	public function __construct()
 	{

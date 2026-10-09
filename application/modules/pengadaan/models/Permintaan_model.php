@@ -50,7 +50,7 @@ class Permintaan_model extends BF_Model
         if (! $row) {
             return false;
         }
-        $row->items = $this->db->select('permintaan_pengadaan_detail.*, obat.nama_obat, obat.kode_obat')
+        $row->items = $this->db->select('permintaan_pengadaan_detail.*, obat.nama_obat, obat.kode_obat, obat.satuan')
             ->join('obat', 'obat.id_obat = permintaan_pengadaan_detail.id_obat')
             ->where('id_permintaan', $id_permintaan)
             ->order_by('obat.nama_obat', 'ASC')

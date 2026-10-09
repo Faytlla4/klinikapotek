@@ -1,5 +1,6 @@
 <?php // Detail pengadaan: info + item + terima barang (batch + kadaluarsa) + retur + nota. ?>
 <?php $this->load->view('transaksi/partials/_nota'); ?>
+<?php $this->load->view('pengadaan/content/_print_styles'); ?>
 <div class="nota-screen">
 <div class="row">
     <div class="col-md-4">
@@ -215,4 +216,56 @@
         <?php endif; ?>
         <div class="nota-foot">Terima kasih atas kunjungan Anda.<br>Semoga lekas sembuh.</div>
     </div>
+</div>
+    <div class="pengadaan-print">
+        <div class="print-kop"><h2>Klinik &amp; Apotek</h2><div>Dokumen Pengadaan Obat</div></div>
+        <div class="print-title">Surat Pesanan / Purchase Order</div>
+        <table class="print-info">
+            <tr><th>Nomor PO</th><td><?php echo html_escape($pengadaan->nomor_pengadaan); ?></td></tr>
+            <tr><th>Tanggal Pesanan</th><td><?php echo date('d-m-Y H:i', strtotime($pengadaan->tanggal_pesanan)); ?></td></tr>
+            <tr><th>Status</th><td><?php echo html_escape(strtoupper($pengadaan->status)); ?></td></tr>
+            <tr><th>Supplier</th><td><?php echo html_escape($pengadaan->nama_supplier); ?></td></tr>
+            <tr><th>Kode Supplier</th><td><?php echo html_escape($pengadaan->kode_supplier ?: '-'); ?></td></tr>
+            <tr><th>Telepon Supplier</th><td><?php echo html_escape($pengadaan->no_hp ?: '-'); ?></td></tr>
+            <tr><th>Alamat Supplier</th><td><?php echo nl2br(html_escape($pengadaan->alamat ?: '-')); ?></td></tr>
+            <?php if (! empty($pengadaan->id_permintaan)): ?>
+            <tr><th>Referensi Permintaan</th><td><?php echo html_escape($pengadaan->nomor_permintaan ?: ('#' . (int) $pengadaan->id_permintaan)); ?></td></tr>
+            <?php endif; ?>
+        </table>
+        <table class="print-items">
+            <thead><tr><th>No.</th><th>Kode</th><th>Nama Obat</th><th>Satuan</th><th>Jumlah Pesan</th><th>Sudah Diterima</th><th>Sisa</th><th>Harga Satuan</th><th>Subtotal</th></tr></thead>
+            <tbody><?php foreach ($details as $index => $d): ?>
+                <tr>
+                    <td class="print-center"><?php echo (int) $index + 1; ?></td>
+                    <td><?php echo html_escape($d->kode_obat); ?></td>
+                    <td><?php echo html_escape($d->nama_obat); ?></td>
+                    <td><?php echo html_escape($d->satuan); ?></td>
+                    <td class="print-center"><?php echo (int) $d->jumlah_pesan; ?></td>
+                    <td class="print-center"><?php echo (int) $d->jumlah_sudah_terima; ?></td>
+                    <td class="print-center"><?php echo (int) $d->sisa_pesanan; ?></td>
+                    <td class="print-right">Rp <?php echo number_format((float) $d->harga, 0, ',', '.'); ?></td>
+                    <td class="print-right">Rp <?php echo number_format((float) $d->jumlah_pesan * (float) $d->harga, 0, ',', '.'); ?></td>
+                </tr>
+            <?php endforeach; ?></tbody>
+            <tfoot><tr><th colspan="8" class="print-right">Total PO</th><th class="print-right">Rp <?php echo number_format((float) $pengadaan->total, 0, ',', '.'); ?></th></tr></tfoot>
+        </table>
+        <?php if (! empty($riwayat_penerimaan)): ?>
+        <strong>Riwayat Penerimaan</strong>
+        <table class="print-items">
+            <thead><tr><th>Tanggal</th><th>Nomor Penerimaan</th><th>Obat</th><th>Jumlah</th><th>Status Konfirmasi</th></tr></thead>
+            <tbody><?php foreach ($riwayat_penerimaan as $r): ?>
+                <tr>
+                    <td><?php echo date('d-m-Y H:i', strtotime($r->tanggal_terima)); ?></td>
+                    <td><?php echo html_escape($r->nomor_penerimaan); ?></td>
+                    <td><?php echo html_escape($r->nama_obat); ?></td>
+                    <td class="print-center"><?php echo (int) $r->jumlah_terima; ?></td>
+                    <td><?php echo html_escape(isset($r->status_konfirmasi) ? $r->status_konfirmasi : '-'); ?></td>
+                </tr>
+            <?php endforeach; ?></tbody>
+        </table>
+        <?php endif; ?>
+        <div class="print-signatures">
+            <div class="print-signature">Supplier<div class="print-signature-space"></div><strong>(........................................)</strong></div>
+            <div class="print-signature">Pemesanan<div class="print-signature-space"></div><strong>(........................................)</strong></div>
+        </div>
 </div>

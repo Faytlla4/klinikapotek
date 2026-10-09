@@ -1,16 +1,28 @@
 <?php defined('BASEPATH') || exit('No direct script access allowed');
 
-/** Entry point context Master; menu detail tetap memakai view template existing. */
+/** Entry point konteks Master. */
 class Master extends App_Controller
 {
-	public function __construct()
-	{
-		parent::__construct();
-		$this->auth->restrict('kelola_master_data');
-	}
+    public function index()
+    {
+        $masters = array(
+            array('Master.Pelayanan.Manage', 'pelayanan'),
+            array('Master.Spesialis.Manage', 'spesialis'),
+            array('Master.Dokter.Manage', 'dokter'),
+            array('Master.Poli.Manage', 'poli'),
+            array('Master.Ruangan.Manage', 'ruangan'),
+            array('Master.Obat.Manage', 'obat'),
+            array('Master.Satuan.Manage', 'satuan'),
+            array('Master.Supplier.Manage', 'pengadaan/supplier')
+        );
 
-	public function index()
-	{
-		redirect(SITE_AREA . '/master/pelayanan');
-	}
+        foreach ($masters as $master) {
+            if ($this->auth->has_permission($master[0])) {
+                redirect(SITE_AREA . '/master/' . $master[1]);
+                return;
+            }
+        }
+
+        $this->auth->restrict('Master.Pelayanan.Manage');
+    }
 }

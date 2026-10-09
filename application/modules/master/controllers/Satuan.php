@@ -2,7 +2,7 @@
 
 class Satuan extends App_Controller
 {
-	protected $permission = 'kelola_master_data';
+	protected $permission = 'Master.Satuan.Manage';
 
 	public function __construct()
 	{
