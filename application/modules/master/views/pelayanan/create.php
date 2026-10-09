@@ -23,17 +23,6 @@
                     <?php echo form_error('nama_pelayanan'); ?>
                 </div>
                 </div>
-                <div class="col-md-6">
-                <div class="form-group">
-                    <label for="jenis_pelayanan">Jenis Pelayanan</label>
-                    <select id="jenis_pelayanan" name="jenis_pelayanan" class="form-control select2">
-                        <option value="Rawat Jalan">Rawat Jalan</option>
-                        <option value="Rawat Inap">Rawat Inap</option>
-                        <option value="Tindakan Medis">Tindakan Medis</option>
-                        <option value="Laboratorium">Laboratorium</option>
-                    </select>
-                </div>
-                </div>
                 </div>
                 <div class="row">
                 <div class="col-md-6">

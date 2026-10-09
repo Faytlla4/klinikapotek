@@ -23,21 +23,6 @@
                     <?php echo form_error('nama_pelayanan'); ?>
                 </div>
                 </div>
-                <div class="col-md-6">
-                <div class="form-group">
-                    <label for="jenis_pelayanan">Jenis Pelayanan</label>
-                    <select id="jenis_pelayanan" name="jenis_pelayanan" class="form-control select2">
-                        <?php
-                        	$opts = ['Rawat Jalan', 'Rawat Inap', 'Tindakan Medis', 'Laboratorium'];
-                        	$cur = set_value('jenis_pelayanan', $pelayanan->jenis_pelayanan ?? '');
-                        	foreach ($opts as $opt) {
-                        		$sel = ($opt === $cur) ? 'selected' : '';
-                        		echo "<option value='{$opt}' {$sel}>{$opt}</option>";
-                        	}
-                        ?>
-                    </select>
-                </div>
-                </div>
                 </div>
                 <div class="row">
                 <div class="col-md-6">

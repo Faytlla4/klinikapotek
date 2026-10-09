@@ -76,7 +76,6 @@ class Pelayanan extends App_Controller
 
 		$data = array(
 			'nama_pelayanan'  => $nama,
-			'jenis_pelayanan' => $this->input->post('jenis_pelayanan'),
 			'tarif'           => $this->input->post('tarif'),
 			'status'          => $this->input->post('status') ? $this->input->post('status') : 'AKTIF',
 		);
