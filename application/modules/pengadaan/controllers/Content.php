@@ -418,6 +418,13 @@ class Content extends App_Controller
             $this->db->where('retur_pengadaan.status', $status);
         }
         Template::set(array('retur_list' => $this->db->get('retur_pengadaan')->result(), 'f_status' => $status));
+        // ponytail: picker penerimaan DIKONFIRMASI agar retur bisa dimulai dari halaman ini.
+        Template::set('terima_list', $this->db->select('penerimaan_obat.id_penerimaan, penerimaan_obat.nomor_penerimaan, penerimaan_obat.tanggal_terima, pengadaan_obat.nomor_pengadaan, supplier.nama_supplier')
+            ->join('pengadaan_obat', 'pengadaan_obat.id_pengadaan = penerimaan_obat.id_pengadaan')
+            ->join('supplier', 'supplier.id_supplier = pengadaan_obat.id_supplier')
+            ->where('penerimaan_obat.status_konfirmasi', 'DIKONFIRMASI')
+            ->order_by('penerimaan_obat.id_penerimaan', 'DESC')->limit(50)
+            ->get('penerimaan_obat')->result());
         Template::set('toolbar_title', 'Retur Pembelian');
         Template::set_view('content/retur');
         Template::render();

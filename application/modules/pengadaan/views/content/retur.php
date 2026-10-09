@@ -24,3 +24,21 @@
         </table></div>
     </div>
 </div></div></div>
+<div class="row"><div class="col-12"><div class="card card-primary">
+    <div class="card-header"><h3 class="card-title">Buat Retur Baru — Pilih Penerimaan</h3></div>
+    <div class="card-body">
+        <div class="table-responsive"><table class="table table-bordered table-hover table-striped">
+            <thead><tr><th>No. Penerimaan</th><th>Tanggal</th><th>PO</th><th>Supplier</th><th>Aksi</th></tr></thead>
+            <tbody>
+            <?php if (empty($terima_list)): ?><tr><td colspan="5" class="text-center text-muted">Belum ada penerimaan yang dikonfirmasi.</td></tr>
+            <?php else: foreach ($terima_list as $t): ?><tr>
+                <td><?php echo html_escape($t->nomor_penerimaan); ?></td>
+                <td><?php echo date('d-m-Y H:i', strtotime($t->tanggal_terima)); ?></td>
+                <td><?php echo html_escape($t->nomor_pengadaan); ?></td>
+                <td><?php echo html_escape($t->nama_supplier); ?></td>
+                <td><a href="<?php echo site_url(SITE_AREA . '/' . $this->uri->segment(2) . '/pengadaan/retur_buat/' . (int) $t->id_penerimaan); ?>" class="btn btn-sm btn-danger"><i class="fas fa-undo mr-1"></i>Buat Retur</a></td>
+            </tr><?php endforeach; endif; ?>
+            </tbody>
+        </table></div>
+    </div>
+</div></div></div>
