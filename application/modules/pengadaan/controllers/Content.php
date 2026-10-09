@@ -231,7 +231,7 @@ class Content extends App_Controller
         Template::render();
     }
 
-    /** Baca item permintaan dari POST: items[id_obat][jumlah_minta,catatan]. */
+    /** Baca item permintaan dari POST: items[*][id_obat,jumlah_minta,catatan]. */
     private function baca_item_minta()
     {
         $in = $this->input->post('items');
@@ -239,14 +239,20 @@ class Content extends App_Controller
             return false;
         }
         $items = array();
-        foreach ($in as $id_obat => $r) {
+        foreach ($in as $r) {
+            if (! is_array($r)) {
+                continue;
+            }
+            // ponytail: id_obat dibaca dari isi baris (form buat pakai indeks angka,
+            // form ubah pakai id obat sebagai key + hidden field) — bukan dari key.
+            $id_obat = isset($r['id_obat']) ? (int) $r['id_obat'] : 0;
             $jml = isset($r['jumlah_minta']) ? trim($r['jumlah_minta']) : '';
-            if ($jml === '' || (int) $jml <= 0) {
+            if ($id_obat <= 0 && ($jml === '' || (int) $jml <= 0)) {
                 continue;
             }
             $items[] = array(
-                'id_obat' => (int) $id_obat,
-                'jumlah_minta' => (int) $jml,
+                'id_obat' => $id_obat,
+                'jumlah_minta' => $jml === '' ? 0 : (int) $jml,
                 'catatan' => isset($r['catatan']) ? trim($r['catatan']) : '',
             );
         }
