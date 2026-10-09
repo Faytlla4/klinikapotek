@@ -42,6 +42,8 @@ Route::block('users/register');
 Route::any('logout', 'users/logout');
 Route::any('dokter-bertugas', 'dokter_bertugas/index');
 Route::any('dokter-bertugas/ganti', 'dokter_bertugas/ganti');
+Route::any('display-antrian', 'antrian/display/index');
+Route::any('display-antrian/data', 'antrian/display/data');
 Route::any('forgot_password', 'users/forgot_password');
 Route::any('reset_password/(:any)/(:any)', 'users/reset_password/$1/$2');
 
@@ -84,6 +86,10 @@ $route['admin/master/ruangan/(:any)/(:any)'] = 'master/ruangan/$1/$2';
 $route['admin/master/obat'] = 'master/obat/index';
 $route['admin/master/obat/(:any)'] = 'master/obat/$1';
 $route['admin/master/obat/(:any)/(:any)'] = 'master/obat/$1/$2';
+
+$route['admin/master/satuan'] = 'master/satuan/index';
+$route['admin/master/satuan/(:any)'] = 'master/satuan/$1';
+$route['admin/master/satuan/(:any)/(:any)'] = 'master/satuan/$1/$2';
 
 
 // PELAYANAN: Pendaftaran (pasien), Kunjungan, Antrian.

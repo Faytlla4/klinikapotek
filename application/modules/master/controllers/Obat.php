@@ -17,6 +17,7 @@ class Obat extends App_Controller
 		}
 		$this->load->model('master/obat_model');
 		$this->load->model('pengadaan/supplier_model');
+		$this->load->model('master/satuan_model');
 		$this->form_validation->set_error_delimiters("<span class='error text-danger'>", "</span>");
 		Template::set_block('sub_nav', 'obat/_sub_nav');
 		Assets::add_module_js('master', 'obat.js');
@@ -36,6 +37,7 @@ class Obat extends App_Controller
 		}
 		Template::set('kode_obat_baru', $this->obat_model->generate_kode());
 		Template::set('supplier_list', $this->supplier_model->aktif());
+		Template::set('satuan_list', $this->satuan_model->aktif());
 		Template::set('toolbar_title', 'Tambah Obat');
 		Template::render();
 	}
@@ -53,6 +55,19 @@ class Obat extends App_Controller
 		}
 		Template::set('obat', $this->obat_model->find($id));
 		Template::set('supplier_list', $this->supplier_model->aktif());
+		
+		$satuan_list = $this->satuan_model->aktif();
+		$obat = $this->obat_model->find($id);
+		// Ensure current satuan is in the list even if non-aktif
+		$found = false;
+		foreach ($satuan_list as $s) {
+			if ($s->id_satuan == $obat->id_satuan) { $found = true; break; }
+		}
+		if (!$found && $obat->id_satuan) {
+			$s_lama = $this->satuan_model->find($obat->id_satuan);
+			if ($s_lama) $satuan_list[] = $s_lama;
+		}
+		Template::set('satuan_list', $satuan_list);
 		Template::set('toolbar_title', 'Edit Obat');
 		Template::render();
 	}
@@ -66,7 +81,7 @@ class Obat extends App_Controller
 		$data = array(
 			'nama_obat'    => $this->input->post('nama_obat'),
 			'jenis_obat'   => $this->input->post('jenis_obat'),
-			'satuan'       => $this->input->post('satuan'),
+			'id_satuan'    => $this->input->post('id_satuan'),
 			'harga'        => $this->input->post('harga'),
 			'stok_minimum' => $this->input->post('stok_minimum') ?: 0,
 			'wajib_resep'  => $this->input->post('wajib_resep') === 'true' ? 'true' : 'false',
@@ -82,6 +97,13 @@ class Obat extends App_Controller
 			'harga_jual'      => $this->input->post('harga_jual') !== '' && is_numeric($this->input->post('harga_jual'))
 				? $this->input->post('harga_jual') : $this->input->post('harga'),
 		);
+		
+		// Set string satuan from id_satuan for backward compatibility
+		$satuan_obj = $this->satuan_model->find($data['id_satuan']);
+		if ($satuan_obj) {
+			$data['satuan'] = $satuan_obj->nama_satuan;
+		}
+
 		// ponytail: harga lama tetap cerminan harga_satuan agar transaksi existing konsisten.
 		$data['harga'] = $data['harga_satuan'];
 		if ($type === 'insert') {

@@ -251,8 +251,16 @@
 <div class="dashboard-pelayanan">
 
     <div class="hero">
-        <h2>Dashboard Pelayanan</h2>
-        <p>Ringkasan aktivitas pelayanan klinik hari ini.</p>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h2>Dashboard Pelayanan</h2>
+                <p>Ringkasan aktivitas pelayanan klinik hari ini.</p>
+            </div>
+            <a href="<?php echo html_escape(site_url('display-antrian')); ?>" target="_blank" rel="noopener"
+                class="btn btn-sm btn-light mt-2 mt-md-0">
+                <i class="fas fa-tv"></i> Buka Display Antrian
+            </a>
+        </div>
     </div>
 
 

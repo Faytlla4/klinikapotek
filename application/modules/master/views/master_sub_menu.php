@@ -42,5 +42,11 @@
             <p>Master Obat</p>
         </a>
     </li>
+    <li class="nav-item">
+        <a href="<?php echo site_url(SITE_AREA . '/master/satuan'); ?>" class="nav-link <?php echo $seg2 == 'master' && $this->uri->segment(3) == 'satuan' ? 'active' : ''; ?>">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Master Satuan Obat</p>
+        </a>
+    </li>
 <?php endif; ?>
 </ul>

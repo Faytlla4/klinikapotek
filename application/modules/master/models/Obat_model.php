@@ -15,7 +15,7 @@ class Obat_model extends BF_Model
 
     protected $validation_rules = array(
         array('field' => 'nama_obat', 'label' => 'Nama Obat', 'rules' => 'max_length[150]'),
-        array('field' => 'satuan', 'label' => 'Satuan', 'rules' => 'max_length[30]'),
+        array('field' => 'id_satuan', 'label' => 'Satuan', 'rules' => 'required'),
         array('field' => 'harga', 'label' => 'Harga', 'rules' => 'numeric'),
         array('field' => 'kategori', 'label' => 'Kategori', 'rules' => 'max_length[100]'),
         array('field' => 'bentuk_sediaan', 'label' => 'Bentuk Sediaan', 'rules' => 'max_length[100]'),
@@ -26,7 +26,7 @@ class Obat_model extends BF_Model
     );
     protected $insert_validation_rules = array(
         array('field' => 'nama_obat', 'label' => 'Nama Obat', 'rules' => 'required'),
-        array('field' => 'satuan', 'label' => 'Satuan', 'rules' => 'required'),
+        array('field' => 'id_satuan', 'label' => 'Satuan', 'rules' => 'required'),
         array('field' => 'harga', 'label' => 'Harga', 'rules' => 'numeric'),
     );
     protected $skip_validation = false;
