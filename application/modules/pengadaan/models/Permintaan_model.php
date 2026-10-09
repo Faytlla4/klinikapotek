@@ -74,7 +74,12 @@ class Permintaan_model extends BF_Model
         $valid = array();
         $obat_ids = array();
         foreach ($items as $it) {
-            if (empty($it['id_obat']) || ! preg_match('/^\d+$/', (string) ($it['jumlah_minta'] ?? '')) || (int) $it['jumlah_minta'] <= 0) {
+            if (empty($it['id_obat'])) {
+                $this->db->trans_complete();
+                $this->error = 'Pilih obat dulu pada tiap baris item.';
+                return false;
+            }
+            if (! preg_match('/^\d+$/', (string) ($it['jumlah_minta'] ?? '')) || (int) $it['jumlah_minta'] <= 0) {
                 $this->db->trans_complete();
                 $this->error = 'Jumlah diminta harus bilangan bulat positif.';
                 return false;
@@ -143,7 +148,12 @@ class Permintaan_model extends BF_Model
         $this->db->where('id_permintaan', $id_permintaan)->delete('permintaan_pengadaan_detail');
         $obat_ids = array();
         foreach ($items as $it) {
-            if (empty($it['id_obat']) || ! preg_match('/^\d+$/', (string) ($it['jumlah_minta'] ?? '')) || (int) $it['jumlah_minta'] <= 0) {
+            if (empty($it['id_obat'])) {
+                $this->db->trans_complete();
+                $this->error = 'Pilih obat dulu pada tiap baris item.';
+                return false;
+            }
+            if (! preg_match('/^\d+$/', (string) ($it['jumlah_minta'] ?? '')) || (int) $it['jumlah_minta'] <= 0) {
                 $this->db->trans_complete();
                 $this->error = 'Jumlah diminta harus bilangan bulat positif.';
                 return false;
